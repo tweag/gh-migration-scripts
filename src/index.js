@@ -20,6 +20,10 @@ import { ghesVsGhec } from './api/compare/ghes-vs-ghec/ghes-vs-ghec.js';
 import { insertTeamMembers } from './api/import/ghec/teams/insert-team-members.js';
 import { setMembershipInOrg } from './api/import/ghec/users/set-memberships-in-org.js';
 import { getFunctionName } from './services/utils.js';
+import getBitbucketRepositories from './api/export/bitbucket/repos/get-bitbucket-repos.js';
+import getBitbucketReposDirectCollaborators from './api/export/bitbucket/repos/get-bitbucket-repo-direct-collaborators.js';
+import getBitbucketOrganizationMembers from './api/export/bitbucket/users/get-bitbucket-organization-users.js';
+import getBitbucketEnterpriseUsers from './api/export/bitbucket/users/get-bitbucket-enterprise-users.js';
 
 const args = {
 	allowUntrustedSslCertificates: {
@@ -277,6 +281,31 @@ program
 	);
 
 program
+	.command(getFunctionName(getBitbucketEnterpriseUsers))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(
+		'-e, --enterprise-organizations <ENTERPRISE ORGANIZATION...>',
+		'List of organizations on the enterprise',
+	)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(args.usersFile.argument, args.usersFile.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbeu')
+	.description('Fetches all users on the Bitbucket enterprise')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketEnterpriseUsers),
+	);
+
+program
 	.command(getFunctionName(getOrgUsers))
 	.option(
 		args.allowUntrustedSslCertificates.argument,
@@ -301,6 +330,32 @@ program
 	.description("Fetches users' details in an organization")
 	.action(async (args) =>
 		commandController(process.env.PAT, args, getOrgUsers),
+	);
+
+program
+	.command(getFunctionName(getBitbucketOrganizationMembers))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(args.usersFile.argument, args.usersFile.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbom')
+	.description("Fetches users' details in a Bitbucket organization")
+	.action(async (args) =>
+		commandController(
+			process.env.PAT,
+			args,
+			getBitbucketOrganizationMembers,
+		),
 	);
 
 program
@@ -370,6 +425,56 @@ program
 	.alias('gr')
 	.description('Fetches all repositories of an organization')
 	.action(async (args) => commandController(process.env.PAT, args, getRepos));
+
+program
+	.command(getFunctionName(getBitbucketRepositories))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbr')
+	.description(
+		'Fetches all repositories of a bitbucket organization (workspace)',
+	)
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketRepositories),
+	);
+
+program
+	.command(getFunctionName(getBitbucketReposDirectCollaborators))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbrdc')
+	.description(
+		'Fetches users permissions of all repositories of a bitbucket organization (workspace)',
+	)
+	.action(async (args) =>
+		commandController(
+			process.env.PAT,
+			args,
+			getBitbucketReposDirectCollaborators,
+		),
+	);
 
 program
 	.command(getFunctionName(getTeams))
