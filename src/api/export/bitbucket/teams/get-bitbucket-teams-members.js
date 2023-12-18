@@ -8,10 +8,10 @@ import {
 } from '../../../../services/utils.js';
 import { BITBUCKET_CLOUD_API_URL } from '../../../../services/constants.js';
 
-const processTeamMembers = (team, values, stringifier) => {
+const processTeamMembers = (team, values, stringifier, isServer) => {
 	for (const value of values) {
 		const row = {
-			user: value.nickname,
+			user: isServer ? value.slug : value.nickname,
 			team,
 			role: 'maintainer',
 		};
@@ -19,15 +19,22 @@ const processTeamMembers = (team, values, stringifier) => {
 	}
 };
 
-const getTeamMembersConfig = (options, team, cloudUrl) => {
-	const { organization: org, token, batchSize } = options;
+const getTeamMembersConfig = (options, urlOpts) => {
+	const { organization: org, token, batchSize, bitbucketUrl } = options;
+	const { team, next, nextPageStart } = urlOpts;
+	let url = next ? next : `${BITBUCKET_CLOUD_API_URL}/groups/${org}/${team}/members?pagelen=${batchSize}`;
 
+	if (bitbucketUrl) {
+		if (nextPageStart) {
+			url = `${bitbucketUrl}/rest/api/latest/admin/groups/more-members?context=${team}&start=${nextPageStart}&limit=${batchSize}`;
+		} else {
+			url = `${bitbucketUrl}/rest/api/latest/admin/groups/more-members?context=${team}&limit=${batchSize}`;
+		}
+	}
 	return {
 		method: 'get',
 		maxBodyLength: Infinity,
-		url: cloudUrl
-			? cloudUrl
-			: `${BITBUCKET_CLOUD_API_URL}/groups/${org}/${team}/members?pagelen=${batchSize}`,
+		url,
 		headers: {
 			Accept: 'application/json',
 			Authorization: `Bearer ${token}`,
@@ -35,15 +42,15 @@ const getTeamMembersConfig = (options, team, cloudUrl) => {
 	};
 };
 
-const getTeamMembers = async (options, team, cloudUrl) => {
-	const config = getTeamMembersConfig(options, team, cloudUrl);
+const getTeamMembers = async (options, urlOpts) => {
+	const config = getTeamMembersConfig(options, urlOpts);
 	return doRequest(config);
 };
 
 const columns = ['user', 'team', 'role'];
 
 const getBitbucketTeamsMembers = async (options) => {
-	const { organization: org, inputFile, outputFile, waitTime } = options;
+	const { organization: org, inputFile, outputFile, waitTime, bitbucketUrl } = options;
 	const teams = (await getData(inputFile)).map((row) => row.team);
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
@@ -52,12 +59,12 @@ const getBitbucketTeamsMembers = async (options) => {
 
 	for (const team of teams) {
 		let teamMembersInfo = await getTeamMembers(options, team);
-		processTeamMembers(team, teamMembersInfo.values, stringifier);
+		processTeamMembers(team, teamMembersInfo.values, stringifier, bitbucketUrl);
 		await delay(waitTime);
 
-		while (teamMembersInfo.next) {
-			teamMembersInfo = await getTeam(options, team, teamMembersInfo.next);
-			processTeamMembers(team, teamMembersInfo.values, stringifier);
+		while (teamMembersInfo.next || !teamsInfo.isLastPage) {
+			teamMembersInfo = await getTeam(options, { team, next: teamsInfo.next, nextPageStart: teamsInfo.nextPageStart });
+			processTeamMembers(team, teamMembersInfo.values, stringifier, bitbucketUrl);
 			await delay(waitTime);
 		}
 	}

@@ -21,15 +21,22 @@ const processTeams = (values, stringifier) => {
 	}
 };
 
-const getTeamsConfig = (options, cloudUrl) => {
-	const { organization: org, token, batchSize } = options;
+const getTeamsConfig = (options, urlOpts) => {
+	const { organization: org, token, batchSize, bitbucketUrl } = options;
+	const { next, nextPageStart } = urlOpts;
+	let url = next ? next : `${BITBUCKET_CLOUD_API_URL}/groups/${org}?pagelen=${batchSize}`;
 
+	if (bitbucketUrl) {
+		if (nextPageStart) {
+			url = `${bitbucketUrl}/rest/api/latest/admin/groups?start=${nextPageStart}&limit=${batchSize}`;
+		} else {
+			url = `${bitbucketUrl}/rest/api/latest/admin/groups?limit=${batchSize}`;
+		}
+	}
 	return {
 		method: 'get',
 		maxBodyLength: Infinity,
-		url: cloudUrl
-			? cloudUrl
-			: `${BITBUCKET_CLOUD_API_URL}/groups/${org}?pagelen=${batchSize}`,
+		url,
 		headers: {
 			Accept: 'application/json',
 			Authorization: `Bearer ${token}`,
@@ -37,8 +44,8 @@ const getTeamsConfig = (options, cloudUrl) => {
 	};
 };
 
-const getTeams = async (options, cloudUrl) => {
-	const config = getTeamsConfig(options, cloudUrl);
+const getTeams = async (options, urlOpts) => {
+	const config = getTeamsConfig(options, urlOpts);
 	return doRequest(config);
 };
 
@@ -55,8 +62,8 @@ const getBitbucketTeams = async (options) => {
 	processTeams(teamsInfo.values, stringifier);
 	await delay(waitTime);
 
-	while (teamsInfo.next) {
-		teamsInfo = await getTeams(options, teamsInfo.next);
+	while (teamsInfo.next || !teamsInfo.isLastPage) {
+		teamsInfo = await getTeams(options, { next: teamsInfo.next, nextPageStart: teamsInfo.nextPageStart });
 		processTeams(teamsInfo.values, stringifier);
 		await delay(waitTime);
 	}
