@@ -65,7 +65,7 @@ export const insertTeamMembers = async (options) => {
 			const response = await insertTeamMember({
 				member,
 				team,
-				role: role.toLowerCase(),
+				role,
 				options,
 			});
 

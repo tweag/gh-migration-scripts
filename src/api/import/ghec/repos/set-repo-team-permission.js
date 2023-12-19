@@ -47,16 +47,6 @@ const setTeamPermission = async (details) => {
 	return doRequest(config);
 };
 
-const convertPermission = (permission) => {
-	return {
-		ADMIN: 'admin',
-		MAINTAIN: 'maintain',
-		WRITE: 'push',
-		TRIAGE: 'triage',
-		READ: 'pull',
-	}[permission];
-};
-
 export const setRepoTeamPermission = async (options) => {
 	try {
 		const {
@@ -110,7 +100,7 @@ export const setRepoTeamPermission = async (options) => {
 
 			if (!options.reposFile || filterRepos.includes(repo)) {
 				if (index > skip) {
-					const permission = convertPermission(rowArr[2]);
+					const permission = rowArr[2];
 					const response = await setTeamPermission({
 						repo,
 						team,
