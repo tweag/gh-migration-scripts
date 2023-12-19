@@ -102,11 +102,11 @@ Repositories direct collaborators role file (-y | --output-file)
 | --------- | --------- | ----- |
 | test-repo | test-user | admin |
 
-Status file
+**Status file**
 
 | repo      | status  | statusText | errorMessage |
-| --------- | ------- | ---------- | ------------ | --- |
-| test-repo | Success |            |              |     |
+| --------- | ------- | ---------- | ------------ |
+| test-repo | Success |            |              |
 
 ### 3a. Get Team In An Organization
 ### 3b. Get Team Members
@@ -298,8 +298,8 @@ node src/index.js set-membership-in-org -o <organization> -f <file>
 #### Output
 
 | login        | status  | statusText | errorMessage |
-| ------------ | ------- | ---------- | ------------ | --- |
-| example-user | Success |            |              |     |
+| ------------ | ------- | ---------- | ------------ |
+| example-user | Success |            |              |
 
 
 ### 2. Create teams
@@ -345,9 +345,9 @@ Required fields in the input CSV file are:
 #### Output
 
 | team   | status  | statusText | errorMessage |
-| ------ | ------- | ---------- | ------------ | --- |
+| ------ | ------- | ---------- | ------------ |
 | team a | Success |            |              |
-| team b | Success |            |              |     |
+| team b | Success |            |              |
 
 ### 3. Insert Members To Teams
 
@@ -385,8 +385,8 @@ To migrate the team members from GHES to GHEC, use the team members output file 
 #### Output
 
 | member    | team      | role   | status  | statusText | errorMessage |
-| --------- | --------- | ------ | ------- | ---------- | ------------ | --- |
-| test-user | test-team | member | Success |            |              |     |
+| --------- | --------- | ------ | ------- | ---------- | ------------ |
+| test-user | test-team | member | Success |            |              |
 
 ### 4. Add Repo direct collaborators
 
@@ -523,7 +523,7 @@ Format
 
 | member | team      | role  |
 | ------ | --------- | ----- |
-| abc    | test-team | WRITE |
+| abc    | test-team | write |
 
 ### 2. Compare Repository Direct Collaborators
 
@@ -613,8 +613,8 @@ node src/index.js set-archived-status -o <organization> -f <file>
 #### Output
 
 | repo     | status  | statusText | errorMessage |
-| -------- | ------- | ---------- | ------------ | --- |
-| abc-repo | Success |            |              |     |
+| -------- | ------- | ---------- | ------------ |
+| abc-repo | Success |            |              |
 
 ### 2. delete-repos
 
@@ -648,8 +648,8 @@ node src/index.js delete-repos -o <organization> -f <file>
 #### Output
 
 | repo     | status  | statusText | errorMessage |
-| -------- | ------- | ---------- | ------------ | --- |
-| abc-repo | Success |            |              |     |
+| -------- | ------- | ---------- | ------------ |
+| abc-repo | Success |            |              |
 
 ### 3. get-outside-collaborators
 
@@ -696,35 +696,23 @@ If a wrong token is provided, then you will get the bad credentials error.
 
 GraphQL scripts error
 
-![bad-credentials](https://github.com/ModusCreateOrg/gh-migration-scripts/assets/1175631/e8a8b79b-0350-49e2-be57-4416e7704c88)
-
 REST API scripts error
-
-![bad-credentials-2](https://github.com/ModusCreateOrg/gh-migration-scripts/assets/1175631/2b855204-bbf6-407b-9b95-60fa902935b4)
 
 ### 2. Wrong Command
 
 If you mistype command name, then this error will happen.
 
-![wrong-command](https://github.com/ModusCreateOrg/gh-migration-scripts/assets/1175631/2bee8f08-2db0-4504-8a41-f72feec3c487)
-
 ### 3. Server error
 
 Sometimes the server connection can abruptly close which may be because of less time between consecutive requests. To avoid this issue, we can increase the time by increasing the wait/delay time. Default wait time is 1 second for all scripts where wait time is used. `-w` or `--wait-time` is the option to increase the delay.
-
-![server-error](https://github.com/ModusCreateOrg/gh-migration-scripts/assets/1175631/c227dd9a-30db-4505-999c-e7932e70a314)
 
 ### 4. Validation failed
 
 If we try to create an entity that is already created then we will get the validation failed error. For example, if we send a request to create a team which is an existing team, then this will be the error.
 
-![validation-failed](https://github.com/ModusCreateOrg/gh-migration-scripts/assets/1175631/aaa7dc3b-0ef8-439e-9ed9-26290e2bb8b6)
-
 ### 5. 404 - Not found
 
 If our request is to a non-existent entity, then we will get the 404 not found error.
-
-![not-found](https://github.com/ModusCreateOrg/gh-migration-scripts/assets/1175631/1f55b409-114e-4b84-8738-cba51aae286b)
 
 ### 6. Archive
 
@@ -732,15 +720,13 @@ There are some archived repositories. We cannot make any post/put requests to th
 
 But if this error occurred and the post request didn't succeed, it might be because of token. So, proceed by generating a new token with admin access.
 
-![archive](https://github.com/ModusCreateOrg/gh-migration-scripts/assets/1175631/dc196031-762e-4729-93fc-3347f50db330)
-
 # Developing
 
 {Show how engineers can set up a development environment and contribute.}
 
 ## Prerequisites
 
- **Node 16+**
+ **Node V16+**
 
 ## Testing
 
