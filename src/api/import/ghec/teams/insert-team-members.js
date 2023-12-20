@@ -13,11 +13,11 @@ import {
 } from '../../../../services/constants.js';
 
 const getInsertTeamMembersConfig = ({ member, team, role, options }) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/orgs/${org}/teams/${team}/memberships/${member}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/orgs/${org}/teams/${team}/memberships/${member}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/orgs/${org}/teams/${team}/memberships/${member}`;
 	}
 
 	return {

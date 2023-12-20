@@ -23,7 +23,6 @@ export const INSERT_TEAM_MEMBERS = 'insert-team-members';
 export const SET_MEMBERSHIP_IN_ORG = 'set-membership-in-org';
 export const SUCCESS_STATUS = 'Success';
 export const VALIDATION_FAILED = 'Validation Failed';
-export const BITBUCKET_CLOUD_API_URL = 'https://api.bitbucket.org/2.0';
 export const GET_BITBUCKET_CLOUD_REPOS = 'get-bitbucket-cloud-repos';
 export const GET_BITBUCKET_CLOUD_REPOS_DIRECT_COLLABORATORS =
 	'get-bitbucket-cloud-repos-direct-collaborators';

@@ -9,10 +9,9 @@ const spinner = Ora();
 const getScript = (repo, options) => {
 	const {
 		destinationOrg,
-    bitbucketUrl,
+    serverUrl,
     bitbucketProject,
     repo,
-    destinationRepo,
     sshUser,
     awsBucketName,
 	} = options;
@@ -21,14 +20,14 @@ const getScript = (repo, options) => {
 		'bbs2gh',
 		'migrate-repo',
 		'--bbs-server-url',
-		bitbucketUrl,
+		serverUrl,
 		'--bbs-project',
 		bitbucketProject,
 		'--bbs-repo',
 		repo,
 		'--github-org',
 		destinationOrg,
-		destinationRepo ? destinationRepo : repo,
+		repo,
 		'--ssh-user',
 		sshUser,
 		'--aws-bucket-name',

@@ -13,10 +13,10 @@ const processUsers = (values, stringifier) => {
 	}
 };
 
-const getEnterpriseUsersConfig = (options, urlOpts) => {
-	const { token, batchSize, serverUrl } = options;
+const getProjectUsersConfig = (options, urlOpts) => {
+	const { organization: project, token, batchSize, serverUrl } = options;
 	const { nextPageStart } = urlOpts;
-	let url = `${serverUrl}/rest/api/latest/admin/users?limit=${batchSize}`;
+	let url = `${serverUrl}/rest/api/latest/projects/${project}/permissions/users?limit=${batchSize}`;
 
 	if (nextPageStart) url = url + `&start=${nextPageStart}`;
 
@@ -31,26 +31,26 @@ const getEnterpriseUsersConfig = (options, urlOpts) => {
 	};
 };
 
-const getEnterpriseUsers = async (options, urlOpts) => {
-	const config = getEnterpriseUsersConfig(options, urlOpts);
+const getProjectUsers = async (options, urlOpts) => {
+	const config = getProjectUsersConfig(options, urlOpts);
 	return doRequest(config);
 };
 
 const columns = ['repo', 'login', 'role'];
 
-const getBitbucketEnterpriseUsers = async (options) => {
+const getBitbucketProjectUsers = async (options) => {
 	let users = [];
 	const { organization: org, outputFile, waitTime } = options;
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${org}-bitbucket-cloud-organization-users-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
-	let usersInfo = await getEnterpriseUsers(options, { nextPageStart: null });
+	let usersInfo = await getProjectUsers(options, { nextPageStart: null });
 	processUsers(usersInfo.values, stringifier);
 	await delay(waitTime);
 
 	while (!usersInfo.isLastPage) {
-		usersInfo = await getEnterpriseUsers(options, {
+		usersInfo = await getProjectUsers(options, {
 			nextPageStart: usersInfo.nextPageStart,
 		});
 		processUsers(usersInfo.values, stringifier);
@@ -61,4 +61,4 @@ const getBitbucketEnterpriseUsers = async (options) => {
 	return users;
 };
 
-export default getBitbucketEnterpriseUsers;
+export default getBitbucketProjectUsers;

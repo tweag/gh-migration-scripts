@@ -13,11 +13,11 @@ import {
 } from '../../../../services/constants.js';
 
 const getArchiveRepoConfig = (repo, status, options) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/repos/${org}/${repo}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/repos/${org}/${repo}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/repos/${org}/${repo}`;
 	}
 
 	return {

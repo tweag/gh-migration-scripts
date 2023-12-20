@@ -20,7 +20,11 @@ const processRepos = (repos, slug, stringifier) => {
 
 		for (const repoInfo of reposArray) {
 			const [repo, permission] = repoInfo.split(':');
-			stringifier.write({ repo, team: slug, permission: convertPermission(permission) });
+			stringifier.write({
+				repo,
+				team: slug,
+				permission: convertPermission(permission),
+			});
 		}
 	}
 };

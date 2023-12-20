@@ -13,11 +13,11 @@ import {
 } from '../../../../services/constants.js';
 
 const getMembershipConfig = (login, options) => {
-	const { organization: org, githubUrl, token, deleteMembers } = options;
+	const { organization: org, serverUrl, token, deleteMembers } = options;
 	let url = `${GITHUB_API_URL}/orgs/${org}/memberships/${login}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/orgs/${org}/memberships/${login}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/orgs/${org}/memberships/${login}`;
 	}
 
 	const config = {

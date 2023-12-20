@@ -46,7 +46,7 @@ node src/index.js get-repos -o <organization>
 
 1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
 2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
 4. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. Default file name is `<organization>-metrics/<organization>-repo-metrics-<date>-<target>.csv`.
    _date_ - Format is DD/MM/YYYY - The date is when the file is created
    _target_ - ghes or ghec
@@ -81,7 +81,7 @@ node src/index.js get-repo-direct-collaborators -o <organization> -f <file>
 #### Optional Arguments
 
 1. `c` or `--outside-collaborators-file` - Outside collaborators files to filter out the result. The api for repository directory collaborators returns outside collaborators as well. The CSV file should have a column with the name `login`.
-2. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+2. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 3. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-repo-direct-collaborators-<timestamp>.csv`.
 4. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 5. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
@@ -109,7 +109,9 @@ Repositories direct collaborators role file (-y | --output-file)
 | test-repo | Success |            |              |
 
 ### 3a. Get Team In An Organization
+
 ### 3b. Get Team Members
+
 ### 3c. Get Repository Team Permission
 
 All the above 3 actions are done by the below `get-teams` script.
@@ -132,7 +134,7 @@ node src/index.js get-teams -o <organization>
 
 1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
 2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
 4. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. The default file name is applicable only for the team metrics file.
 5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
@@ -151,8 +153,8 @@ a. **Teams metrics** - Contains the teams info.
 
 **Format**
 
-| name        | id  | slug        | combinedSlug    | description | privacy | url             | repositories         | repositoriesCount | childTeams | members                | membersCount | parentTeam       | parentTeamId | repositoriesUrl | repositoriesResourcePath            | resourcePath              | createdAt            | updatedAt            |
-| ----------- | --- | ----------- | --------------- | ----------- | ------- | --------------- | -------------------- | ----------------- | ---------- | ---------------------- | ------------ | ---------------- | ------------ | --------------- | ----------------------------------- | ------------------------- | -------------------- | -------------------- |
+| name        | id  | slug        | combinedSlug    | description | privacy | url             | repositories         | repositoriesCount | childTeams | members                | membersCount | parentTeam       | parentTeamId | repositoriesUrl | repositoriesResourcePath            | resourcePath           | createdAt            | updatedAt            |
+| ----------- | --- | ----------- | --------------- | ----------- | ------- | --------------- | -------------------- | ----------------- | ---------- | ---------------------- | ------------ | ---------------- | ------------ | --------------- | ----------------------------------- | ---------------------- | -------------------- | -------------------- |
 | Sample Team | 123 | sample-team | org/sample-team | Desc        | closed  | https://url.com | repo-name:permission | 1                 | null       | abc:abc@email.com:role | 1            | parent-team-slug | 2            | https://url.com | /orgs/org/teams/owners/repositories | /orgs/org/teams/owners | 2018-11-02T21:22:15Z | 2018-11-02T21:22:15Z |
 
 Default file name is `<organization>-metrics/<organization>-team-metrics-<date>-<target>.csv`.
@@ -202,7 +204,7 @@ node src/index.js get-enterprise-users
 1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
 2. `-b` or `--batch-size` - Batch size for GraphQL request.
 3. `-e` or `--enterprise-organizations` - List of organizations on the enterprise. Organization names should be given space separated. E.g `-e org1 org2 org3`.
-4. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `enterprise-users-<timestamp>.csv`.
 6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 7. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
@@ -239,7 +241,7 @@ node src/index.js get-org-users -o <organization-name>
 
 1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
 2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-metrics/<organization>-user-metrics-13-11-2023-ghes.csv`. If the target is GHEC, then the end part of the file will be 'ghec' instead of 'ghes'. Moreover, the date part in the output file is `DD/MM/YYYY`.
 5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 6. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
@@ -283,7 +285,7 @@ node src/index.js set-membership-in-org -o <organization> -f <file>
 #### Optional Arguments
 
 1. `-d` or `--delete-member` - Boolean flag. If set then it will remove the members from the organization.
-2. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+2. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 3. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-membership-in-org-status-<timestamp>.csv`. The output files logs the successfully deleted organization members.
 4. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 5. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
@@ -300,7 +302,6 @@ node src/index.js set-membership-in-org -o <organization> -f <file>
 | login        | status  | statusText | errorMessage |
 | ------------ | ------- | ---------- | ------------ |
 | example-user | Success |            |              |
-
 
 ### 2. Create teams
 
@@ -322,7 +323,7 @@ node src/index.js create-teams -o <organization> -f <file> -z <github-user>
 
 #### Optional Arguments
 
-1. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-create-teams-status-<timestamp>.csv`. The output file logs the names of the successfully migrated team names.
 3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
@@ -330,8 +331,8 @@ node src/index.js create-teams -o <organization> -f <file> -z <github-user>
 
 #### Input
 
-| name        | id  | slug        | combinedSlug    | description | privacy | url             | repositories         | repositoriesCount | childTeams | members                | membersCount | parentTeam       | parentTeamId | repositoriesUrl | repositoriesResourcePath            | resourcePath              | createdAt            | updatedAt            |
-| ----------- | --- | ----------- | --------------- | ----------- | ------- | --------------- | -------------------- | ----------------- | ---------- | ---------------------- | ------------ | ---------------- | ------------ | --------------- | ----------------------------------- | ------------------------- | -------------------- | -------------------- |
+| name        | id  | slug        | combinedSlug    | description | privacy | url             | repositories         | repositoriesCount | childTeams | members                | membersCount | parentTeam       | parentTeamId | repositoriesUrl | repositoriesResourcePath            | resourcePath           | createdAt            | updatedAt            |
+| ----------- | --- | ----------- | --------------- | ----------- | ------- | --------------- | -------------------- | ----------------- | ---------- | ---------------------- | ------------ | ---------------- | ------------ | --------------- | ----------------------------------- | ---------------------- | -------------------- | -------------------- |
 | Sample Team | 123 | sample-team | org/sample-team | Desc        | closed  | https://url.com | repo-name:permission | 1                 | null       | abc:abc@email.com:role | 1            | parent-team-slug | 2            | https://url.com | /orgs/org/teams/owners/repositories | /orgs/org/teams/owners | 2018-11-02T21:22:15Z | 2018-11-02T21:22:15Z |
 
 Required fields in the input CSV file are:
@@ -368,7 +369,7 @@ node src/index.js insert-team-members -o <organization> -f <file>
 
 #### Optional Arguments
 
-1. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-insert-team-members-status-<timestamp>.csv`. The output files logs the successfully inserted teams members.
 3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
@@ -407,7 +408,7 @@ node src/index.js set-repo-collaborators -o <organization> -f <file>
 
 #### Optional Arguments
 
-1. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-repo-collaborators-status-<timestamp>.csv`. This output file logs the successful collaborators requests to repositories.
 3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 4. `-r` or `--repos-file` - File with repos names so only those repos will be considered. Should have the column `repos`.
@@ -445,7 +446,7 @@ node src/index.js set-repo-team-permission -o <organization> -f <file>
 
 #### Optional Arguments
 
-1. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-repo-team-permission-status-<timestamp>.csv`. This output file logs the successful teams permissions added to repositories.
 3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 4. `-r` or `--repos-file` - File with repos names so only those repos will be considered. Should have the column `repos`.
@@ -487,8 +488,8 @@ node src/index.js compare-teams -c <ghec-file> -s <ghes-file> -o <organization>
 
 #### Input
 
-| name        | id  | slug        | combinedSlug    | description | privacy | url             | repositories         | repositoriesCount | childTeams | members                | membersCount | parentTeam       | parentTeamId | repositoriesUrl | repositoriesResourcePath            | resourcePath              | createdAt            | updatedAt            |
-| ----------- | --- | ----------- | --------------- | ----------- | ------- | --------------- | -------------------- | ----------------- | ---------- | ---------------------- | ------------ | ---------------- | ------------ | --------------- | ----------------------------------- | ------------------------- | -------------------- | -------------------- |
+| name        | id  | slug        | combinedSlug    | description | privacy | url             | repositories         | repositoriesCount | childTeams | members                | membersCount | parentTeam       | parentTeamId | repositoriesUrl | repositoriesResourcePath            | resourcePath           | createdAt            | updatedAt            |
+| ----------- | --- | ----------- | --------------- | ----------- | ------- | --------------- | -------------------- | ----------------- | ---------- | ---------------------- | ------------ | ---------------- | ------------ | --------------- | ----------------------------------- | ---------------------- | -------------------- | -------------------- |
 | Sample Team | 123 | sample-team | org/sample-team | Desc        | closed  | https://url.com | repo-name:permission | 1                 | null       | abc:abc@email.com:role | 1            | parent-team-slug | 2            | https://url.com | /orgs/org/teams/owners/repositories | /orgs/org/teams/owners | 2018-11-02T21:22:15Z | 2018-11-02T21:22:15Z |
 
 #### Output
@@ -597,7 +598,7 @@ node src/index.js set-archived-status -o <organization> -f <file>
 
 #### Optional Arguments
 
-1. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-archived-status-<timestamp>.csv`. This output file logs the successful requests.
 3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
@@ -633,7 +634,7 @@ node src/index.js delete-repos -o <organization> -f <file>
 
 #### Optional Arguments
 
-1. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-delete-repos-status-<timestamp>.csv`. This output file logs the successful repositories deleted from the organization.
 3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
@@ -667,7 +668,7 @@ node src/index.js get-outside-collaborators -o <organization>
 
 #### Optional Arguments
 
-1. `-g` or `--github-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
 2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-outside-collaborators-<timestamp>.csv`.
 3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
 4. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
@@ -726,7 +727,7 @@ But if this error occurred and the post request didn't succeed, it might be beca
 
 ## Prerequisites
 
- **Node V16+**
+**Node V16+**
 
 ## Testing
 

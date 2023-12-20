@@ -21,11 +21,11 @@ const getCreateTeamConfig = ({
 	parentTeamId,
 	options,
 }) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/orgs/${org}/teams`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/orgs/${org}/teams`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/orgs/${org}/teams`;
 	}
 
 	const paramsData = {
@@ -55,11 +55,11 @@ const createSingleTeam = async (details) => {
 };
 
 const deleteMemberFromTeam = async (slug, member, options) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/orgs/${org}/teams/${slug}/memberships/${member}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/orgs/${org}/teams/${slug}/memberships/${member}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/orgs/${org}/teams/${slug}/memberships/${member}`;
 	}
 
 	const config = {

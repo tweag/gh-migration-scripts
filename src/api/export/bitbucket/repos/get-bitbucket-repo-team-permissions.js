@@ -7,28 +7,29 @@ import {
 	currentTime,
 	delay,
 } from '../../../../services/utils.js';
-import { BITBUCKET_CLOUD_API_URL } from '../../../../services/constants.js';
 
 const processReposTeamsPermissions = (repo, values, stringifier) => {
 	for (const value of values) {
 		const row = {
 			repo,
-			login: value.group.slug,
+			login: value.group.name,
 			role: value.permission,
 		};
 		stringifier.write(row);
 	}
 };
 
-const getReposTeamsPermissionsConfig = (options, repo, cloudUrl) => {
-	const { organization: org, token, batchSize } = options;
+const getReposTeamsPermissionsConfig = (options, urlOpts) => {
+	const { organization: project, token, batchSize, serverUrl } = options;
+	const { repo, nextPageStart } = urlOpts;
+	let url = `${serverUrl}/rest/api/latest/projects/${project}/repos/${repo}/permissions/groups?limit=${batchSize}`;
+
+	if (nextPageStart) url = url + `&start=${nextPageStart}`;
 
 	return {
 		method: 'get',
 		maxBodyLength: Infinity,
-		url: cloudUrl
-			? cloudUrl
-			: `${BITBUCKET_CLOUD_API_URL}/repositories/${org}/${repo}/permissions-config/groups?pagelen=${batchSize}`,
+		url,
 		headers: {
 			Accept: 'application/json',
 			Authorization: `Bearer ${token}`,
@@ -36,32 +37,31 @@ const getReposTeamsPermissionsConfig = (options, repo, cloudUrl) => {
 	};
 };
 
-const getReposTeamsPermissions = async (options, repo, cloudUrl) => {
-	const config = getReposTeamsPermissionsConfig(options, repo, cloudUrl);
+const getReposTeamsPermissions = async (options, urlOpts) => {
+	const config = getReposTeamsPermissionsConfig(options, urlOpts);
 	return doRequest(config);
 };
 
 const columns = ['repo', 'team', 'permission'];
 
 const getBitbucketReposTeamsPermissions = async (options) => {
-	const { organization: org, inputFile, outputFile, waitTime } = options;
+	const { organization: project, inputFile, outputFile, waitTime } = options;
 	const repos = (await getData(inputFile)).map((row) => row.repo);
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${org}-bitbucket-repos-teams-permissions-${currentTime()}.csv`;
+		`${project}-bitbucket-repos-teams-permissions-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const repo of repos) {
-		let repoTeamsInfo = await getReposTeamsPermissions(options, repo);
+		let repoTeamsInfo = await getReposTeamsPermissions(options, { repo });
 		processReposTeamsPermissions(repo, repoTeamsInfo.values, stringifier);
 		await delay(waitTime);
 
 		while (repoTeamsInfo.next) {
-			repoTeamsInfo = await getReposTeamsPermissions(
-				options,
+			repoTeamsInfo = await getReposTeamsPermissions(options, {
 				repo,
-				repoTeamsInfo.next,
-			);
+				nextPageStart: repoTeamsInfo.nextPageStart,
+			});
 			processReposTeamsPermissions(repo, repoTeamsInfo.values, stringifier);
 			await delay(waitTime);
 		}

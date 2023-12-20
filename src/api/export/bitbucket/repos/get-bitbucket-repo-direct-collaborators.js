@@ -6,28 +6,48 @@ import {
 	currentTime,
 	delay,
 } from '../../../../services/utils.js';
-import { BITBUCKET_CLOUD_API_URL } from '../../../../services/constants.js';
+
+const rolesMap = {
+	USER_ADMIN: 'admin',
+	PROJECT_VIEW: 'read',
+	REPO_READ: 'read',
+	REPO_WRITE: 'write',
+	REPO_ADMIN: 'admin',
+	PROJECT_READ: 'read',
+	PROJECT_WRITE: 'write',
+	REPO_CREATE: 'triage',
+	PROJECT_ADMIN: 'admin',
+	LICENSED_USER: 'read',
+	PROJECT_CREATE: 'triage',
+	ADMIN: 'admin',
+	SYS_ADMIN: 'admin',
+};
+
+const processRole = (role) => rolesMap[role];
 
 const processReposDirectCollaborators = (repo, values, stringifier) => {
 	for (const value of values) {
+		const { slug, permission } = value;
 		const row = {
 			repo,
-			login: value.user.nickname,
-			role: value.permission,
+			login: slug,
+			role: processRole(permission),
 		};
 		stringifier.write(row);
 	}
 };
 
-const getReposDirectCollaboratorsConfig = (options, repo, cloudUrl) => {
-	const { organization: org, token, batchSize } = options;
+const getReposDirectCollaboratorsConfig = (options, urlOpts) => {
+	const { organization: project, token, batchSize, serverUrl } = options;
+	const { repo, nextPageStart } = urlOpts;
+	let url = `${serverUrl}/rest/api/latest/projects/${project}/repos/${repo}/permissions/users?limit=${batchSize}`;
+
+	if (nextPageStart) url = url + `&start=${nextPageStart}`;
 
 	return {
 		method: 'get',
 		maxBodyLength: Infinity,
-		url: cloudUrl
-			? cloudUrl
-			: `${BITBUCKET_CLOUD_API_URL}/repositories/${org}/${repo}/permissions-config/users?pagelen=${batchSize}`,
+		url,
 		headers: {
 			Accept: 'application/json',
 			Authorization: `Bearer ${token}`,
@@ -35,8 +55,8 @@ const getReposDirectCollaboratorsConfig = (options, repo, cloudUrl) => {
 	};
 };
 
-const getReposDirectCollaborators = async (options, repo, cloudUrl) => {
-	const config = getReposDirectCollaboratorsConfig(options, repo, cloudUrl);
+const getReposDirectCollaborators = async (options, urlOpts) => {
+	const config = getReposDirectCollaboratorsConfig(options, urlOpts);
 	return doRequest(config);
 };
 
@@ -51,16 +71,15 @@ const getBitbucketReposDirectCollaborators = async (options) => {
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const repo of repos) {
-		let repoUsersInfo = await getReposDirectCollaborators(options, repo);
+		let repoUsersInfo = await getReposDirectCollaborators(options, { repo });
 		processReposDirectCollaborators(repo, repoUsersInfo.values, stringifier);
 		await delay(waitTime);
 
-		while (repoUsersInfo.next) {
-			repoUsersInfo = await getReposDirectCollaborators(
-				options,
+		while (!repoUsersInfo.isLastPage) {
+			repoUsersInfo = await getReposDirectCollaborators(options, {
 				repo,
-				repoUsersInfo.next,
-			);
+				nextPageStart: repoUsersInfo.nextPageStart,
+			});
 			processReposDirectCollaborators(repo, repoUsersInfo.values, stringifier);
 			await delay(waitTime);
 		}

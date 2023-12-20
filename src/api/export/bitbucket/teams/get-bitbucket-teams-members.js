@@ -6,12 +6,11 @@ import {
 	currentTime,
 	delay,
 } from '../../../../services/utils.js';
-import { BITBUCKET_CLOUD_API_URL } from '../../../../services/constants.js';
 
-const processTeamMembers = (team, values, stringifier, isServer) => {
+const processTeamMembers = (team, values, stringifier) => {
 	for (const value of values) {
 		const row = {
-			user: isServer ? value.slug : value.nickname,
+			user: value.slug,
 			team,
 			role: 'maintainer',
 		};
@@ -20,17 +19,12 @@ const processTeamMembers = (team, values, stringifier, isServer) => {
 };
 
 const getTeamMembersConfig = (options, urlOpts) => {
-	const { organization: org, token, batchSize, bitbucketUrl } = options;
-	const { team, next, nextPageStart } = urlOpts;
-	let url = next ? next : `${BITBUCKET_CLOUD_API_URL}/groups/${org}/${team}/members?pagelen=${batchSize}`;
+	const { token, batchSize, serverUrl } = options;
+	const { team, nextPageStart } = urlOpts;
+	let url = `${serverUrl}/rest/api/latest/admin/groups/more-members?context=${team}&limit=${batchSize}`;
 
-	if (bitbucketUrl) {
-		if (nextPageStart) {
-			url = `${bitbucketUrl}/rest/api/latest/admin/groups/more-members?context=${team}&start=${nextPageStart}&limit=${batchSize}`;
-		} else {
-			url = `${bitbucketUrl}/rest/api/latest/admin/groups/more-members?context=${team}&limit=${batchSize}`;
-		}
-	}
+	if (nextPageStart) url = url + `&start=${nextPageStart}`;
+
 	return {
 		method: 'get',
 		maxBodyLength: Infinity,
@@ -50,7 +44,7 @@ const getTeamMembers = async (options, urlOpts) => {
 const columns = ['user', 'team', 'role'];
 
 const getBitbucketTeamsMembers = async (options) => {
-	const { organization: org, inputFile, outputFile, waitTime, bitbucketUrl } = options;
+	const { organization: org, inputFile, outputFile, waitTime } = options;
 	const teams = (await getData(inputFile)).map((row) => row.team);
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
@@ -58,13 +52,16 @@ const getBitbucketTeamsMembers = async (options) => {
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const team of teams) {
-		let teamMembersInfo = await getTeamMembers(options, team);
-		processTeamMembers(team, teamMembersInfo.values, stringifier, bitbucketUrl);
+		let teamMembersInfo = await getTeamMembers(options, { team });
+		processTeamMembers(team, teamMembersInfo.values, stringifier);
 		await delay(waitTime);
 
-		while (teamMembersInfo.next || !teamsInfo.isLastPage) {
-			teamMembersInfo = await getTeam(options, { team, next: teamsInfo.next, nextPageStart: teamsInfo.nextPageStart });
-			processTeamMembers(team, teamMembersInfo.values, stringifier, bitbucketUrl);
+		while (!teamsInfo.isLastPage) {
+			teamMembersInfo = await getTeam(options, {
+				team,
+				nextPageStart: teamsInfo.nextPageStart,
+			});
+			processTeamMembers(team, teamMembersInfo.values, stringifier);
 			await delay(waitTime);
 		}
 	}

@@ -6,32 +6,32 @@ import {
 	currentTime,
 	delay,
 } from '../../../../services/utils.js';
-import { BITBUCKET_CLOUD_API_URL } from '../../../../services/constants.js';
 
-const processRepositories = (repos, stringifier) => {
-	for (const repo of repos) {
-		const { slug, is_private, has_wiki, size } = repo;
+const processRepositories = (values, stringifier) => {
+	for (const value of values) {
+		const { name, archived } = value;
 
 		const row = {
-			repo: slug,
-			visibility: is_private ? 'private' : 'public',
-			wikiEnabled: has_wiki ? 'enabled' : 'disabled',
-			diskUsage: size,
+			repo: name,
+			visibility: value.public ? 'public' : 'private',
+			isArchived: archived ? true : false,
 		};
 
 		stringifier.write(row);
 	}
 };
 
-const getRepositoriesConfig = (options, cloudUrl) => {
-	const { organization: org, token, batchSize } = options;
+const getRepositoriesConfig = (options, urlOpts) => {
+	const { organization: project, token, batchSize, serverUrl } = options;
+	const { nextPageStart } = urlOpts;
+	let url = `${serverUrl}/rest/api/latest/projects/${project}/repos?limit=${batchSize}`;
+
+	if (nextPageStart) url = url + `&start=${nextPageStart}`;
 
 	return {
 		method: 'get',
 		maxBodyLength: Infinity,
-		url: cloudUrl
-			? cloudUrl
-			: `${BITBUCKET_CLOUD_API_URL}/repositories/${org}?pagelen=${batchSize}`,
+		url,
 		headers: {
 			Accept: 'application/json',
 			Authorization: `Bearer ${token}`,
@@ -39,25 +39,27 @@ const getRepositoriesConfig = (options, cloudUrl) => {
 	};
 };
 
-const getRepositories = async (options, url) => {
-	const config = getRepositoriesConfig(options, url);
+const getRepositories = async (options, urlOpts) => {
+	const config = getRepositoriesConfig(options, urlOpts);
 	return doRequest(config);
 };
 
-const columns = ['repo', 'visibility', 'wikiEnabled', 'diskUsage'];
+const columns = ['repo', 'isArchived', 'visibility'];
 
 const getBitbucketRepositories = async (options) => {
-	const { organization: org, outputFile, waitTime } = options;
+	const { organization: project, outputFile, waitTime } = options;
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${org}-bitbucket-repos-${currentTime()}.csv`;
+		`${project}-bitbucket-repos-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
-	let reposInfo = await getRepositories(options);
+	let reposInfo = await getRepositories(options, { nextPageStart: null });
 	processRepositories(reposInfo.values, stringifier);
 	await delay(waitTime);
 
-	while (reposInfo.next) {
-		reposInfo = await getRepositories(options, reposInfo.next);
+	while (!reposInfo.isLastPage) {
+		reposInfo = await getRepositories(options, {
+			nextPageStart: reposInfo.nextPageStart,
+		});
 		processRepositories(reposInfo.values, stringifier);
 		await delay(waitTime);
 	}

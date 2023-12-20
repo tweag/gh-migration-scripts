@@ -6,7 +6,6 @@ import {
 	currentTime,
 	delay,
 } from '../../../../services/utils.js';
-import { BITBUCKET_CLOUD_API_URL } from '../../../../services/constants.js';
 
 const processTeams = (values, stringifier) => {
 	for (const value of values) {
@@ -22,17 +21,12 @@ const processTeams = (values, stringifier) => {
 };
 
 const getTeamsConfig = (options, urlOpts) => {
-	const { organization: org, token, batchSize, bitbucketUrl } = options;
-	const { next, nextPageStart } = urlOpts;
-	let url = next ? next : `${BITBUCKET_CLOUD_API_URL}/groups/${org}?pagelen=${batchSize}`;
+	const { organization: project, token, batchSize, serverUrl } = options;
+	const { nextPageStart } = urlOpts;
+	let url = `${serverUrl}/rest/api/latest/projects/${project}/permissions/groups?limit=${batchSize}`;
 
-	if (bitbucketUrl) {
-		if (nextPageStart) {
-			url = `${bitbucketUrl}/rest/api/latest/admin/groups?start=${nextPageStart}&limit=${batchSize}`;
-		} else {
-			url = `${bitbucketUrl}/rest/api/latest/admin/groups?limit=${batchSize}`;
-		}
-	}
+	if (nextPageStart) url = url + `&start=${nextPageStart}`;
+
 	return {
 		method: 'get',
 		maxBodyLength: Infinity,
@@ -58,12 +52,14 @@ const getBitbucketTeams = async (options) => {
 		`${org}-bitbucket-teams-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 
-	let teamsInfo = await getTeams(options);
+	let teamsInfo = await getTeams(options, { nextPageStart: null });
 	processTeams(teamsInfo.values, stringifier);
 	await delay(waitTime);
 
-	while (teamsInfo.next || !teamsInfo.isLastPage) {
-		teamsInfo = await getTeams(options, { next: teamsInfo.next, nextPageStart: teamsInfo.nextPageStart });
+	while (!teamsInfo.isLastPage) {
+		teamsInfo = await getTeams(options, {
+			nextPageStart: teamsInfo.nextPageStart,
+		});
 		processTeams(teamsInfo.values, stringifier);
 		await delay(waitTime);
 	}

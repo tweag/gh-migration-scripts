@@ -20,9 +20,13 @@ import { ghesVsGhec } from './api/compare/ghes-vs-ghec/ghes-vs-ghec.js';
 import { insertTeamMembers } from './api/import/ghec/teams/insert-team-members.js';
 import { setMembershipInOrg } from './api/import/ghec/users/set-memberships-in-org.js';
 import { getFunctionName } from './services/utils.js';
+import generateBitbucketMigrationScript from './api/export/bitbucket/repos/generate-bitbucket-migration-script.js';
+import getBitbucketReposTeamsPermissions from './api/export/bitbucket/repos/get-bitbucket-repo-team-permissions.js';
 import getBitbucketRepositories from './api/export/bitbucket/repos/get-bitbucket-repos.js';
 import getBitbucketReposDirectCollaborators from './api/export/bitbucket/repos/get-bitbucket-repo-direct-collaborators.js';
-import getBitbucketOrganizationMembers from './api/export/bitbucket/users/get-bitbucket-organization-users.js';
+import getBitbucketTeams from './api/export/bitbucket/teams/get-bitbucket-teams.js';
+import getBitbucketTeamsMembers from './api/export/bitbucket/teams/get-bitbucket-teams-members.js';
+import getBitbucketProjectUsers from './api/export/bitbucket/users/get-bitbucket-project-users.js';
 import getBitbucketEnterpriseUsers from './api/export/bitbucket/users/get-bitbucket-enterprise-users.js';
 
 const args = {
@@ -42,10 +46,10 @@ const args = {
 		description: '',
 		defaultValue: '',
 	},
-	githubUrl: {
-		argument: '-g, --github-url <GITHUB SERVER URL>',
+	serverUrl: {
+		argument: '-g, --server-url <SERVER URL>',
 		description:
-			'The target GHES server endpoint url, for eg. https://github.gh-services-partners.com. If an URL is not provided then the target will the cloud instance',
+			'The target GHES server endpoint url, for eg. https://github.gh-services-partners.com.',
 		defaultValue: '',
 	},
 	organization: {
@@ -95,7 +99,7 @@ program
 		args.file.argument,
 		'Input file name with repo, collaborators & roles info',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -120,7 +124,7 @@ program
 		args.file.argument,
 		'Input file name with repo, team & permission info',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -145,7 +149,7 @@ program
 		args.file.argument,
 		'Input file name with repo names, if --repo is not specified',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(
@@ -172,7 +176,7 @@ program
 program
 	.command(getFunctionName(createTeams))
 	.requiredOption(args.file.argument, 'Input file name with teams info')
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -198,7 +202,7 @@ program
 		args.file.argument,
 		'Input file name with repository names to delete',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -238,7 +242,7 @@ program
 		'GHEC destination token',
 	)
 	.requiredOption('-t, --source-token <SOURCE TOKEN>', 'GHES destination token')
-	.requiredOption(args.githubUrl.argument, args.githubUrl.description)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.option(
 		'-v, --visibility <VISIBILITY>',
 		'Visibility of the repositories on the GHEC server',
@@ -248,6 +252,50 @@ program
 	.description('Generates GHES migration script')
 	.action(async (args) =>
 		commandController('', args, generateGHESMigrationScript),
+	);
+
+program
+	.command(getFunctionName(generateBitbucketMigrationScript))
+	.option(
+		'-a, --archive <ARCHIVE>',
+		'Generate script for archive repositories only',
+	)
+	.option(
+		'-u, --unarchive <UNARCHIVE>',
+		'Generate script for un-archived repositories only',
+	)
+	.requiredOption(
+		'-c, --destination-org <DESTINATION ORGANIZATION>',
+		'GHEC destination organization name',
+	)
+	.requiredOption(
+		'-w, --aws-bucket-name <AWS BUCKET NAME>',
+		'AWS bucket name to store the repository data',
+	)
+	.requiredOption('-h, --ssh-user <SSH USER>', 'Ssh user')
+	.requiredOption(args.file.argument, 'Input file name with repository info')
+	.requiredOption(
+		'-s, --bitbucket-project <BITBUCKET PROJECT>',
+		'Bitbucket source project name',
+	)
+	.requiredOption(
+		'-d, --destination-token <DESTINATION TOKEN>',
+		'GHEC destination token',
+	)
+	.requiredOption(
+		'-t, --source-token <SOURCE TOKEN>',
+		'Bitbucket destination token',
+	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.option(
+		'-v, --visibility <VISIBILITY>',
+		'Visibility of the repositories on the GHEC server',
+	)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.alias('gbms')
+	.description('Generates Bitbucket migration script')
+	.action(async (args) =>
+		commandController('', args, generateBitbucketMigrationScript),
 	);
 
 program
@@ -265,7 +313,7 @@ program
 		'-e, --enterprise-organizations <ENTERPRISE ORGANIZATION...>',
 		'List of organizations on the enterprise',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
 	.option(args.usersFile.argument, args.usersFile.description)
@@ -291,6 +339,7 @@ program
 		'-e, --enterprise-organizations <ENTERPRISE ORGANIZATION...>',
 		'List of organizations on the enterprise',
 	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
 	.option(args.usersFile.argument, args.usersFile.description)
@@ -316,7 +365,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -333,12 +382,13 @@ program
 	);
 
 program
-	.command(getFunctionName(getBitbucketOrganizationMembers))
+	.command(getFunctionName(getBitbucketProjectUsers))
 	.option(
 		args.batchSize.argument,
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -348,19 +398,15 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('gbom')
-	.description("Fetches users' details in a Bitbucket organization")
+	.alias('gbpu')
+	.description("Fetches users' details in a Bitbucket project")
 	.action(async (args) =>
-		commandController(
-			process.env.PAT,
-			args,
-			getBitbucketOrganizationMembers,
-		),
+		commandController(process.env.PAT, args, getBitbucketProjectUsers),
 	);
 
 program
 	.command(getFunctionName(getOutsideCollaborators))
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -383,7 +429,7 @@ program
 		'Outside collaborators files to filter out the result',
 	)
 	.requiredOption(args.file.argument, 'Input file with repository names')
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -413,7 +459,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -433,6 +479,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -456,6 +503,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -487,7 +535,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -502,6 +550,74 @@ program
 		'Fetches all teams of an organization along with repo team permissions and team memberships.',
 	)
 	.action(async (args) => commandController(process.env.PAT, args, getTeams));
+
+program
+	.command(getFunctionName(getBitbucketTeams))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbt')
+	.description('Fetches all teams of a Bitbucket project.')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketTeams),
+	);
+
+program
+	.command(getFunctionName(getBitbucketReposTeamsPermissions))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbrtp')
+	.description(
+		'Fetches team permissions of all repositories of a bitbucket project',
+	)
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketReposTeamsPermissions),
+	);
+
+program
+	.command(getFunctionName(getBitbucketTeamsMembers))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbtm')
+	.description('Fetches team of a bitbucket project')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketTeamsMembers),
+	);
 
 program
 	.command(getFunctionName(ghesVsGhec))
@@ -524,7 +640,7 @@ program
 	)
 	.option('-e, --ghec-token <GHEC token>', 'GHEC token')
 	.option('-f, --ghes-token <GHES token>', 'GHES token')
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.option('-i, --ghec-file <GHEC FILE>', 'GHEC repo metrics file')
 	.option(
 		'-j, --ghes-file <GHES FILE>',
@@ -546,7 +662,7 @@ program
 		args.file.argument,
 		'Input file name with teams, member, and roles',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -566,7 +682,7 @@ program
 	.command(getFunctionName(setMembershipInOrg))
 	.option('-d, --delete-members', 'Delete members from an organization')
 	.requiredOption(args.file.argument, 'Input file name with members name')
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)

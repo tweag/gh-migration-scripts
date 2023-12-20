@@ -23,11 +23,11 @@ const getSetRepoTeamPermissionConfig = ({
 	permission,
 	options,
 }) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/orgs/${org}/teams/${team}/repos/${org}/${repo}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/orgs/${org}/teams/${team}/repos/${org}/${repo}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/orgs/${org}/teams/${team}/repos/${org}/${repo}`;
 	}
 
 	return {
