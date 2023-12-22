@@ -20,6 +20,12 @@ import { ghesVsGhec } from './api/compare/ghes-vs-ghec/ghes-vs-ghec.js';
 import { insertTeamMembers } from './api/import/ghec/teams/insert-team-members.js';
 import { setMembershipInOrg } from './api/import/ghec/users/set-memberships-in-org.js';
 import { getFunctionName } from './services/utils.js';
+import getGitlabRepositories from './api/export/gitlab/repos/get-gitlab-repos.js';
+import getGitlabReposDirectCollaborators from './api/export/gitlab/repos/get-gitlab-repo-direct-collaborators.js';
+import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
+import getGitlabTeamsMembers from './api/export/gitlab/teams/get-gitlab-team-members.js';
+import getGitlabTeamsRepositories from './api/export/gitlab/teams/get-gitlab-team-repos.js';
+import getGitlabUsers from './api/export/gitlab/users/get-gitlab-users.js';
 
 const args = {
 	allowUntrustedSslCertificates: {
@@ -511,4 +517,129 @@ program
 		commandController('', args, compareRepoDirectCollaborators),
 	);
 
-program.parse(process.argv);
+// Gitlab
+
+program
+	.command(getFunctionName(getGitlabRepositories))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('ggr')
+	.description('Fetches all repositories of a Gitlab organization')
+	.action(async (args) => commandController(process.env.PAT, args, getGitlabRepositories));
+
+program
+	.command(getFunctionName(getGitlabReposDirectCollaborators))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.file.argument, 'Input file with repositories names')
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('ggrdc')
+	.description('Fetches direct collaborators of all repositories of a Gitlab organization')
+	.action(async (args) => commandController(process.env.PAT, args, getGitlabReposDirectCollaborators));
+
+program
+	.command(getFunctionName(getGitlabTeams))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('ggt')
+	.description('Fetches direct collaborators of all repositories of a Gitlab organization')
+	.action(async (args) => commandController(process.env.PAT, args, getGitlabTeams));
+
+program
+	.command(getFunctionName(getGitlabTeamsMembers))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.file.argument, 'Input file with teams names')
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('ggtm')
+	.description('Fetches members of all teams of a Gitlab organization')
+	.action(async (args) => commandController(process.env.PAT, args, getGitlabTeamsMembers));
+
+program
+	.command(getFunctionName(getGitlabTeamsRepositories))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.file.argument, 'Input file with teams names')
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('ggtr')
+	.description('Fetches repositories (projects) all teams of a Gitlab organization')
+	.action(async (args) => commandController(process.env.PAT, args, getGitlabTeamsRepositories));
+
+program
+	.command(getFunctionName(getGitlabUsers))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('ggu')
+	.description('Fetches direct collaborators of all repositories of a Gitlab organization')
+	.action(async (args) => commandController(process.env.PAT, args, getGitlabUsers));
+
+	program.parse(process.argv);

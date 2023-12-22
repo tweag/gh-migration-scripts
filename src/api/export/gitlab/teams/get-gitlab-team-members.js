@@ -32,7 +32,7 @@ const processTeamMembers = (team, values, stringifier) => {
 const getTeamMembersConfig = (options, urlOpts) => {
 	const { token, batchSize, serverUrl } = options;
 	const { groupId, idAfter } = urlOpts;
-	let url = `${serverUrl}/group/${groupId}/members/all?pagination=keyset&per_page=${batchSize}&order_by=id&sort=asc`;
+	let url = `${serverUrl}/api/v4/group/${groupId}/members/all?pagination=keyset&per_page=${batchSize}&order_by=id&sort=asc`;
 
 	if (idAfter) url = url + `&id_after=${idAfter}`;
 

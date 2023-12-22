@@ -17,7 +17,7 @@ const processUsers = (values, stringifier) => {
 const getUsers = (options, urlOpts) => {
 	const { token, batchSize, serverUrl } = options;
 	const { idAfter } = urlOpts;
-	let url = `${serverUrl}/users?pagination=keyset&per_page=${batchSize}&order_by=id&sort=asc`;
+	let url = `${serverUrl}/api/v4/users?pagination=keyset&per_page=${batchSize}&order_by=id&sort=asc`;
 
 	if (idAfter) url = url + `&id_after=${idAfter}`;
 
