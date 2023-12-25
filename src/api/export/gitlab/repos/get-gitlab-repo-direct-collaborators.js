@@ -2,6 +2,7 @@
 
 import {
 	doRequest,
+	getData,
 	getStringifier,
 	currentTime,
 	delay,
@@ -31,10 +32,12 @@ const processReposDirectCollaborators = (repo, values, stringifier) => {
 
 const getReposDirectCollaboratorsConfig = (options, urlOpts) => {
 	const { token, batchSize, serverUrl } = options;
-	const { projectId, idAfter } = urlOpts;
-	let url = `${serverUrl}/api/v4/project/${projectId}/members/all?pagination=keyset&per_page=${batchSize}&order_by=id&sort=asc`;
+	const { repoId, idAfter } = urlOpts;
+	let url = `${serverUrl}/api/v4/projects/${repoId}/members/all?pagination=keyset&per_page=${batchSize}&order_by=id&sort=asc`;
 
 	if (idAfter) url = url + `&id_after=${idAfter}`;
+
+	console.log({ url, token, batchSize, serverUrl });
 
 	return {
 		method: 'get',
@@ -55,7 +58,14 @@ const getReposDirectCollaborators = async (options, urlOpts) => {
 const columns = ['repo', 'login', 'role'];
 
 const getGitlabReposDirectCollaborators = async (options) => {
-	const { organization: org, inputFile, outputFile, waitTime, batchSize } = options;
+	const {
+		organization: org,
+		inputFile,
+		outputFile,
+		waitTime,
+		batchSize,
+	} = options;
+	console.log({ inputFile });
 	const repos = await getData(inputFile);
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
@@ -63,17 +73,21 @@ const getGitlabReposDirectCollaborators = async (options) => {
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const repo of repos) {
-		let repoUsersInfo = await getReposDirectCollaborators(options, { repoId: repo.id });
+		let { data: repoUsersInfo } = await getReposDirectCollaborators(options, {
+			repoId: repo.id,
+		});
+		console.log(JSON.stringify(repoUsersInfo, null, 2));
 		let reposLength = repoUsersInfo.length;
-		processReposDirectCollaborators(repo, repoUsersInfo, stringifier);
+		processReposDirectCollaborators(repo.repo, repoUsersInfo, stringifier);
 		await delay(waitTime);
 
-		while (reposLength === batchSize) {
-			repoUsersInfo = await getReposDirectCollaborators(options, {
+		while (reposLength == batchSize) {
+			const { data } = await getReposDirectCollaborators(options, {
 				repoId: repo.id,
-				idAfter: repoUsersInfo[batchSize - 1].id,
+				idAfter: repoUsersInfo[Number(batchSize) - 1].id,
 			});
-			processReposDirectCollaborators(repo, repoUsersInfo, stringifier);
+			repoUsersInfo = data;
+			processReposDirectCollaborators(repo.repo, repoUsersInfo, stringifier);
 			reposLength = repoUsersInfo.length;
 			await delay(waitTime);
 		}

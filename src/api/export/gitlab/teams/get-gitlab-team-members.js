@@ -2,6 +2,7 @@
 
 import {
 	doRequest,
+	getData,
 	getStringifier,
 	currentTime,
 	delay,
@@ -31,8 +32,8 @@ const processTeamMembers = (team, values, stringifier) => {
 
 const getTeamMembersConfig = (options, urlOpts) => {
 	const { token, batchSize, serverUrl } = options;
-	const { groupId, idAfter } = urlOpts;
-	let url = `${serverUrl}/api/v4/group/${groupId}/members/all?pagination=keyset&per_page=${batchSize}&order_by=id&sort=asc`;
+	const { teamId, idAfter } = urlOpts;
+	let url = `${serverUrl}/api/v4/groups/${teamId}/members/all?pagination=keyset&per_page=${batchSize}&order_by=id&sort=asc`;
 
 	if (idAfter) url = url + `&id_after=${idAfter}`;
 
@@ -52,10 +53,16 @@ const getTeamMembers = async (options, urlOpts) => {
 	return doRequest(config);
 };
 
-const columns = ['user', 'team', 'role'];
+const columns = ['login', 'team', 'role'];
 
 const getGitlabTeamsMembers = async (options) => {
-	const { organization: org, inputFile, outputFile, waitTime, batchSize } = options;
+	const {
+		organization: org,
+		inputFile,
+		outputFile,
+		waitTime,
+		batchSize,
+	} = options;
 	const teams = await getData(inputFile);
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
@@ -63,17 +70,20 @@ const getGitlabTeamsMembers = async (options) => {
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const team of teams) {
-		let teamUsersInfo = await getTeamMembers(options, { teamId: team.id });
+		let { data: teamUsersInfo } = await getTeamMembers(options, {
+			teamId: team.id,
+		});
 		let usersLength = teamUsersInfo.length;
-		processTeamMembers(team, teamUsersInfo, stringifier);
+		processTeamMembers(team.slug, teamUsersInfo, stringifier);
 		await delay(waitTime);
 
-		while (usersLength === batchSize) {
-			teamUsersInfo = await getTeamMembers(options, {
+		while (usersLength == batchSize) {
+			const { data } = await getTeamMembers(options, {
 				teamId: team.id,
-				idAfter: teamUsersInfo[batchSize - 1].id,
+				idAfter: teamUsersInfo[Number(batchSize) - 1].id,
 			});
-			processTeamMembers(team, teamUsersInfo, stringifier);
+			teamUsersInfo = data;
+			processTeamMembers(team.slug, teamUsersInfo, stringifier);
 			usersLength = teamUsersInfo.length;
 			await delay(waitTime);
 		}

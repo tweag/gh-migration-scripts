@@ -9,13 +9,21 @@ import {
 
 const processTeams = (values, stringifier) => {
 	for (const value of values) {
-		const { name, path, description, visibility, parent_id } = value;
+		const {
+			id,
+			name,
+			path,
+			description,
+			parent_id,
+			web_url: webUrl,
+		} = value;
 		stringifier.write({
+			id,
 			name,
 			slug: path,
 			description,
-			privacy: visibility === 'public' ? 'closed' : 'secret',
-			parentTeam: parent_id,
+			privacy: 'closed',
+			parentTeam: parent_id ? webUrl.split('/').slice(-2)[0] : '',
 		});
 	}
 };
@@ -43,7 +51,7 @@ const getTeamsRequest = async (options, urlOpts) => {
 	return doRequest(config);
 };
 
-const columns = ['name', 'slug', 'description', 'privacy', 'parentTeam'];
+const columns = ['id', 'name', 'slug', 'description', 'privacy', 'parentTeam'];
 
 const getGitlabTeams = async (options) => {
 	const { organization: org, outputFile, waitTime, batchSize } = options;
@@ -52,15 +60,17 @@ const getGitlabTeams = async (options) => {
 		`${org}-gitlab-teams-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 
-	let teamsInfo = await getTeamsRequest(options, { idAfter: null });
+	let { data: teamsInfo } = await getTeamsRequest(options, { idAfter: null });
+	console.log(JSON.stringify(teamsInfo, null, 2));
 	let teamsLength = teamsInfo.length;
 	processTeams(teamsInfo, stringifier);
 	await delay(waitTime);
 
-	while (teamsLength === batchSize) {
-		teamsInfo = await getTeamsRequest(options, {
-			idAfter: teamsInfo[batchSize - 1].id,
+	while (teamsLength == batchSize) {
+		const { data } = await getTeamsRequest(options, {
+			idAfter: teamsInfo[Number(batchSize) - 1].id,
 		});
+		teamsInfo = data;
 		processTeams(teamsInfo, stringifier);
 		teamsLength = teamsInfo.length;
 		await delay(waitTime);

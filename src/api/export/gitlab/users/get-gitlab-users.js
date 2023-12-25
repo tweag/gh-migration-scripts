@@ -37,7 +37,7 @@ const getUsersRequest = async (options, urlOpts) => {
 	return doRequest(config);
 };
 
-const columns = ['user', 'team', 'role'];
+const columns = ['login'];
 
 const getGitlabUsers = async (options) => {
 	const { organization: org, outputFile, waitTime, batchSize } = options;
@@ -46,15 +46,16 @@ const getGitlabUsers = async (options) => {
 		`${org}-gitlab-users-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 
-	let usersInfo = await getUsersRequest(options, { idAfter: null });
+	let { data: usersInfo } = await getUsersRequest(options, { idAfter: null });
 	let usersLength = usersInfo.length;
 	processUsers(usersInfo, stringifier);
 	await delay(waitTime);
 
-	while (usersLength === batchSize) {
-		usersInfo = await getUsersRequest(options, {
-			idAfter: usersInfo[batchSize - 1].id,
+	while (usersLength == batchSize) {
+		const { data } = await getUsersRequest(options, {
+			idAfter: usersInfo[Number(batchSize) - 1].id,
 		});
+		usersInfo = data;
 		processUsers(usersInfo, stringifier);
 		usersLength = usersInfo.length;
 		await delay(waitTime);

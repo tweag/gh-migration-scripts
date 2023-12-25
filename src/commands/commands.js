@@ -60,20 +60,6 @@ export const handleToken = async (PAT, options, msg, field) => {
 };
 
 /**
- * Sets the users file if one was provided, otherwise prompts the user for one
- * @param {object} options the information needed for the migration
- */
-export const handleUsersFile = async (options) => {
-	if (!options.usersFile) {
-		// If the users file is not provided as argument
-		const input = await prompts(promptForUsersFile());
-		return input.usersFile;
-	}
-
-	return options.usersFile;
-};
-
-/**
  * Generalizes execution of command by User
  *
  * @param {string} PAT the personal access token for the user

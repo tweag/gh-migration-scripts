@@ -24,7 +24,6 @@ import getGitlabRepositories from './api/export/gitlab/repos/get-gitlab-repos.js
 import getGitlabReposDirectCollaborators from './api/export/gitlab/repos/get-gitlab-repo-direct-collaborators.js';
 import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
 import getGitlabTeamsMembers from './api/export/gitlab/teams/get-gitlab-team-members.js';
-import getGitlabTeamsRepositories from './api/export/gitlab/teams/get-gitlab-team-repos.js';
 import getGitlabUsers from './api/export/gitlab/users/get-gitlab-users.js';
 
 const args = {
@@ -40,12 +39,12 @@ const args = {
 		defaultValue: 50,
 	},
 	file: {
-		argument: '-f, --file <INPUT FILE>',
+		argument: '-f, --input-file <INPUT FILE>',
 		description: '',
 		defaultValue: '',
 	},
-	githubUrl: {
-		argument: '-g, --github-url <GITHUB SERVER URL>',
+	serverUrl: {
+		argument: '-g, --server-url <GITHUB SERVER URL>',
 		description:
 			'The target GHES server endpoint url, for eg. https://github.gh-services-partners.com. If an URL is not provided then the target will the cloud instance',
 		defaultValue: '',
@@ -97,7 +96,7 @@ program
 		args.file.argument,
 		'Input file name with repo, collaborators & roles info',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -122,7 +121,7 @@ program
 		args.file.argument,
 		'Input file name with repo, team & permission info',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -147,7 +146,7 @@ program
 		args.file.argument,
 		'Input file name with repo names, if --repo is not specified',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(
@@ -174,7 +173,7 @@ program
 program
 	.command(getFunctionName(createTeams))
 	.requiredOption(args.file.argument, 'Input file name with teams info')
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -200,7 +199,7 @@ program
 		args.file.argument,
 		'Input file name with repository names to delete',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -240,7 +239,7 @@ program
 		'GHEC destination token',
 	)
 	.requiredOption('-t, --source-token <SOURCE TOKEN>', 'GHES destination token')
-	.requiredOption(args.githubUrl.argument, args.githubUrl.description)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.option(
 		'-v, --visibility <VISIBILITY>',
 		'Visibility of the repositories on the GHEC server',
@@ -267,7 +266,7 @@ program
 		'-e, --enterprise-organizations <ENTERPRISE ORGANIZATION...>',
 		'List of organizations on the enterprise',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
 	.option(args.usersFile.argument, args.usersFile.description)
@@ -293,7 +292,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -311,7 +310,7 @@ program
 
 program
 	.command(getFunctionName(getOutsideCollaborators))
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -334,7 +333,7 @@ program
 		'Outside collaborators files to filter out the result',
 	)
 	.requiredOption(args.file.argument, 'Input file with repository names')
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -364,7 +363,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -388,7 +387,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -425,7 +424,7 @@ program
 	)
 	.option('-e, --ghec-token <GHEC token>', 'GHEC token')
 	.option('-f, --ghes-token <GHES token>', 'GHES token')
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.option('-i, --ghec-file <GHEC FILE>', 'GHEC repo metrics file')
 	.option(
 		'-j, --ghes-file <GHES FILE>',
@@ -447,7 +446,7 @@ program
 		args.file.argument,
 		'Input file name with teams, member, and roles',
 	)
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -467,7 +466,7 @@ program
 	.command(getFunctionName(setMembershipInOrg))
 	.option('-d, --delete-members', 'Delete members from an organization')
 	.requiredOption(args.file.argument, 'Input file name with members name')
-	.option(args.githubUrl.argument, args.githubUrl.description)
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
@@ -526,8 +525,8 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.serverUrl.argument, args.serverUrl.description)
-	.requiredOption(args.organization.argument, args.organization.description)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
 	.option(
@@ -537,7 +536,9 @@ program
 	)
 	.alias('ggr')
 	.description('Fetches all repositories of a Gitlab organization')
-	.action(async (args) => commandController(process.env.PAT, args, getGitlabRepositories));
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getGitlabRepositories),
+	);
 
 program
 	.command(getFunctionName(getGitlabReposDirectCollaborators))
@@ -548,7 +549,7 @@ program
 	)
 	.requiredOption(args.file.argument, 'Input file with repositories names')
 	.option(args.serverUrl.argument, args.serverUrl.description)
-	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
 	.option(
@@ -557,8 +558,12 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggrdc')
-	.description('Fetches direct collaborators of all repositories of a Gitlab organization')
-	.action(async (args) => commandController(process.env.PAT, args, getGitlabReposDirectCollaborators));
+	.description(
+		'Fetches direct collaborators of all repositories of a Gitlab organization',
+	)
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getGitlabReposDirectCollaborators),
+	);
 
 program
 	.command(getFunctionName(getGitlabTeams))
@@ -567,8 +572,8 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.serverUrl.argument, args.serverUrl.description)
-	.requiredOption(args.organization.argument, args.organization.description)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
 	.option(
@@ -577,8 +582,10 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggt')
-	.description('Fetches direct collaborators of all repositories of a Gitlab organization')
-	.action(async (args) => commandController(process.env.PAT, args, getGitlabTeams));
+	.description('Fetches all teams of a Gitlab organization')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getGitlabTeams),
+	);
 
 program
 	.command(getFunctionName(getGitlabTeamsMembers))
@@ -587,9 +594,9 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.requiredOption(args.file.argument, 'Input file with teams names')
-	.option(args.serverUrl.argument, args.serverUrl.description)
-	.requiredOption(args.organization.argument, args.organization.description)
+	.requiredOption(args.file.argument, 'Input file with team names')
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
 	.option(
@@ -599,28 +606,9 @@ program
 	)
 	.alias('ggtm')
 	.description('Fetches members of all teams of a Gitlab organization')
-	.action(async (args) => commandController(process.env.PAT, args, getGitlabTeamsMembers));
-
-program
-	.command(getFunctionName(getGitlabTeamsRepositories))
-	.option(
-		args.batchSize.argument,
-		args.batchSize.description,
-		args.batchSize.defaultValue,
-	)
-	.requiredOption(args.file.argument, 'Input file with teams names')
-	.option(args.serverUrl.argument, args.serverUrl.description)
-	.requiredOption(args.organization.argument, args.organization.description)
-	.option(args.outputFile.argument, args.outputFile.description)
-	.option(args.token.argument, args.token.description)
-	.option(
-		args.waitTime.argument,
-		args.waitTime.description,
-		args.waitTime.defaultValue,
-	)
-	.alias('ggtr')
-	.description('Fetches repositories (projects) all teams of a Gitlab organization')
-	.action(async (args) => commandController(process.env.PAT, args, getGitlabTeamsRepositories));
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getGitlabTeamsMembers),
+	);
 
 program
 	.command(getFunctionName(getGitlabUsers))
@@ -629,8 +617,8 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.option(args.serverUrl.argument, args.serverUrl.description)
-	.requiredOption(args.organization.argument, args.organization.description)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.token.argument, args.token.description)
 	.option(
@@ -639,7 +627,9 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggu')
-	.description('Fetches direct collaborators of all repositories of a Gitlab organization')
-	.action(async (args) => commandController(process.env.PAT, args, getGitlabUsers));
+	.description('Fetches all users of a Gitlab organization')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getGitlabUsers),
+	);
 
-	program.parse(process.argv);
+program.parse(process.argv);
