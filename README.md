@@ -22,6 +22,39 @@ Hey there! 👋 Welcome to our migration tools repository – your go-to toolkit
 
 # How it works
 
+## Supported Features
+
+### Export
+
+| Features  |  GHES | Bitbucket Server  | GitLab  |
+| ------------ | ------------ | ------------ | ------------ |
+| 1. List repositories  | ✅  | ✅ | ✅  |
+| 2. List repositories members  | ✅  | ✅  | ✅  |
+| 3. List teams  | ✅  | ✅  | ✅  |
+| 4. List team members  | ✅  | ✅  | ✅  |
+| 5. List team repositories permission  | ✅  | ✅  | ✅  |
+| 6. List organization users  | ❌  | ✅  | ✅  |
+| 7. List enterprise users  | ✅ | ✅  | ✅  |
+| 8. List organization projects | ❌ | ❌ | ❌ |
+| 9. Repositories last commit check | ✅ | ❌ | ❌ |
+| 10. Delete repositories | ✅ | ❌ | ❌ |
+| 11. Get outside collaborators | ✅ | ❌ | ❌ |
+
+### Import
+
+| Features  |  GHEC |
+| ------------ | ------------ |
+| 1. Set repository direct collaborators  | ✅  |
+| 2. Set repository team permissions  | ✅  |
+| 3. Create teams  | ✅  |
+| 4. Add team members  | ✅  |
+| 5. Archive/unarchive repositories  | ✅  |
+| 6. Delete repositories  | ✅  |
+| 7. Set organization memberships  | ✅ |
+| 8. Add organization projects | ❌ |
+| 10. Delete repositories | ✅ |
+
+
 ## Export
 
 ### A. GitHub Enterprise Server - GHES
