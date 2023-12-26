@@ -52,9 +52,9 @@ const saveScriptToFile = (scriptsArr, options) => {
 
 const generateGHESMigrationScript = async (options) => {
 	spinner.start('Generating GHES migration script');
-	const { file } = options;
+	const { inputFile } = options;
 
-	const rows = await getData(file);
+	const rows = await getData(inputFile);
 	const scriptsArr = [];
 
 	for (const row of rows) {

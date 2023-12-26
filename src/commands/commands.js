@@ -25,8 +25,8 @@ const promptForToken = (msg) => {
  * @param {string} URL GHES URL
  * @param {object} options the information needed for the migration
  */
-export const handleGithubUrl = async (URL, options) => {
-	if (!options.githubUrl) {
+export const handleServerUrl = async (URL, options) => {
+	if (!options.serverUrl) {
 		if (URL) return URL;
 		else {
 			const input = await prompts(promptForToken());
@@ -34,7 +34,7 @@ export const handleGithubUrl = async (URL, options) => {
 		}
 	}
 
-	return options.githubUrl;
+	return options.serverUrl;
 };
 
 /**
@@ -94,7 +94,7 @@ export const commandController = async (PAT, options, service) => {
 				'Enter GHES Token: ',
 				'ghesToken',
 			);
-			options.githubUrl = await handleGithubUrl(options.githubUrl, options);
+			options.serverUrl = await handleServerUrl(options.serverUrl, options);
 		}
 	}
 

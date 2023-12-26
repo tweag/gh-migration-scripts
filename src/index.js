@@ -20,6 +20,7 @@ import { ghesVsGhec } from './api/compare/ghes-vs-ghec/ghes-vs-ghec.js';
 import { insertTeamMembers } from './api/import/ghec/teams/insert-team-members.js';
 import { setMembershipInOrg } from './api/import/ghec/users/set-memberships-in-org.js';
 import { getFunctionName } from './services/utils.js';
+import ghesLastCommitCheck from './api/compare/ghes-vs-ghec/ghes-last-commit-check.js';
 import getGitlabRepositories from './api/export/gitlab/repos/get-gitlab-repos.js';
 import getGitlabReposDirectCollaborators from './api/export/gitlab/repos/get-gitlab-repo-direct-collaborators.js';
 import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
@@ -38,7 +39,7 @@ const args = {
 		description: 'Batch size to call at once for GraphQL',
 		defaultValue: 50,
 	},
-	file: {
+	inputFile: {
 		argument: '-f, --input-file <INPUT FILE>',
 		description: '',
 		defaultValue: '',
@@ -93,7 +94,7 @@ program
 		'If set then the collaborators will be deleted from the repositories',
 	)
 	.requiredOption(
-		args.file.argument,
+		args.inputFile.argument,
 		'Input file name with repo, collaborators & roles info',
 	)
 	.option(args.serverUrl.argument, args.serverUrl.description)
@@ -118,7 +119,7 @@ program
 program
 	.command(getFunctionName(setRepoTeamPermission))
 	.requiredOption(
-		args.file.argument,
+		args.inputFile.argument,
 		'Input file name with repo, team & permission info',
 	)
 	.option(args.serverUrl.argument, args.serverUrl.description)
@@ -143,7 +144,7 @@ program
 program
 	.command(getFunctionName(setArchivedStatus))
 	.requiredOption(
-		args.file.argument,
+		args.inputFile.argument,
 		'Input file name with repo names, if --repo is not specified',
 	)
 	.option(args.serverUrl.argument, args.serverUrl.description)
@@ -172,7 +173,7 @@ program
 
 program
 	.command(getFunctionName(createTeams))
-	.requiredOption(args.file.argument, 'Input file name with teams info')
+	.requiredOption(args.inputFile.argument, 'Input file name with teams info')
 	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
@@ -196,9 +197,10 @@ program
 program
 	.command(getFunctionName(deleteRepos))
 	.requiredOption(
-		args.file.argument,
+		args.inputFile.argument,
 		'Input file name with repository names to delete',
 	)
+	.option('-r, --repo <REPO>', 'A single repo name to delete')
 	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
@@ -229,7 +231,7 @@ program
 		'-c, --destination-org <DESTINATION ORGANIZATION>',
 		'GHEC destination organization name',
 	)
-	.requiredOption(args.file.argument, 'Input file name with repository info')
+	.requiredOption(args.inputFile.argument, 'Input file name with repository info')
 	.requiredOption(
 		'-s, --source-org <SOURCE ORGANIZATION>',
 		'GHES source organization name',
@@ -332,7 +334,7 @@ program
 		'-c, --outside-collaborators-file <OUTSIDE COLLABORATORS FILE>',
 		'Outside collaborators files to filter out the result',
 	)
-	.requiredOption(args.file.argument, 'Input file with repository names')
+	.requiredOption(args.inputFile.argument, 'Input file with repository names')
 	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
@@ -443,7 +445,7 @@ program
 program
 	.command(getFunctionName(insertTeamMembers))
 	.requiredOption(
-		args.file.argument,
+		args.inputFile.argument,
 		'Input file name with teams, member, and roles',
 	)
 	.option(args.serverUrl.argument, args.serverUrl.description)
@@ -465,7 +467,7 @@ program
 program
 	.command(getFunctionName(setMembershipInOrg))
 	.option('-d, --delete-members', 'Delete members from an organization')
-	.requiredOption(args.file.argument, 'Input file name with members name')
+	.requiredOption(args.inputFile.argument, 'Input file name with members name')
 	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
@@ -491,6 +493,18 @@ program
 	.alias('ct')
 	.description('Compares team metrics for GHES and GHEC for an organization')
 	.action(async (args) => commandController('', args, compareTeams));
+
+program
+	.command(getFunctionName(ghesLastCommitCheck))
+	.option('-d, --delete', 'Delete repositories from GHEC')
+	.requiredOption('-c, --ghec-file <GHEC FILE>', 'GHEC team metrics file')
+	.requiredOption('-s, --ghes-file <GHES FILE>', 'GHES team metrics file')
+	.requiredOption('-p, --ghec-org <GHEC ORGANIZATION NAME>', 'GHEC organization name')
+	.requiredOption('-q, --ghes-org <GHES ORGANIZATION NAME>', 'GHES organization name')
+	.option(args.token.argument, args.token.description)
+	.alias('ct')
+	.description('Compares team metrics for GHES and GHEC for an organization')
+	.action(async (args) => commandController('', args, ghesLastCommitCheck));
 
 program
 	.command(getFunctionName(compareRepoDirectCollaborators))
@@ -547,7 +561,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.requiredOption(args.file.argument, 'Input file with repositories names')
+	.requiredOption(args.inputFile.argument, 'Input file with repositories names')
 	.option(args.serverUrl.argument, args.serverUrl.description)
 	.option(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
@@ -594,7 +608,7 @@ program
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
-	.requiredOption(args.file.argument, 'Input file with team names')
+	.requiredOption(args.inputFile.argument, 'Input file with team names')
 	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.option(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)

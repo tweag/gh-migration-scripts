@@ -35,7 +35,7 @@ let count = 0;
 export const fetchUsersInOrg = async (
 	org,
 	token,
-	githubUrl,
+	serverUrl,
 	allowUntrustedSslCertificates,
 	cursor,
 ) => {
@@ -45,7 +45,7 @@ export const fetchUsersInOrg = async (
 		allowUntrustedSslCertificates,
 		cursor,
 	);
-	config.url = determineGraphQLEndpoint(githubUrl);
+	config.url = determineGraphQLEndpoint(serverUrl);
 
 	return doRequest(config);
 };
@@ -56,7 +56,7 @@ export const getOrgUsers = async (options) => {
 	const response = await fetchUsersInOrg(
 		options.organization,
 		options.token,
-		options.githubUrl,
+		options.serverUrl,
 		options.allowUntrustedSslCertificates,
 		'',
 	);
@@ -123,7 +123,7 @@ export const fetchUsersMetrics = async (users) => {
 		const result = await fetchUsersInOrg(
 			opts.organization,
 			opts.token,
-			opts.githubUrl,
+			opts.serverUrl,
 			opts.allowUntrustedSslCertificates,
 			`, after: "${cursor}"`,
 		);
@@ -147,7 +147,7 @@ export const storeUsersMetrics = async (organization) => {
 	}
 
 	const today = getDate();
-	const suffix = opts.githubUrl ? `${today}-ghes` : `${today}-ghec`;
+	const suffix = opts.serverUrl ? `${today}-ghes` : `${today}-ghec`;
 	const path =
 		(opts.outputFile && opts.outputFile.endsWith('.csv') && opts.outputFile) ||
 		`${dir}/${organization}-user-metrics-${suffix}.csv`;

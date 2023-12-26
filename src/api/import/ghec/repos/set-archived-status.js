@@ -13,11 +13,11 @@ import {
 } from '../../../../services/constants.js';
 
 const getArchiveRepoConfig = (repo, status, options) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/repos/${org}/${repo}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/repos/${org}/${repo}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/repos/${org}/${repo}`;
 	}
 
 	return {
@@ -41,7 +41,7 @@ export const setArchivedStatus = async (options) => {
 	try {
 		const {
 			repo,
-			file,
+			inputFile,
 			organization: org,
 			unarchive,
 			outputFile,
@@ -59,7 +59,7 @@ export const setArchivedStatus = async (options) => {
 		if (repo) {
 			repositories = [repo];
 		} else {
-			const repositoriesData = await getData(file);
+			const repositoriesData = await getData(inputFile);
 			repositories = repositoriesData.map((r) => r.repo);
 		}
 

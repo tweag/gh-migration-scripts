@@ -23,7 +23,7 @@ describe('createTeams Function', () => {
 
   test('it should create teams with expected operations', async () => {
     const options = {
-      file: 'teamsData.csv',
+      inputFile: 'teamsData.csv',
       organization: 'example-org',
       outputFile: 'output.csv',
       skip: 0,

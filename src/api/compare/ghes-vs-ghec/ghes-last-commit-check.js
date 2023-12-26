@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { getRepos } from '../../export/ghes/repos/get-repos.js';
+import { deleteRepos } from '../../import/ghec/repos/delete-repos.js';
 import {
 	getData,
 	getStringifier,
@@ -10,18 +10,12 @@ import {
 const columns = [
 	'repo',
 	'pushedAt',
-	'ghesPushedAt',
-	'updatedAt',
-	'ghesUpdatedAt',
+	'ghecUpdatedAt',
 	'hasChanged',
-	'hasPushed',
-	'hasUpdated',
-	'hasPRChanged',
-	'hasIssuesChanged',
 	'isNewRepo',
 ];
 
-const compareRepos = (ghecRepo, ghesRepo, ghesFile) => {
+const compareRepo = (ghecRepo, ghesRepo, ghesFile) => {
 	let { pushedAt: ghecPushedAt, updatedAt: ghecUpdatedAt } = ghecRepo;
 	let { pushedAt, updatedAt, pullRequests, issues } = ghesRepo;
 
@@ -64,51 +58,54 @@ const compareRepos = (ghecRepo, ghesRepo, ghesFile) => {
 	repo.ghesUpdatedAt = ghecUpdatedAt;
 };
 
-export const ghesVsGhec = async (options) => {
+const compareRepos = (ghecRepos, ghesRepos) => {
+	const ghecUpdatedAt = new Date(ghecRepos.updatedAt).getTime();
+	const ghesUpdatedAt = new Date(ghesRepos.updatedAt).getTime();
+
+	return ghecUpdatedAt < ghesUpdatedAt;
+}
+
+const ghesLastCommitCheck = async (options) => {
 	const {
 		ghecFile,
 		ghesFile,
 		ghecOrg,
 		ghesOrg,
-		ghecToken,
-		ghesToken,
-		serverUrl,
+		token,
 		outputFile,
+		delete: canDelete,
 	} = options;
 
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${ghecOrg}-${ghesOrg}-updated-details-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
-	let ghecRepos = [];
-	let ghesRepos = [];
-	options.return = true;
-
-	if (ghecFile) {
-		ghecRepos = await getData(ghecFile);
-	} else {
-		options.token = ghecToken;
-		options.organization = ghecOrg;
-		options.serverUrl = undefined;
-		ghecRepos = await getRepos(options);
-	}
-
-	if (ghesFile) {
-		ghesRepos = await getData(ghesFile);
-	} else {
-		options.token = ghesToken;
-		options.organization = ghesOrg;
-		options.serverUrl = serverUrl;
-		ghesRepos = await getRepos(options);
-	}
+	let ghecRepos = await getData(ghecFile);
+	let ghesRepos = await getData(ghesFile);
 
 	for (let ghesRepo of ghesRepos) {
-		const found = ghecRepos.find((r) => r.repo === ghesRepo.repo);
+		const obj = {
+			repo: ghesRepo.repo,
+			updatedAt: ghesRepo.updatedAt,
+			ghecUpdatedAt: '',
+			hasChanged: false,
+			isNewRepo: true,
+		};
+		const foundRepo = ghecRepos.find((r) => r.repo === ghesRepo.repo);
 
-		if (found) {
-			compareRepos(found, ghesRepo, ghesFile);
-		} else {
-			ghesRepo.isNewRepo = true;
+		if (foundRepo) {
+			obj.updatedAt = foundRepo.updatedAt;
+			obj.hasChanged = compareRepos(foundRepo, ghesRepo);
+			obj.isNewRepo = false;
+			obj.ghecUpdatedAt = foundRepo.updatedAt;
+
+			if (canDelete) {
+				await deleteRepos({
+					repo: ghesRepo.repo,
+					organization: ghecOrg,
+					token,
+				});
+			}
 		}
 
 		stringifier.write(ghesRepo);
@@ -116,3 +113,5 @@ export const ghesVsGhec = async (options) => {
 
 	stringifier.end();
 };
+
+export default ghesLastCommitCheck;

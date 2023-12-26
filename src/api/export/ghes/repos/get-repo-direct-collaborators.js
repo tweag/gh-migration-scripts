@@ -16,11 +16,11 @@ import {
 import { getOutsideCollaborators } from '../users/get-outside-collaborators.js';
 
 const getReposDirectCollaboratorsConfig = (repo, options) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/repos/${org}/${repo}/collaborators?affiliation=direct&per_page=100`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/repos/${org}/${repo}/collaborators?affiliation=direct&per_page=100`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/repos/${org}/${repo}/collaborators?affiliation=direct&per_page=100`;
 	}
 
 	return {
@@ -42,7 +42,7 @@ const fetchRepoDirectCollaborators = async (repo, options) => {
 export const getReposDirectCollaborators = async (options) => {
 	try {
 		const {
-			file,
+			inputFile,
 			outsideCollaboratorsFile,
 			usersFile,
 			organization: org,
@@ -76,7 +76,7 @@ export const getReposDirectCollaborators = async (options) => {
 			outsideCollaborators = await getOutsideCollaborators(options);
 		}
 
-		const fileStream = fs.createReadStream(file);
+		const fileStream = fs.createReadStream(inputFile);
 
 		const rl = readline.createInterface({
 			input: fileStream,

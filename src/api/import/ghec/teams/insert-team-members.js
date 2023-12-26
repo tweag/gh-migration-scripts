@@ -13,11 +13,11 @@ import {
 } from '../../../../services/constants.js';
 
 const getInsertTeamMembersConfig = ({ member, team, role, options }) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/orgs/${org}/teams/${team}/memberships/${member}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/orgs/${org}/teams/${team}/memberships/${member}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/orgs/${org}/teams/${team}/memberships/${member}`;
 	}
 
 	return {
@@ -39,7 +39,7 @@ const insertTeamMember = async (details) => {
 
 export const insertTeamMembers = async (options) => {
 	try {
-		const { file, organization: org, outputFile, waitTime, skip } = options;
+		const { inputFile, organization: org, outputFile, waitTime, skip } = options;
 		const outputFileName =
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-insert-team-members-status-${currentTime()}.csv`;
@@ -52,7 +52,7 @@ export const insertTeamMembers = async (options) => {
 			'errorMessage',
 		];
 		const stringifier = getStringifier(outputFileName, columns);
-		const rows = await getData(file);
+		const rows = await getData(inputFile);
 		let index = 0;
 
 		for (const row of rows) {

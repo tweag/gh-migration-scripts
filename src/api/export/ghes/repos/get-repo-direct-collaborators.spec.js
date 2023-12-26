@@ -25,7 +25,7 @@ describe('getReposDirectCollaborators', () => {
 
   test('it should fetch repo direct collaborators and save to file', async () => {
     // Mocking the getData function
-    utils.getData.mockImplementation((file) => {
+    utils.getData.mockImplementation((inputFile) => {
       return Promise.resolve([
         { repo: 'repo1' },
         { repo: 'repo2' },
@@ -98,7 +98,7 @@ describe('getReposDirectCollaborators', () => {
 
 // Mock data for the test
 const mockOptions = {
-  file: 'mockFile.csv',
+  inputFile: 'mockFile.csv',
   outsideCollaboratorsFile: 'mockOutsideCollaboratorsFile.csv',
   usersFile: 'mockUsersFile.csv',
   organization: 'mockOrg',

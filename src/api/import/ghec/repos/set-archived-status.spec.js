@@ -41,7 +41,7 @@ describe('setArchivedStatus Function', () => {
 
   test('it should set archived status for multiple repositories from a file', async () => {
     const options = {
-      file: 'repositories.csv',
+      inputFile: 'repositories.csv',
       organization: 'example-org',
       unarchive: true,
       outputFile: 'output.csv',
@@ -66,7 +66,7 @@ describe('setArchivedStatus Function', () => {
 
   test('it should skip specified number of repositories', async () => {
     const options = {
-      file: 'repositories.csv',
+      inputFile: 'repositories.csv',
       organization: 'example-org',
       unarchive: true,
       outputFile: 'output.csv',
