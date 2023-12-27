@@ -9,12 +9,12 @@ import {
 	doRequest,
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
+import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
 import processTeamsMembers from '../../../../services/process-teams-members.js';
 import processTeamsRepos from '../../../../services/process-teams-repos.js';
 import https from 'https';
 
 const spinner = Ora();
-const githubGraphQL = 'https://api.github.com/graphql';
 
 const metrics = [];
 
@@ -275,7 +275,7 @@ export const storeTeamMetrics = async (organization) => {
 
 export function determineGraphQLEndpoint(url) {
 	if (!url) {
-		return githubGraphQL;
+		return GITHUB_GRAPHQL_API_URL;
 	} else {
 		return url + '/api/graphql';
 	}

@@ -6,7 +6,7 @@ import { setRepoDirectCollaborators } from './api/import/ghec/repos/set-repo-dir
 import { setRepoTeamPermission } from './api/import/ghec/repos/set-repo-team-permission.js';
 import { setArchivedStatus } from './api/import/ghec/repos/set-archived-status.js';
 import compareRepoDirectCollaborators from './api/compare/ghes-vs-ghec/repo-direct-collaborators.js';
-import { compareTeams } from './api/compare/ghes-vs-ghec/teams.js';
+import compareTeams from './api/compare/ghes-vs-ghec/teams.js';
 import { createTeams } from './api/import/ghec/teams/create-teams.js';
 import { deleteRepos } from './api/import/ghec/repos/delete-repos.js';
 import generateGHESMigrationScript from './api/export/ghes/repos/generate-ghes-migration-script.js';
@@ -16,11 +16,11 @@ import { getOutsideCollaborators } from './api/export/ghes/users/get-outside-col
 import { getRepos } from './api/export/ghes/repos/get-repos.js';
 import { getReposDirectCollaborators } from './api/export/ghes/repos/get-repo-direct-collaborators.js';
 import { getTeams } from './api/export/ghes/teams/get-teams.js';
-import { ghesVsGhec } from './api/compare/ghes-vs-ghec/ghes-vs-ghec.js';
+import getReposMigrationStatus from './api/import/ghec/repos/get-repos-migration-status.js';
 import { insertTeamMembers } from './api/import/ghec/teams/insert-team-members.js';
 import { setMembershipInOrg } from './api/import/ghec/users/set-memberships-in-org.js';
 import { getFunctionName } from './services/utils.js';
-import ghesLastCommitCheck from './api/compare/ghes-vs-ghec/ghes-last-commit-check.js';
+import ghecLastCommitCheck from './api/compare/ghec-last-commit-check.js';
 import getGitlabRepositories from './api/export/gitlab/repos/get-gitlab-repos.js';
 import getGitlabReposDirectCollaborators from './api/export/gitlab/repos/get-gitlab-repo-direct-collaborators.js';
 import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
@@ -379,6 +379,29 @@ program
 	.action(async (args) => commandController(process.env.PAT, args, getRepos));
 
 program
+	.command(getFunctionName(getReposMigrationStatus))
+	.option(
+		args.allowUntrustedSslCertificates.argument,
+		args.allowUntrustedSslCertificates.description,
+	)
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gpms')
+	.description('Fetches migration status of repositories in an organization')
+	.action(async (args) => commandController(process.env.PAT, args, getReposMigrationStatus));
+
+program
 	.command(getFunctionName(getTeams))
 	.option(
 		args.allowUntrustedSslCertificates.argument,
@@ -404,43 +427,6 @@ program
 		'Fetches all teams of an organization along with repo team permissions and team memberships.',
 	)
 	.action(async (args) => commandController(process.env.PAT, args, getTeams));
-
-program
-	.command(getFunctionName(ghesVsGhec))
-	.option(
-		args.allowUntrustedSslCertificates.argument,
-		args.allowUntrustedSslCertificates.description,
-	)
-	.option(
-		args.batchSize.argument,
-		args.batchSize.description,
-		args.batchSize.defaultValue,
-	)
-	.requiredOption(
-		'-c, --ghec-org <GHEC ORGANIZATION NAME>',
-		'GHEC organization name',
-	)
-	.requiredOption(
-		'-d, --ghes-org <GHES ORGANIZATION NAME>',
-		'GHES organization name',
-	)
-	.option('-e, --ghec-token <GHEC token>', 'GHEC token')
-	.option('-f, --ghes-token <GHES token>', 'GHES token')
-	.option(args.serverUrl.argument, args.serverUrl.description)
-	.option('-i, --ghec-file <GHEC FILE>', 'GHEC repo metrics file')
-	.option(
-		'-j, --ghes-file <GHES FILE>',
-		'GHES repo metrics file with pull requests and issues columns',
-	)
-	.option(args.outputFile.argument, args.outputFile.description)
-	.option(
-		args.waitTime.argument,
-		args.waitTime.description,
-		args.waitTime.defaultValue,
-	)
-	.alias('gvg')
-	.description('Compares GHEC repositories with GHES repositories for changes')
-	.action(async (args) => commandController('', args, ghesVsGhec));
 
 program
 	.command(getFunctionName(insertTeamMembers))
@@ -495,16 +481,17 @@ program
 	.action(async (args) => commandController('', args, compareTeams));
 
 program
-	.command(getFunctionName(ghesLastCommitCheck))
-	.option('-d, --delete', 'Delete repositories from GHEC')
-	.requiredOption('-c, --ghec-file <GHEC FILE>', 'GHEC team metrics file')
-	.requiredOption('-s, --ghes-file <GHES FILE>', 'GHES team metrics file')
+	.command(getFunctionName(ghecLastCommitCheck))
+	// .option('-d, --delete', 'Delete repositories from GHEC')
+	.requiredOption('-c, --ghec-file <GHEC FILE>', 'GHEC repo metrics file')
+	.requiredOption('-s, --source-file <SOURCE FILE>', 'Source repo metrics file')
 	.requiredOption('-p, --ghec-org <GHEC ORGANIZATION NAME>', 'GHEC organization name')
-	.requiredOption('-q, --ghes-org <GHES ORGANIZATION NAME>', 'GHES organization name')
+	.requiredOption('-q, --source-org <SOURCE ORGANIZATION NAME>', 'Source organization name')
+	.option('-h --git-host <GIT HOST>', 'Git host name, eg. github, gitlab, etc.')
 	.option(args.token.argument, args.token.description)
-	.alias('ct')
-	.description('Compares team metrics for GHES and GHEC for an organization')
-	.action(async (args) => commandController('', args, ghesLastCommitCheck));
+	.alias('glcc')
+	.description("Compares corresponding repositories' between source and GHEC for an organization for last updates and optionally deletes out-of-sync repositories in GHEC")
+	.action(async (args) => commandController('', args, ghecLastCommitCheck));
 
 program
 	.command(getFunctionName(compareRepoDirectCollaborators))
