@@ -1,15 +1,12 @@
 #!/usr/bin/env node
 
 import prompts from 'prompts';
-import {
-	GIT_HOST,
-	GITHUB_HOST,
-	GITLAB_HOST,
-} from '../services/constants.js';
+import { GIT_HOST, GITHUB_HOST, GITLAB_HOST } from '../services/constants.js';
 import compareRepoDirectCollaborators from '../api/compare/ghes-vs-ghec/repo-direct-collaborators.js';
 import compareTeams from '../api/compare/ghes-vs-ghec/teams.js';
 import generateGHESMigrationScript from '../api/export/ghes/repos/generate-ghes-migration-script.js';
 import ghecLastCommitCheck from '../api/compare/ghec-last-commit-check.js';
+import getGHECMissingRepos from '../api/import/ghec/repos/get-ghec-missing-repos.js';
 
 // Prompt for Personal Access Token
 const promptForToken = (msg) => {
@@ -35,7 +32,7 @@ const promptForGitHost = () => {
 			],
 		},
 	];
-}
+};
 
 /**
  * Sets the PAT if one was provided, otherwise prompts the user for one
@@ -90,6 +87,15 @@ export const commandController = async (PAT, options, service) => {
 		].includes(service)
 	)
 		options.token = await handleToken(PAT, options, 'Enter PAT: ', 'token');
+
+	if (service === getGHECMissingRepos) {
+		options.sourceToken = await handleToken(
+			options.sourceToken,
+			options,
+			'Enter Source PAT: ',
+			'sourceToken',
+		);
+	}
 
 	if (service === ghecLastCommitCheck) {
 		options[GIT_HOST] = await handleGitHost(options);

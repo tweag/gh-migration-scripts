@@ -1,11 +1,7 @@
 #!/usr/bin/env node
 
 import { deleteRepos } from '../import/ghec/repos/delete-repos.js';
-import {
-	getData,
-	getStringifier,
-	currentTime,
-} from '../../services/utils.js';
+import { getData, getStringifier, currentTime } from '../../services/utils.js';
 
 const columns = [
 	'repo',
@@ -16,16 +12,16 @@ const columns = [
 ];
 
 const updateFieldMap = {
-  'github': 'pushedAt',
-  'gitlab': 'last_activity_at',
-}
+	github: 'pushedAt',
+	gitlab: 'last_activity_at',
+};
 
 const compareRepos = (ghecUpdatedAt, sourceUpdatedAt) => {
 	const ghecUpdatedAtTime = new Date(ghecUpdatedAt).getTime();
 	const sourceUpdatedAtTime = new Date(sourceUpdatedAt).getTime();
 
 	return ghecUpdatedAtTime < sourceUpdatedAtTime;
-}
+};
 
 const ghecLastCommitCheck = async (options) => {
 	const {
@@ -36,7 +32,7 @@ const ghecLastCommitCheck = async (options) => {
 		token,
 		outputFile,
 		// delete: canDelete,
-    gitHost,
+		gitHost,
 	} = options;
 
 	const outputFileName =
@@ -47,7 +43,7 @@ const ghecLastCommitCheck = async (options) => {
 	const sourceRepos = await getData(sourceFile);
 
 	for (let sourceRepo of sourceRepos) {
-    const sourceUpdatedAt = sourceRepo[updateFieldMap[gitHost]];
+		const sourceUpdatedAt = sourceRepo[updateFieldMap[gitHost]];
 		const obj = {
 			repo: sourceRepo.repo,
 			updatedAt: sourceUpdatedAt,

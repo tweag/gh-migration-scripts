@@ -123,11 +123,13 @@ export const fetchingController = async () => {
 	// fetching PR and ISSUE metrics
 	await fetchRepoMetrics(fetched.data.organization.repositories.edges);
 
-	if (!opts.return && metrics) {
+	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
 		await storeRepoMetrics(org);
 		await storeOrgMetrics(org);
 	}
+
+	return metrics;
 };
 
 /**
@@ -249,14 +251,25 @@ export const storeRepoMetrics = async (organization) => {
 	const path =
 		(opts.outputFile && opts.outputFile.endsWith('.csv') && opts.outputFile) ||
 		`${dir}/${organization}-repo-metrics-${suffix}.csv`;
+	const archivedPath = path.split('.csv')[0] + '-archived.csv';
+	const activePath = path.split('.csv')[0] + '-active.csv';
 	const stringifier = getStringifier(path, headers);
+	const archivedStringifier = getStringifier(archivedPath, headers);
+	const activeStringifier = getStringifier(activePath, headers);
 	spinner.start('Exporting...');
 
 	for (const metric of metrics) {
 		stringifier.write(metric);
+		if (metric.isArchived) {
+			archivedStringifier.write(metric);
+		} else {
+			activeStringifier.write(metric);
+		}
 	}
 
 	stringifier.end();
+	archivedStringifier.end();
+	activeStringifier.end();
 	spinner.succeed(`Exporting Completed: ${path}`);
 };
 

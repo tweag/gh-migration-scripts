@@ -141,7 +141,9 @@ export const fetchMigrationRepoMetrics = async (repositories) => {
 		);
 
 		await delay(opts.waitTime);
-		await fetchMigrationRepoMetrics(result.data.data.organization.repositoryMigrations.edges);
+		await fetchMigrationRepoMetrics(
+			result.data.data.organization.repositoryMigrations.edges,
+		);
 	}
 };
 
@@ -172,15 +174,24 @@ export const storeMigrationRepoMetrics = async (organization) => {
 	const path =
 		(opts.outputFile && opts.outputFile.endsWith('.csv') && opts.outputFile) ||
 		`${dir}/${organization}-migration-repo-${suffix}.csv`;
+	const failedPath = path.split('.csv')[0] + '-failed.csv';
 	const stringifier = getStringifier(path, headers);
+	const failedStringifier = getStringifier(failedPath, headers);
 	spinner.start('Exporting...');
 
 	for (const metric of metrics) {
 		stringifier.write(metric);
+
+		if (metric.state === 'failed') {
+			failedStringifier.write(metric);
+		}
 	}
 
 	stringifier.end();
+	failedStringifier.end();
 	spinner.succeed(`Exporting Completed: ${path}`);
+
+	return metrics;
 };
 
 /**
@@ -198,7 +209,6 @@ export function fetchMigrationsRepoInOrgInfoOptions(
 	allowUntrustedSslCertificates,
 	cursor,
 ) {
-	const first = opts.return ? Number(opts.batchSize) : '1';
 	let fetchOptions = {
 		method: 'post',
 		maxBodyLength: Infinity,

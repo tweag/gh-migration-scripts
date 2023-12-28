@@ -38,7 +38,14 @@ const deleteRequest = async (repo, options) => {
 
 export const deleteRepos = async (options) => {
 	try {
-		const { inputFile, organization: org, repo, outputFile, waitTime, skip } = options;
+		const {
+			inputFile,
+			organization: org,
+			repo,
+			outputFile,
+			waitTime,
+			skip,
+		} = options;
 
 		const columns = ['repo', 'status', 'statusText', 'errorMessage'];
 		const outputFileName =

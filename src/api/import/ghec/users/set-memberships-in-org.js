@@ -44,7 +44,13 @@ const setMembership = async (login, options) => {
 
 export const setMembershipInOrg = async (options) => {
 	try {
-		const { inputFile, organization: org, outputFile, waitTime, skip } = options;
+		const {
+			inputFile,
+			organization: org,
+			outputFile,
+			waitTime,
+			skip,
+		} = options;
 		const outputFileName =
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-set-membership-status-${currentTime()}.csv`;

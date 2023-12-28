@@ -39,7 +39,13 @@ const insertTeamMember = async (details) => {
 
 export const insertTeamMembers = async (options) => {
 	try {
-		const { inputFile, organization: org, outputFile, waitTime, skip } = options;
+		const {
+			inputFile,
+			organization: org,
+			outputFile,
+			waitTime,
+			skip,
+		} = options;
 		const outputFileName =
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-insert-team-members-status-${currentTime()}.csv`;

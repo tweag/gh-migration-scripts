@@ -7,7 +7,13 @@ import {
 	delay,
 } from '../../../../services/utils.js';
 
-const processRepositories = (values, stringifier) => {
+const processRepositories = (
+	values,
+	metrics,
+	stringifier,
+	archivedStringifier,
+	activeStringifier,
+) => {
 	for (const value of values) {
 		const {
 			name,
@@ -28,6 +34,13 @@ const processRepositories = (values, stringifier) => {
 		};
 
 		stringifier.write(row);
+		metrics.push(row);
+
+		if (row.isArchived) {
+			archivedStringifier.write(row);
+		} else {
+			activeStringifier.write(row);
+		}
 	}
 };
 
@@ -82,36 +95,133 @@ const getRepositories = async (options, urlOpts) => {
 const columns = ['name', 'repo', 'group', 'id', 'isArchived', 'visibility'];
 const permissionColumns = ['repo', 'team', 'permission'];
 
-const getGitlabRepositories = async (options) => {
-	const { organization: org, outputFile, waitTime, batchSize } = options;
+const getOutputFileNames = (outputFile, org) => {
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${org}-gitlab-repos-${currentTime()}.csv`;
+	const archivedOutputFileName =
+		outputFileName.split('.csv')[0] + '-archived.csv';
+	const activeOutputFileName = outputFileName.split('.csv')[0] + '-active.csv';
 	const teamPermissionFileName = `${org}-gitlab-repos-team-permissions-${currentTime()}.csv`;
+
+	return {
+		outputFileName,
+		archivedOutputFileName,
+		activeOutputFileName,
+		teamPermissionFileName,
+	};
+};
+
+const getStringifiers = (fileNames) => {
+	const {
+		outputFileName,
+		archivedOutputFileName,
+		activeOutputFileName,
+		teamPermissionFileName,
+	} = fileNames;
 	const stringifier = getStringifier(outputFileName, columns);
+	const archivedStringifier = getStringifier(archivedOutputFileName, columns);
+	const activeStringifier = getStringifier(activeOutputFileName, columns);
 	const permissionStringifier = getStringifier(
 		teamPermissionFileName,
 		permissionColumns,
 	);
-	let { data: reposInfo } = await getRepositories(options, { idAfter: null });
-	let reposLength = reposInfo.length;
-	processRepositories(reposInfo, stringifier);
-	processRepoTeamPermission(reposInfo, permissionStringifier);
-	await delay(waitTime);
 
+	return {
+		stringifier,
+		archivedStringifier,
+		activeStringifier,
+		permissionStringifier,
+	};
+};
+
+const processPagination = async ({
+	options,
+	reposInfo,
+	reposLength,
+	metrics,
+	batchSize,
+	stringifiers,
+}) => {
+	const {
+		stringifier,
+		archivedStringifier,
+		activeStringifier,
+		permissionStringifier,
+	} = stringifiers;
 	while (reposLength == batchSize) {
 		const { data } = await getRepositories(options, {
 			idAfter: reposInfo[Number(batchSize) - 1].id,
 		});
 		reposInfo = data;
-		processRepositories(reposInfo, stringifier);
+		processRepositories(
+			reposInfo,
+			metrics,
+			stringifier,
+			archivedStringifier,
+			activeStringifier,
+			permissionStringifier,
+		);
 		processRepoTeamPermission(reposInfo, permissionStringifier);
 		reposLength = reposInfo.length;
 		await delay(waitTime);
 	}
+};
+
+const getGitlabRepositories = async (options) => {
+	const { organization: org, outputFile, waitTime, batchSize } = options;
+	const metrics = [];
+	const {
+		outputFileName,
+		archivedOutputFileName,
+		activeOutputFileName,
+		teamPermissionFileName,
+	} = getOutputFileNames(outputFile, org);
+	const {
+		stringifier,
+		archivedStringifier,
+		activeStringifier,
+		permissionStringifier,
+	} = getStringifiers({
+		outputFileName,
+		archivedOutputFileName,
+		activeOutputFileName,
+		teamPermissionFileName,
+	});
+	let { data: reposInfo } = await getRepositories(options, { idAfter: null });
+	let reposLength = reposInfo.length;
+	processRepositories(
+		reposInfo,
+		metrics,
+		stringifier,
+		archivedStringifier,
+		activeStringifier,
+		permissionStringifier,
+	);
+	processRepoTeamPermission(reposInfo, permissionStringifier);
+	await delay(waitTime);
+
+	await processPagination({
+		options,
+		reposInfo,
+		reposLength,
+		metrics,
+		batchSize,
+		waitTime,
+		stringifiers: {
+			stringifier,
+			archivedStringifier,
+			activeStringifier,
+			permissionStringifier,
+		},
+	});
 
 	stringifier.end();
+	archivedStringifier.end();
+	activeStringifier.end();
 	permissionStringifier.end();
+
+	return metrics;
 };
 
 export default getGitlabRepositories;

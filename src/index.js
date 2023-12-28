@@ -26,6 +26,7 @@ import getGitlabReposDirectCollaborators from './api/export/gitlab/repos/get-git
 import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
 import getGitlabTeamsMembers from './api/export/gitlab/teams/get-gitlab-team-members.js';
 import getGitlabUsers from './api/export/gitlab/users/get-gitlab-users.js';
+import getGHECMissingRepos from './api/import/ghec/repos/get-ghec-missing-repos.js';
 
 const args = {
 	allowUntrustedSslCertificates: {
@@ -231,7 +232,10 @@ program
 		'-c, --destination-org <DESTINATION ORGANIZATION>',
 		'GHEC destination organization name',
 	)
-	.requiredOption(args.inputFile.argument, 'Input file name with repository info')
+	.requiredOption(
+		args.inputFile.argument,
+		'Input file name with repository info',
+	)
 	.requiredOption(
 		'-s, --source-org <SOURCE ORGANIZATION>',
 		'GHES source organization name',
@@ -399,7 +403,9 @@ program
 	)
 	.alias('gpms')
 	.description('Fetches migration status of repositories in an organization')
-	.action(async (args) => commandController(process.env.PAT, args, getReposMigrationStatus));
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getReposMigrationStatus),
+	);
 
 program
 	.command(getFunctionName(getTeams))
@@ -485,13 +491,55 @@ program
 	// .option('-d, --delete', 'Delete repositories from GHEC')
 	.requiredOption('-c, --ghec-file <GHEC FILE>', 'GHEC repo metrics file')
 	.requiredOption('-s, --source-file <SOURCE FILE>', 'Source repo metrics file')
-	.requiredOption('-p, --ghec-org <GHEC ORGANIZATION NAME>', 'GHEC organization name')
-	.requiredOption('-q, --source-org <SOURCE ORGANIZATION NAME>', 'Source organization name')
+	.requiredOption(
+		'-p, --ghec-org <GHEC ORGANIZATION NAME>',
+		'GHEC organization name',
+	)
+	.requiredOption(
+		'-q, --source-org <SOURCE ORGANIZATION NAME>',
+		'Source organization name',
+	)
 	.option('-h --git-host <GIT HOST>', 'Git host name, eg. github, gitlab, etc.')
 	.option(args.token.argument, args.token.description)
 	.alias('glcc')
-	.description("Compares corresponding repositories' between source and GHEC for an organization for last updates and optionally deletes out-of-sync repositories in GHEC")
+	.description(
+		"Compares corresponding repositories' between source and GHEC for an organization for last updates and optionally deletes out-of-sync repositories in GHEC",
+	)
 	.action(async (args) => commandController('', args, ghecLastCommitCheck));
+
+program
+	.command(getFunctionName(getGHECMissingRepos))
+	.option(
+		args.allowUntrustedSslCertificates.argument,
+		args.allowUntrustedSslCertificates.description,
+	)
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.token.argument, 'GHEC token')
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.requiredOption(
+		'-p, --ghec-org <GHEC ORGANIZATION NAME>',
+		'GHEC organization name',
+	)
+	.requiredOption(
+		'-q, --source-org <SOURCE ORGANIZATION NAME>',
+		'Source organization name',
+	)
+	.requiredOption('-e, --source-token <SOURCE TOKEN>', 'Source token')
+	.option('-h --git-host <GIT HOST>', 'Git host name, eg. github, gitlab, etc.')
+	.alias('ghmr')
+	.description(
+		'Fetches the missing repositories in GHEC during and after migration',
+	)
+	.action(async (args) => commandController('', args, getGHECMissingRepos));
 
 program
 	.command(getFunctionName(compareRepoDirectCollaborators))

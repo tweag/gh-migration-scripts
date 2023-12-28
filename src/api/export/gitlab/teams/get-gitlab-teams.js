@@ -9,14 +9,7 @@ import {
 
 const processTeams = (values, stringifier) => {
 	for (const value of values) {
-		const {
-			id,
-			name,
-			path,
-			description,
-			parent_id,
-			web_url: webUrl,
-		} = value;
+		const { id, name, path, description, parent_id, web_url: webUrl } = value;
 		stringifier.write({
 			id,
 			name,
