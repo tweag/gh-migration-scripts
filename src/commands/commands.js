@@ -97,9 +97,9 @@ export const commandController = async (PAT, options, service) => {
 		);
 	}
 
-	if (service === ghecLastCommitCheck) {
-		options[GIT_HOST] = await handleGitHost(options);
-	}
+	// if (service === ghecLastCommitCheck) {
+	// 	options[GIT_HOST] = await handleGitHost(options);
+	// }
 
 	service(options);
 };

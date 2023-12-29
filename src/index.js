@@ -488,9 +488,12 @@ program
 
 program
 	.command(getFunctionName(ghecLastCommitCheck))
-	// .option('-d, --delete', 'Delete repositories from GHEC')
-	.requiredOption('-c, --ghec-file <GHEC FILE>', 'GHEC repo metrics file')
-	.requiredOption('-s, --source-file <SOURCE FILE>', 'Source repo metrics file')
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option('-f, --input-file <INPUT FILE>', 'Source repo names file')
 	.requiredOption(
 		'-p, --ghec-org <GHEC ORGANIZATION NAME>',
 		'GHEC organization name',
@@ -499,8 +502,16 @@ program
 		'-q, --source-org <SOURCE ORGANIZATION NAME>',
 		'Source organization name',
 	)
-	.option('-h --git-host <GIT HOST>', 'Git host name, eg. github, gitlab, etc.')
+	.option('-h, --source-token <SOURCE TOKEN>', 'Source organization token')
+	.option(args.serverUrl.argument, args.serverUrl.description)
 	.option(args.token.argument, args.token.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.skip.argument, args.skip.description, args.skip.defaultValue)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
 	.alias('glcc')
 	.description(
 		"Compares corresponding repositories' between source and GHEC for an organization for last updates and optionally deletes out-of-sync repositories in GHEC",
