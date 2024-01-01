@@ -37,7 +37,7 @@ const args = {
 	},
 	batchSize: {
 		argument: '-b, --batch-size <BATCH SIZE>',
-		description: 'Batch size to call at once for GraphQL',
+		description: 'Batch size to call at once for the API requests',
 		defaultValue: 50,
 	},
 	inputFile: {

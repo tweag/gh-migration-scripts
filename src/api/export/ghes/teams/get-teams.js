@@ -19,7 +19,7 @@ const spinner = Ora();
 const metrics = [];
 
 /**
- * Valid user options
+ * Valid team options
  */
 let opts = {};
 
@@ -29,7 +29,7 @@ let opts = {};
 let fetched = {};
 
 /**
- * Count number of team
+ * Count number of teams
  */
 let count = 0;
 
