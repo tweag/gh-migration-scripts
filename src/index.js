@@ -503,7 +503,7 @@ program
 		'Source organization name',
 	)
 	.option('-h, --source-token <SOURCE TOKEN>', 'Source organization token')
-	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.option(args.token.argument, args.token.description)
 	.option(args.outputFile.argument, args.outputFile.description)
 	.option(args.skip.argument, args.skip.description, args.skip.defaultValue)

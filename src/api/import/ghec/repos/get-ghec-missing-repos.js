@@ -12,7 +12,7 @@ const getRepoNames = async (options, gitHost, sourceFile) => {
 
 	let repos = [];
 	options.organization = options.sourceOrg;
-  options.token = options.sourceToken;
+	options.token = options.sourceToken;
 
 	if (gitHost === GITHUB_HOST) {
 		repos = await getRepos(options);
@@ -34,7 +34,8 @@ const getMissingRepos = (repoNames, migratedRepos) => {
 };
 
 const getGHECMissingRepos = async (options) => {
-	const { sourceOrg, ghecOrg, gitHost, sourceFile, outputFile, token } = options;
+	const { sourceOrg, ghecOrg, gitHost, sourceFile, outputFile, token } =
+		options;
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${sourceOrg}-${ghecOrg}-ghec-missing-repos-${currentTime()}.csv`;
@@ -42,7 +43,7 @@ const getGHECMissingRepos = async (options) => {
 	const repoNames = await getRepoNames(options, gitHost, sourceFile);
 
 	options.organization = ghecOrg;
-  options.token = token;
+	options.token = token;
 	const migratedRepos = await getReposMigrationStatus(options);
 	const missingRepos = getMissingRepos(repoNames, migratedRepos);
 	missingRepos.forEach((repoName) => stringifier.write({ repo: repoName }));

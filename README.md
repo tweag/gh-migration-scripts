@@ -24,33 +24,32 @@ Hey there! 👋 Welcome to our migration tools repository – your go-to toolkit
 
 ## Export
 
-| Features  |  GHES | Bitbucket Server  | GitLab  |
-| ------------ | ------------ | ------------ | ------------ |
-| 1. List repositories  | ✅  | ✅ | ✅  |
-| 2. List repositories members  | ✅  | ✅  | ✅  |
-| 3. List teams  | ✅  | ✅  | ✅  |
-| 4. List team members  | ✅  | ✅  | ✅  |
-| 5. List team repositories permission  | ✅  | ✅  | ✅  |
-| 6. List organization users  | ❌  | ✅  | ✅  |
-| 7. List enterprise users  | ✅ | ✅  | ✅  |
-| 8. List organization projects | ❌ | ❌ | ❌ |
-| 9. Repositories last commit check | ✅ | ✅ | ❌ |
-| 10. Delete repositories | ✅ | ❌ | ❌ |
-| 11. Get outside collaborators | ✅ | ❌ | ❌ |
+| Features                              | GHES                                                                                                                     | Bitbucket Server (WIP) | GitLab (WIP) |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------- | ------------ |
+| 1. Fetch repositories                 | ✅ [get-repos](https://github.com/ModusCreateOrg/gh-migration-scripts#get-repos)                                         | ✅                     | ✅           |
+| 2. Fetch repositories members         | ✅ [get-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts#get-repo-direct-collaborators) | ✅                     | ✅           |
+| 3. Fetch teams                        | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅                     | ✅           |
+| 4. Fetch team members                 | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅                     | ✅           |
+| 5. Fetch team repositories permission | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅                     | ✅           |
+| 6. Fetch organization users           | ✅ [get-org-users](https://github.com/ModusCreateOrg/gh-migration-scripts#get-org-users)                                 | ✅                     | ✅           |
+| 7. Fetch enterprise users             | ✅ [get-enterprise-users](https://github.com/ModusCreateOrg/gh-migration-scripts#get-enterprise-users)                   | ✅                     | ✅           |
+| 8. Fetch organization projects        | ❌                                                                                                                       | ❌                     | ❌           |
+| 9. Check repositories last commits    | ✅ [ghec-last-commit-check](https://github.com/ModusCreateOrg/gh-migration-scripts#ghec-last-commit-check)               | ❌                     | ❌           |
+| 10. Delete repositories               | ✅ [delete-repos](https://github.com/ModusCreateOrg/gh-migration-scripts#2-delete-repos)                                 | ❌                     | ❌           |
+| 11. Fetch outside collaborators       | ✅ [get-outside-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts#3-get-outside-collaborators)       | ❌                     | ❌           |
 
 ## Import
 
-| Features  |  GHEC |
-| ------------ | ------------ |
-| 1. Set repository direct collaborators  | ✅  |
-| 2. Set repository team permissions  | ✅  |
-| 3. Create teams  | ✅  |
-| 4. Add team members  | ✅  |
-| 5. Archive/unarchive repositories  | ✅  |
-| 6. Delete repositories  | ✅  |
-| 7. Set organization memberships  | ✅ |
-| 8. Add organization projects | ❌ |
-| 10. Delete repositories | ✅ |
+| Features                               | GHEC                                                                                                           |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 1. Set repository direct collaborators | ✅ [set-repo-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts#set-repo-collaborators)     |
+| 2. Set repository team permissions     | ✅ [set-repo-team-permission](https://github.com/ModusCreateOrg/gh-migration-scripts#set-repo-team-permission) |
+| 3. Create teams                        | ✅ [create-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#create-teams)                         |
+| 4. Add team members                    | ✅ [insert-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts#insert-team-members)           |
+| 5. Archive/unarchive repositories      | ✅ [set-archived-status](https://github.com/ModusCreateOrg/gh-migration-scripts#1-set-archived-status)         |
+| 6. Delete repositories                 | ✅ [delete-repos](https://github.com/ModusCreateOrg/gh-migration-scripts#2-delete-repos)                       |
+| 7. Set organization memberships        | ✅ [set-membership-in-org](https://github.com/ModusCreateOrg/gh-migration-scripts#set-membership-in-org)       |
+| 8. Add organization projects           | ❌                                                                                                             |
 
 # How it works
 
@@ -107,7 +106,7 @@ node src/index.js get-repo-direct-collaborators -o <organization> -f <file>
 
 #### Required Arguments
 
-1. `-f` or `--file` - Input file with repository names.
+1. `-f` or `--input-file` - Input file with repository names.
 2. `-o` or `--organization` - Organization name.
 
 #### Optional Arguments
@@ -315,7 +314,7 @@ node src/index.js set-membership-in-org -o <organization> -f <file>
 
 #### Required Arguments
 
-1. `-f` or `--file` - Input file name with member name.
+1. `-f` or `--input-file` - Input file name with member name.
 2. `-o` or `--organization` - Organization name.
 
 #### Optional Arguments
@@ -353,7 +352,7 @@ node src/index.js create-teams -o <organization> -f <file> -z <github-user>
 
 #### Required Arguments
 
-1. `-f` or `--file` - Input file name with teams info.
+1. `-f` or `--input-file` - Input file name with teams info.
 2. `-o` or `--organization` - Organization name.
 3. `-z` or `--github-user` - GitHub username who is performing the operation, to delete the user after the team is created, because by default when a team is created, the user who created it will be added to the team.
 
@@ -400,7 +399,7 @@ node src/index.js insert-team-members -o <organization> -f <file>
 
 #### Required Arguments
 
-1. `-f` or `--file` - Input file name with teams, member, and roles.
+1. `-f` or `--input-file` - Input file name with teams, member, and roles.
 2. `-o` or `--organization` - Organization name.
 
 #### Optional Arguments
@@ -439,7 +438,7 @@ node src/index.js set-repo-collaborators -o <organization> -f <file>
 
 #### Required Arguments
 
-1. `-f` or `--file` - Input file name with repo, collaborators & roles info.
+1. `-f` or `--input-file` - Input file name with repo, collaborators & roles info.
 2. `-o` or `--organization` - Organization name.
 
 #### Optional Arguments
@@ -477,7 +476,7 @@ node src/index.js set-repo-team-permission -o <organization> -f <file>
 
 #### Required Arguments
 
-1. `-f` or `--file` - Input file name with repo, team & permission info.
+1. `-f` or `--input-file` - Input file name with repo, team & permission info.
 2. `-o` or `--organization` - Organization name.
 
 #### Optional Arguments
@@ -615,6 +614,43 @@ Format
 | --------- | ----- |
 | test-repo | xyz   |
 
+### 3. Check last commit
+
+#### ghec-last-commit-check
+
+#### Usage
+
+Compares the last commits of all branches of every repositories between source and target organizations
+
+```
+node src/index.js ghec-last-commit-check -p <ghec-organization> -q <source-organization> -h <source token> -t <target-token> -g <server-url>
+```
+
+#### Required Arguments
+
+1. `-o` or `--organization` - Organization name.
+2. `-f` or `--input-file` - Input file name with teams, member, and roles.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
+4. `p` or `--source-organization` - Source organization name.
+5. `q` or `--target-organization` - Target (GHEC) organization name
+
+#### Optional Arguments
+
+1. `-b` or `--batch-size` - Batch size for GraphQL request.
+2. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. Default file name is `<organization>-metrics/<source-organization>-<target-organization>-last-commit-check-<date>.csv`.
+   _date_ - Format is DD/MM/YYYY
+3. `-t` or `--token` - Personal access token of the target organization- If not provided, then the user wil be prompted to input the token.
+4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+5. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+
+#### Input
+
+Input is optional, a CSV file with header `repo`.
+
+| repo        |
+| ----------- |
+| sample-repo |
+
 ### Miscellaneous
 
 ### 1. set-archived-status
@@ -629,7 +665,7 @@ node src/index.js set-archived-status -o <organization> -f <file>
 
 #### Required Arguments
 
-1. `-f` or `--file` - Input file name with repo, team & permission info.
+1. `-f` or `--input-file` - Input file name with repo, team & permission info.
 2. `-o` or `--organization` - Organization name.
 
 #### Optional Arguments
@@ -665,7 +701,7 @@ node src/index.js delete-repos -o <organization> -f <file>
 
 #### Required Arguments
 
-1. `-f` or `--file` - Input file name with repository names to delete.
+1. `-f` or `--input-file` - Input file name with repository names to delete.
 2. `-o` or `--organization` - Organization name.
 
 #### Optional Arguments
