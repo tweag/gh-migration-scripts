@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 import prompts from 'prompts';
-import {
-	COMPARE_REPO_DIRECT_COLLABORATORS,
-	COMPARE_TEAMS,
-	GENERATE_GHES_MIGRATION_SCRIPT,
-	GHES_VS_GHEC,
-} from '../services/constants.js';
+import { GIT_HOST, GITHUB_HOST, GITLAB_HOST } from '../services/constants.js';
+import compareRepoDirectCollaborators from '../api/compare/ghes-vs-ghec/repo-direct-collaborators.js';
+import compareTeams from '../api/compare/ghes-vs-ghec/teams.js';
+import generateGHESMigrationScript from '../api/export/ghes/repos/generate-ghes-migration-script.js';
+import ghecLastCommitCheck from '../api/compare/ghec-last-commit-check.js';
+import getGHECMissingRepos from '../api/import/ghec/repos/get-ghec-missing-repos.js';
 
 // Prompt for Personal Access Token
 const promptForToken = (msg) => {
@@ -19,22 +19,19 @@ const promptForToken = (msg) => {
 	];
 };
 
-/**
- * Sets the GHES URL if one was provided, otherwise prompts the user for one
- *
- * @param {string} URL GHES URL
- * @param {object} options the information needed for the migration
- */
-export const handleGithubUrl = async (URL, options) => {
-	if (!options.githubUrl) {
-		if (URL) return URL;
-		else {
-			const input = await prompts(promptForToken());
-			return input.URL;
-		}
-	}
-
-	return options.githubUrl;
+// Prompt for Git Host
+const promptForGitHost = () => {
+	return [
+		{
+			type: 'select',
+			name: GIT_HOST,
+			message: 'Select Git Host',
+			choices: [
+				{ title: 'GitHub', value: GITHUB_HOST },
+				{ title: 'GitLab', value: GITLAB_HOST },
+			],
+		},
+	];
 };
 
 /**
@@ -60,17 +57,17 @@ export const handleToken = async (PAT, options, msg, field) => {
 };
 
 /**
- * Sets the users file if one was provided, otherwise prompts the user for one
+ * Sets the gitHost if one was provided, otherwise prompts the user for one
+ *
  * @param {object} options the information needed for the migration
  */
-export const handleUsersFile = async (options) => {
-	if (!options.usersFile) {
-		// If the users file is not provided as argument
-		const input = await prompts(promptForUsersFile());
-		return input.usersFile;
+export const handleGitHost = async (options) => {
+	if (!options[GIT_HOST]) {
+		const input = await prompts(promptForGitHost());
+		return input[GIT_HOST];
 	}
 
-	return options.usersFile;
+	return options[GIT_HOST];
 };
 
 /**
@@ -83,34 +80,26 @@ export const handleUsersFile = async (options) => {
 export const commandController = async (PAT, options, service) => {
 	if (
 		![
-			COMPARE_REPO_DIRECT_COLLABORATORS,
-			COMPARE_TEAMS,
-			GENERATE_GHES_MIGRATION_SCRIPT,
-			GHES_VS_GHEC,
+			compareRepoDirectCollaborators,
+			compareTeams,
+			generateGHESMigrationScript,
+			ghecLastCommitCheck,
 		].includes(service)
 	)
 		options.token = await handleToken(PAT, options, 'Enter PAT: ', 'token');
 
-	if (service === GHES_VS_GHEC) {
-		if (!options.ghecFile) {
-			options.ghecToken = await handleToken(
-				options.ghecToken,
-				options,
-				'Enter GHEC token: ',
-				'ghecToken',
-			);
-		}
-
-		if (!options.ghesFile) {
-			options.ghesToken = await handleToken(
-				options.ghesToken,
-				options,
-				'Enter GHES Token: ',
-				'ghesToken',
-			);
-			options.githubUrl = await handleGithubUrl(options.githubUrl, options);
-		}
+	if (service === getGHECMissingRepos) {
+		options.sourceToken = await handleToken(
+			options.sourceToken,
+			options,
+			'Enter Source PAT: ',
+			'sourceToken',
+		);
 	}
+
+	// if (service === ghecLastCommitCheck) {
+	// 	options[GIT_HOST] = await handleGitHost(options);
+	// }
 
 	service(options);
 };

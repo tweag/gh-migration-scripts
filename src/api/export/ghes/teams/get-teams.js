@@ -9,17 +9,17 @@ import {
 	doRequest,
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
+import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
 import processTeamsMembers from '../../../../services/process-teams-members.js';
 import processTeamsRepos from '../../../../services/process-teams-repos.js';
 import https from 'https';
 
 const spinner = Ora();
-const githubGraphQL = 'https://api.github.com/graphql';
 
 const metrics = [];
 
 /**
- * Valid user options
+ * Valid team options
  */
 let opts = {};
 
@@ -29,14 +29,14 @@ let opts = {};
 let fetched = {};
 
 /**
- * Count number of team
+ * Count number of teams
  */
 let count = 0;
 
 export const fetchTeamInOrg = async (
 	org,
 	token,
-	githubUrl,
+	serverUrl,
 	allowUntrustedSslCertificates,
 	cursor,
 ) => {
@@ -46,7 +46,7 @@ export const fetchTeamInOrg = async (
 		allowUntrustedSslCertificates,
 		cursor,
 	);
-	config.url = determineGraphQLEndpoint(githubUrl);
+	config.url = determineGraphQLEndpoint(serverUrl);
 
 	return doRequest(config);
 };
@@ -55,7 +55,7 @@ export const fetchReposInTeam = async (
 	org,
 	team,
 	token,
-	githubUrl,
+	serverUrl,
 	allowUntrustedSslCertificates,
 	cursor,
 ) => {
@@ -66,7 +66,7 @@ export const fetchReposInTeam = async (
 		allowUntrustedSslCertificates,
 		cursor,
 	);
-	config.url = determineGraphQLEndpoint(githubUrl);
+	config.url = determineGraphQLEndpoint(serverUrl);
 
 	return doRequest(config);
 };
@@ -75,7 +75,7 @@ export const fetchMembersInTeam = async (
 	org,
 	team,
 	token,
-	githubUrl,
+	serverUrl,
 	allowUntrustedSslCertificates,
 	cursor,
 ) => {
@@ -86,7 +86,7 @@ export const fetchMembersInTeam = async (
 		allowUntrustedSslCertificates,
 		cursor,
 	);
-	config.url = determineGraphQLEndpoint(githubUrl);
+	config.url = determineGraphQLEndpoint(serverUrl);
 
 	return doRequest(config);
 };
@@ -97,7 +97,7 @@ export const getTeams = async (options) => {
 	const response = await fetchTeamInOrg(
 		options.organization,
 		options.token,
-		options.githubUrl,
+		options.serverUrl,
 		options.allowUntrustedSslCertificates,
 		'',
 	);
@@ -147,7 +147,7 @@ export const fetchTeamMetrics = async (teams) => {
 				opts.organization,
 				team.node.slug,
 				opts.token,
-				opts.githubUrl,
+				opts.serverUrl,
 				opts.allowUntrustedSslCertificates,
 				`, after: "${membersEndCursor}"`,
 			);
@@ -168,7 +168,7 @@ export const fetchTeamMetrics = async (teams) => {
 				opts.organization,
 				team.node.slug,
 				opts.token,
-				opts.githubUrl,
+				opts.serverUrl,
 				opts.allowUntrustedSslCertificates,
 				`, after: "${repositoriesEndCursor}"`,
 			);
@@ -222,7 +222,7 @@ export const fetchTeamMetrics = async (teams) => {
 		const result = await fetchTeamInOrg(
 			opts.organization,
 			opts.token,
-			opts.githubUrl,
+			opts.serverUrl,
 			opts.allowUntrustedSslCertificates,
 			`, after: "${cursor}"`,
 		);
@@ -244,7 +244,7 @@ export const storeTeamMetrics = async (organization) => {
 	}
 
 	const today = getDate();
-	const suffix = opts.githubUrl ? `${today}-ghes` : `${today}-ghec`;
+	const suffix = opts.serverUrl ? `${today}-ghes` : `${today}-ghec`;
 
 	let path = `${dir}/${organization}-team-metrics-${suffix}.csv`;
 	let membersPath = `${dir}/${organization}-member-team-role-${suffix}.csv`;
@@ -275,7 +275,7 @@ export const storeTeamMetrics = async (organization) => {
 
 export function determineGraphQLEndpoint(url) {
 	if (!url) {
-		return githubGraphQL;
+		return GITHUB_GRAPHQL_API_URL;
 	} else {
 		return url + '/api/graphql';
 	}

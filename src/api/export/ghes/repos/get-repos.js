@@ -9,9 +9,9 @@ import {
 	doRequest,
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
+import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
 import https from 'https';
 const spinner = Ora();
-const githubGraphQL = 'https://api.github.com/graphql';
 
 /**
  * Running PullRequest and issues array
@@ -46,7 +46,7 @@ const orgMetrics = {
  *
  * @param {string} org the organization
  * @param {string} token the token
- * @param {string} githubUrl the graphql endpoint for a GHES instance
+ * @param {string} serverUrl the graphql endpoint for a GHES instance
  * @param {boolean} allowUntrustedSslCertificate allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA
  * @param {string} cursor the last repository fetched
  * @returns {[Objects]} the fetched repo information
@@ -54,7 +54,7 @@ const orgMetrics = {
 export const fetchRepoInOrg = async (
 	org,
 	token,
-	githubUrl,
+	serverUrl,
 	allowUntrustedSslCertificates,
 	cursor,
 ) => {
@@ -64,7 +64,7 @@ export const fetchRepoInOrg = async (
 		allowUntrustedSslCertificates,
 		cursor,
 	);
-	config.url = determineGraphQLEndpoint(githubUrl);
+	config.url = determineGraphQLEndpoint(serverUrl);
 
 	return doRequest(config);
 };
@@ -79,12 +79,12 @@ export const fetchRepoInOrg = async (
  */
 export const fetchOrgInfo = async (
 	org,
-	githubUrl,
+	serverUrl,
 	token,
 	allowUntrustedSslCertificates,
 ) => {
 	const config = fetchOrgInfoOptions(org, token, allowUntrustedSslCertificates);
-	config.url = determineGraphQLEndpoint(githubUrl);
+	config.url = determineGraphQLEndpoint(serverUrl);
 
 	return doRequest(config);
 };
@@ -101,7 +101,7 @@ export const getRepos = async (options) => {
 	const response = await fetchRepoInOrg(
 		options.organization,
 		options.token,
-		options.githubUrl,
+		options.serverUrl,
 		options.allowUntrustedSslCertificates,
 		'',
 	);
@@ -111,24 +111,25 @@ export const getRepos = async (options) => {
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
-	await fetchingController(options.githubUrl);
+	await fetchingController();
 
 	if (options.return) return metrics;
 };
 
 /**
  * Fetching and Storing metrics controller
- *
  */
 export const fetchingController = async () => {
 	// fetching PR and ISSUE metrics
 	await fetchRepoMetrics(fetched.data.organization.repositories.edges);
 
-	if (!opts.return && metrics) {
+	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
 		await storeRepoMetrics(org);
 		await storeOrgMetrics(org);
 	}
+
+	return metrics;
 };
 
 /**
@@ -157,7 +158,7 @@ export const fetchRepoMetrics = async (repositories) => {
 			diskUsage: repo.node.diskUsage,
 		};
 
-		if (opts.githubUrl && (opts.compare || opts.return)) {
+		if (opts.serverUrl && (opts.compare || opts.return)) {
 			repoInfo.pullRequests = repo.node.pullRequests.edges
 				.filter((item) => !item.node.closed && !item.node.merged)
 				.map((item) => new Date(item.node.updatedAt).getTime());
@@ -199,7 +200,7 @@ export const fetchRepoMetrics = async (repositories) => {
 		const result = await fetchRepoInOrg(
 			opts.organization,
 			opts.token,
-			opts.githubUrl,
+			opts.serverUrl,
 			opts.allowUntrustedSslCertificates,
 			`, after: "${cursor}"`,
 		);
@@ -213,16 +214,13 @@ export const fetchRepoMetrics = async (repositories) => {
 };
 
 /**
- * Call CSV service to export repository pull request information
+ * Call CSV service to export repository information
  *
  * @param {String} organization the organization
- * @param {[Object]} data the fetched repositories pr and issue data
- * @param {Object} mostPr the repository with most PR
- * @param {Object} mostIssue the repository with most issues
  */
 export const storeRepoMetrics = async (organization) => {
 	const today = getDate();
-	const suffix = opts.githubUrl ? `${today}-ghes` : `${today}-ghec`;
+	const suffix = opts.serverUrl ? `${today}-ghes` : `${today}-ghec`;
 	const dir = `./${organization}-metrics`;
 
 	if (!opts.outputFile && !fs.existsSync(dir)) {
@@ -245,7 +243,7 @@ export const storeRepoMetrics = async (organization) => {
 		'diskUsage',
 	];
 
-	if (opts.githubUrl && opts.compare) {
+	if (opts.serverUrl && opts.compare) {
 		headers.push('pullRequests');
 		headers.push('issues');
 	}
@@ -253,27 +251,38 @@ export const storeRepoMetrics = async (organization) => {
 	const path =
 		(opts.outputFile && opts.outputFile.endsWith('.csv') && opts.outputFile) ||
 		`${dir}/${organization}-repo-metrics-${suffix}.csv`;
+	const archivedPath = path.split('.csv')[0] + '-archived.csv';
+	const activePath = path.split('.csv')[0] + '-active.csv';
 	const stringifier = getStringifier(path, headers);
+	const archivedStringifier = getStringifier(archivedPath, headers);
+	const activeStringifier = getStringifier(activePath, headers);
 	spinner.start('Exporting...');
 
 	for (const metric of metrics) {
 		stringifier.write(metric);
+		if (metric.isArchived) {
+			archivedStringifier.write(metric);
+		} else {
+			activeStringifier.write(metric);
+		}
 	}
 
 	stringifier.end();
+	archivedStringifier.end();
+	activeStringifier.end();
 	spinner.succeed(`Exporting Completed: ${path}`);
 };
 
 /**
  * Determine if the user is targeting a GHES instance or not.
  *
- * * @param {string} githubUrl the graphql endpoint for a GHES instance
+ * * @param {string} serverUrl the graphql endpoint for a GHES instance
  */
-export function determineGraphQLEndpoint(githubUrl) {
-	if (!githubUrl) {
-		return githubGraphQL;
+export function determineGraphQLEndpoint(serverUrl) {
+	if (!serverUrl) {
+		return GITHUB_GRAPHQL_API_URL;
 	} else {
-		return githubUrl + '/api/graphql';
+		return serverUrl + '/api/graphql';
 	}
 }
 
@@ -409,7 +418,7 @@ export function fetchRepoInOrgInfoOptions(
  */
 export const storeOrgMetrics = async (organization) => {
 	const today = getDate();
-	const suffix = opts.githubUrl ? `${today}-ghes` : `${today}-ghec`;
+	const suffix = opts.serverUrl ? `${today}-ghes` : `${today}-ghec`;
 	const dir = `./${organization}-metrics`;
 	let path = `${dir}/${organization}-org-metrics-${suffix}.csv`;
 
@@ -434,7 +443,7 @@ export const storeOrgMetrics = async (organization) => {
 
 	const orgInfo = await fetchOrgInfo(
 		organization,
-		opts.githubUrl,
+		opts.serverUrl,
 		opts.token,
 		opts.allowUntrustedSslCertificates,
 	);

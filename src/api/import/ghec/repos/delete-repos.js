@@ -13,11 +13,11 @@ import {
 } from '../../../../services/constants.js';
 
 const getDeleteRepoConfig = (repo, options) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/repos/${org}/${repo}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/repos/${org}/${repo}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/repos/${org}/${repo}`;
 	}
 
 	return {
@@ -38,7 +38,14 @@ const deleteRequest = async (repo, options) => {
 
 export const deleteRepos = async (options) => {
 	try {
-		const { file, organization: org, outputFile, waitTime, skip } = options;
+		const {
+			inputFile,
+			organization: org,
+			repo,
+			outputFile,
+			waitTime,
+			skip,
+		} = options;
 
 		const columns = ['repo', 'status', 'statusText', 'errorMessage'];
 		const outputFileName =
@@ -46,8 +53,14 @@ export const deleteRepos = async (options) => {
 			`${org}-delete-repos-status-${currentTime()}.csv`;
 		const stringifier = getStringifier(outputFileName, columns);
 
-		const repositoriesData = await getData(file);
-		const repositories = repositoriesData.map((r) => r.repo);
+		let repositories;
+
+		if (repo) {
+			repositories = [repo];
+		} else {
+			const repositoriesData = await getData(inputFile);
+			repositories = repositoriesData.map((r) => r.repo);
+		}
 		let index = 0;
 
 		for (const repo of repositories) {

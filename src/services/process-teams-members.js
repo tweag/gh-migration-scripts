@@ -9,6 +9,7 @@ const processMembers = (members, enterpriseUsers, slug, stringifier) => {
 		for (const memberInfo of membersArray) {
 			let [member, _, role] = memberInfo.split(':');
 			member = member.toLowerCase();
+			role = role.toLowerCase();
 
 			if (enterpriseUsers.length > 0 && !enterpriseUsers.includes(member))
 				continue;

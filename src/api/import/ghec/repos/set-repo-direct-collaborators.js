@@ -18,11 +18,11 @@ import {
 } from '../../../../services/constants.js';
 
 const getUsersRepoConfig = ({ options, repo, login, role }) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/repos/${org}/${repo}/collaborators/${login}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/repos/${org}/${repo}/collaborators/${login}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/repos/${org}/${repo}/collaborators/${login}`;
 	}
 
 	const config = {
@@ -55,7 +55,7 @@ export const setRepoDirectCollaborators = async (options) => {
 		let filterRepos = [];
 		const {
 			organization: org,
-			file,
+			inputFile,
 			reposFile,
 			outputFile,
 			waitTime,
@@ -80,7 +80,7 @@ export const setRepoDirectCollaborators = async (options) => {
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-set-repo-collaborators-status-${currentTime()}.csv`;
 		const stringifier = getStringifier(outputFileName, columns);
-		const fileStream = fs.createReadStream(file);
+		const fileStream = fs.createReadStream(inputFile);
 
 		const rl = readline.createInterface({
 			input: fileStream,

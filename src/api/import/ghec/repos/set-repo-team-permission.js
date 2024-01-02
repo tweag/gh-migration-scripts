@@ -23,11 +23,11 @@ const getSetRepoTeamPermissionConfig = ({
 	permission,
 	options,
 }) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/orgs/${org}/teams/${team}/repos/${org}/${repo}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/orgs/${org}/teams/${team}/repos/${org}/${repo}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/orgs/${org}/teams/${team}/repos/${org}/${repo}`;
 	}
 
 	return {
@@ -47,20 +47,10 @@ const setTeamPermission = async (details) => {
 	return doRequest(config);
 };
 
-const convertPermission = (permission) => {
-	return {
-		ADMIN: 'admin',
-		MAINTAIN: 'maintain',
-		WRITE: 'push',
-		TRIAGE: 'triage',
-		READ: 'pull',
-	}[permission];
-};
-
 export const setRepoTeamPermission = async (options) => {
 	try {
 		const {
-			file,
+			inputFile,
 			reposFile,
 			organization: org,
 			outputFile,
@@ -80,7 +70,7 @@ export const setRepoTeamPermission = async (options) => {
 			'errorMessage',
 		];
 		const stringifier = getStringifier(outputFileName, columns);
-		const fileStream = fs.createReadStream(file);
+		const fileStream = fs.createReadStream(inputFile);
 		let filterRepos = [];
 
 		if (reposFile) {
@@ -110,7 +100,7 @@ export const setRepoTeamPermission = async (options) => {
 
 			if (!options.reposFile || filterRepos.includes(repo)) {
 				if (index > skip) {
-					const permission = convertPermission(rowArr[2]);
+					const permission = rowArr[2];
 					const response = await setTeamPermission({
 						repo,
 						team,

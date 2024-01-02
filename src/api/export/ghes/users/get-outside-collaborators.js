@@ -10,11 +10,11 @@ import {
 import { GITHUB_API_URL } from '../../../../services/constants.js';
 
 const getOutsideCollaboratorsConfig = (page, options) => {
-	const { organization: org, githubUrl, token } = options;
+	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/orgs/${org}/outside_collaborators?per_page=100&page=${page}`;
 
-	if (githubUrl) {
-		url = `${githubUrl}/api/v3/orgs/${org}/outside_collaborators?per_page=100&page=${page}`;
+	if (serverUrl) {
+		url = `${serverUrl}/api/v3/orgs/${org}/outside_collaborators?per_page=100&page=${page}`;
 	}
 
 	return {

@@ -72,10 +72,10 @@ export const ghesVsGhec = async (options) => {
 		ghesOrg,
 		ghecToken,
 		ghesToken,
-		githubUrl,
+		serverUrl,
 		outputFile,
 	} = options;
-	const serverUrl = githubUrl;
+
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${ghecOrg}-${ghesOrg}-updated-details-${currentTime()}.csv`;
@@ -89,7 +89,7 @@ export const ghesVsGhec = async (options) => {
 	} else {
 		options.token = ghecToken;
 		options.organization = ghecOrg;
-		options.githubUrl = undefined;
+		options.serverUrl = undefined;
 		ghecRepos = await getRepos(options);
 	}
 
@@ -98,7 +98,7 @@ export const ghesVsGhec = async (options) => {
 	} else {
 		options.token = ghesToken;
 		options.organization = ghesOrg;
-		options.githubUrl = serverUrl;
+		options.serverUrl = serverUrl;
 		ghesRepos = await getRepos(options);
 	}
 
