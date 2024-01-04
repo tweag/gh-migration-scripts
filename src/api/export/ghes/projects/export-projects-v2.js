@@ -429,12 +429,9 @@ export function fetchProjectsOptions(
 										name
 										dataType
 										options {
-											id
 											color
 											description
-											descriptionHTML
 											name
-											nameHTML
 										}
 									}
 								}
