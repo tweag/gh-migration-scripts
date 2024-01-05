@@ -35,14 +35,14 @@ let count = 0;
  */
 let totalCount = 0;
 
-export const fetchProjectInOrg = async (
+export const fetchProjectsV2InOrg = async (
 	org,
 	token,
 	serverUrl,
 	allowUntrustedSslCertificates,
 	cursor,
 ) => {
-	const config = fetchProjectInOrgInfoOptions(
+	const config = fetchProjectsV2Options(
 		org,
 		token,
 		allowUntrustedSslCertificates,
@@ -53,28 +53,10 @@ export const fetchProjectInOrg = async (
 	return doRequest(config);
 };
 
-export const fetchProjects = async (
-	org,
-	token,
-	serverUrl,
-	allowUntrustedSslCertificates,
-	cursor,
-) => {
-	const config = fetchProjectsOptions(
-		org,
-		token,
-		allowUntrustedSslCertificates,
-		cursor,
-	);
-	config.url = determineGraphQLEndpoint(serverUrl);
-
-	return doRequest(config);
-};
-
-const getProjectsV2 = async (options) => {
+const exportProjectsV2 = async (options) => {
 	count = 0;
 	opts = options;
-	const response = await fetchProjectInOrg(
+	const response = await fetchProjectsV2InOrg(
 		options.organization,
 		options.token,
 		options.serverUrl,
@@ -103,216 +85,236 @@ export const fetchingController = async () => {
 };
 
 const itemsGql = () => {
-	return (
-	`pageInfo {
-		hasNextPage
-		endCursor
-	}
-	nodes {
-		fieldValues(first: 20) {
-			nodes {
-				... on ProjectV2ItemFieldSingleSelectValue {
-					id
-					name
-					nameHTML
-					optionId
-					color
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldDateValue {
-					id
-					__typename
-					date
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldTextValue {
-					id
-					text
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldUserValue {
-					users(first: 10) {
-						nodes {
-							login
-						}
-					}
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldLabelValue {
-					labels(first: 20) {
-						nodes {
-							name
-							color
-							description
-							isDefault
-						}
-					}
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldNumberValue {
-					id
-					number
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldValueCommon {
-					id
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldIterationValue {
-					id
-					duration
-					title
-					titleHTML
-					startDate
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldMilestoneValue {
-					milestone {
+	return `
+		totalCount
+		pageInfo {
+			hasNextPage
+			endCursor
+		}
+		nodes {
+			fieldValues(first: 20) {
+				nodes {
+					... on ProjectV2ItemFieldSingleSelectValue {
 						id
-						dueOn
-						state
-						closed
-						viewerCanReopen
-						viewerCanClose
-					}
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldRepositoryValue {
-					repository {
 						name
-						id
-					}
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
-							id
-							name
-						}
-					}
-				}
-				... on ProjectV2ItemFieldPullRequestValue {
-					pullRequests(first: 10) {
-						nodes {
-							id
-							number
-							title
-							repository {
-								name
+						nameHTML
+						optionId
+						color
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
 								id
+								name
 							}
 						}
 					}
-					__typename
-					field {
-						... on ProjectV2FieldCommon {
+					... on ProjectV2ItemFieldDateValue {
+						id
+						__typename
+						date
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldTextValue {
+						id
+						text
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldUserValue {
+						users(first: 10) {
+							nodes {
+								login
+							}
+						}
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldLabelValue {
+						labels(first: 20) {
+							nodes {
+								name
+								color
+								description
+								isDefault
+							}
+						}
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldNumberValue {
+						id
+						number
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldValueCommon {
+						id
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldIterationValue {
+						id
+						duration
+						title
+						titleHTML
+						startDate
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldMilestoneValue {
+						milestone {
 							id
+							dueOn
+							state
+							closed
+							viewerCanReopen
+							viewerCanClose
+						}
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldRepositoryValue {
+						repository {
 							name
+							id
+						}
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
+						}
+					}
+					... on ProjectV2ItemFieldPullRequestValue {
+						pullRequests(first: 10) {
+							nodes {
+								id
+								number
+								title
+								repository {
+									name
+									id
+								}
+							}
+						}
+						__typename
+						field {
+							... on ProjectV2FieldCommon {
+								id
+								name
+							}
 						}
 					}
 				}
 			}
-		}
-		content {
-			... on DraftIssue {
-				assignees(first: 10) {
-					nodes {
+			content {
+				... on DraftIssue {
+					assignees(first: 10) {
+						nodes {
+							name
+						}
+					}
+					id
+					__typename
+					body
+					bodyHTML
+					bodyText
+				}
+				... on PullRequest {
+					id
+					__typename
+					number
+					title
+					resourcePath
+					body
+					bodyHTML
+					bodyText
+					assignees {
+						nodes {
+							name
+							id
+						}
+					}
+					repository {
 						name
 					}
 				}
-				id
-				__typename
-				body
-				bodyHTML
-				bodyText
-			}
-			... on PullRequest {
-				id
-				__typename
-				number
-				title
-				resourcePath
-				body
-				bodyHTML
-				bodyText
-			}
-			... on Issue {
-				number
-				id
-				__typename
-				title
-				body
-				bodyUrl
-				bodyHTML
-				bodyText
-				bodyResourcePath
-				databaseId
+				... on Issue {
+					number
+					id
+					__typename
+					title
+					body
+					bodyUrl
+					bodyHTML
+					bodyText
+					bodyResourcePath
+					databaseId
+					assignees {
+						nodes {
+							name
+							id
+						}
+					}
+					repository {
+						name
+					}
+				}
 			}
 		}
-	}`);
+	`
 }
 
 export const fetchProjectMetrics = async (projects, cursor) => {
 	for (const project of projects) {
 		spinner.start(
-			`(${count}/${fetched.data.organization.projectsV2.totalCount}) Fetching metrics for project ${project.node.name}`,
+			`(${count}/${fetched.data.organization.projectsV2.totalCount}) Fetching projects v2`,
 		);
 		count = count + 1;
 		metrics.push(project);
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.projectsV2.totalCount}) Fetching metrics for project ${project.node.name}`,
+			`(${count}/${fetched.data.organization.projectsV2.totalCount}) Fetching projects v2`,
 		);
 	}
 
@@ -322,7 +324,7 @@ export const fetchProjectMetrics = async (projects, cursor) => {
 		spinner.start(
 			`(${count}/${totalCount}) Fetching next 2 projects`,
 		);
-		const result = await fetchProjectInOrg(
+		const result = await fetchProjectsV2InOrg(
 			opts.organization,
 			opts.token,
 			opts.serverUrl,
@@ -367,7 +369,7 @@ export function determineGraphQLEndpoint(url) {
 	}
 }
 
-export function fetchProjectsOptions(
+export function fetchProjectsV2Options(
 	org,
 	token,
 	allowUntrustedSslCertificates,
@@ -382,7 +384,8 @@ export function fetchProjectsOptions(
 		data: JSON.stringify({
 			query: `{
 				organization(login: "${org}") {
-					projectsV2(first: 2${cursor}) {
+					projectsV2(first: 5${cursor}) {
+						totalCount
 						pageInfo {
 							hasNextPage
 							endCursor
@@ -493,4 +496,4 @@ export function fetchProjectsOptions(
 	return fetchOptions;
 }
 
-export default getProjectsV2;
+export default exportProjectsV2;

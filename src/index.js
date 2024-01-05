@@ -27,7 +27,8 @@ import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
 import getGitlabTeamsMembers from './api/export/gitlab/teams/get-gitlab-team-members.js';
 import getGitlabUsers from './api/export/gitlab/users/get-gitlab-users.js';
 import getGHECMissingRepos from './api/import/ghec/repos/get-ghec-missing-repos.js';
-import getProjectsV2 from './api/export/ghes/projects/export-projects-v2.js';
+import exportProjectsV2 from './api/export/ghes/projects/export-projects-v2.js';
+import createProjectsV2 from './api/import/ghec/projects/create-projects-v2.js';
 
 const args = {
 	allowUntrustedSslCertificates: {
@@ -436,11 +437,12 @@ program
 	.action(async (args) => commandController(process.env.PAT, args, getTeams));
 
 program
-	.command(getFunctionName(getProjectsV2))
+	.command(getFunctionName(exportProjectsV2))
 	.option(
 		args.allowUntrustedSslCertificates.argument,
 		args.allowUntrustedSslCertificates.description,
 	)
+	.requiredOption(args.organization.argument, args.organization.description)
 	.option(
 		args.batchSize.argument,
 		args.batchSize.description,
@@ -454,10 +456,24 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('gp')
+	.alias('epv2')
 	.description('Fetches all V2 projects of an organization')
 	.action(async (args) =>
-		commandController(process.env.PAT, args, getProjectsV2),
+		commandController(process.env.PAT, args, exportProjectsV2),
+	);
+
+program
+	.command(getFunctionName(createProjectsV2))
+	.requiredOption(args.organization.argument, args.organization.description)
+	.requiredOption(args.inputFile.argument, 'Input file name with projects info')
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.waitTime.argument, args.waitTime.description)
+	.option(args.token.argument, args.token.description)
+	.option(args.skip.argument, args.skip.description, args.skip.defaultValue)
+	.alias('cpv2')
+	.description('Creates V2 projects in an organization')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, exportProjectsV2)
 	);
 
 program
