@@ -16,22 +16,22 @@ const spinner = Ora();
 const metrics = [];
 
 /**
- * Valid project options
+ * Valid V2 project options
  */
 let opts = {};
 
 /**
- * Initial fetched projects in Organization
+ * Initial fetched V2 projects in Organization
  */
 let fetched = {};
 
 /**
- * Count number of project
+ * Count number of V2 projectS
  */
 let count = 0;
 
 /**
- * Total number of projects
+ * Total number of V2 projects
  */
 let totalCount = 0;
 
@@ -76,15 +76,15 @@ const exportProjectsV2 = async (options) => {
 export const fetchingController = async () => {
 	const nodes = fetched.data.organization.projectsV2.nodes;
 	const cursor = fetched.data.organization.projectsV2.pageInfo.endCursor;
-	await fetchProjectMetrics(nodes, cursor);
+	await fetchProjectV2Metrics(nodes, cursor);
 
 	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
-		await storeProjectsMetrics(org);
+		await storeProjectsV2Metrics(org);
 	}
 };
 
-const itemsGql = () => {
+const projectV2ItemsGql = () => {
 	return `
 		totalCount
 		pageInfo {
@@ -306,23 +306,62 @@ const itemsGql = () => {
 	`
 }
 
-export const fetchProjectMetrics = async (projects, cursor) => {
-	for (const project of projects) {
+const fetchNextItems = async (cursor, id) => {
+	const config = {
+		method: 'post',
+		maxBodyLength: Infinity,
+		headers: {
+			Authorization: `bearer ${opts.token}`,
+		},
+		data: JSON.stringify({
+			query: `{
+				node(id: "${id}") {
+					... on ProjectV2 {
+						items(first: ${Number(opts.batchSize)}, after: "${cursor}") {
+							${projectV2ItemsGql()}
+						}
+					}
+				}
+			}`,
+		}),
+	};
+
+	config.url = determineGraphQLEndpoint(opts.serverUrl);
+
+	const response = await doRequest(config);
+
+	showGraphQLErrors(response);
+
+	return { items: response.data.data.node.items.nodes, nextItemsPageInfo: response.data.data.node.items.pageInfo };
+}
+
+export const fetchProjectV2Metrics = async (projectsV2, cursor) => {
+	for (const projectV2 of projectsV2) {
+		let hasNextItems = projectV2.items.pageInfo.hasNextPage;
+		let endCursor = cursor;
+
+		if (hasNextItems) {
+			const { items, nextItemsPageInfo }  = await fetchNextItems(endCursor, projectV2.id);
+			projectV2.items.nodes.concat(items);
+			hasNextItems = nextItemsPageInfo.hasNextPage;
+			endCursor = nextItemsPageInfo.endCursor;
+		}
+
 		spinner.start(
 			`(${count}/${fetched.data.organization.projectsV2.totalCount}) Fetching projects v2`,
 		);
 		count = count + 1;
-		metrics.push(project);
+		metrics.push(projectV2);
 		spinner.succeed(
 			`(${count}/${fetched.data.organization.projectsV2.totalCount}) Fetching projects v2`,
 		);
 	}
 
 	// paginating calls
-	// fetch the next 2 projects
+	// fetch the next 2 projects V2
 	if (metrics.length !== totalCount) {
 		spinner.start(
-			`(${count}/${totalCount}) Fetching next 2 projects`,
+			`(${count}/${totalCount}) Fetching next 2 projects V2`,
 		);
 		const result = await fetchProjectsV2InOrg(
 			opts.organization,
@@ -333,17 +372,17 @@ export const fetchProjectMetrics = async (projects, cursor) => {
 		);
 
 		spinner.succeed(
-			`(${count}/${totalCount}) Fetched next 2 projects`,
+			`(${count}/${totalCount}) Fetched next 2 projects V2`,
 		);
 
 		await delay(opts.waitTime);
 		const nodes = result.data.data.organization.projectsV2.nodes;
 		const endCursor = result.data.data.organization.projectsV2.pageInfo.endCursor;
-		await fetchProjectMetrics(nodes, endCursor);
+		await fetchProjectV2Metrics(nodes, endCursor);
 	}
 };
 
-export const storeProjectsMetrics = async (organization) => {
+export const storeProjectsV2Metrics = async (organization) => {
 	const dir = `./${organization}-metrics`;
 
 	if (!opts.outputFile && !fs.existsSync(dir)) {
@@ -352,13 +391,13 @@ export const storeProjectsMetrics = async (organization) => {
 
 	const suffix = opts.serverUrl ? `ghes-${currentTime()}` : `ghec-${currentTime()}`;
 
-	const path = `${dir}/${organization}-projects-${suffix}.json`;
+	const path = `${dir}/${organization}-projects-v2-${suffix}.json`;
 
-	spinner.start('Exporting...');
+	spinner.start('Exporting Projects V2...');
 
 	fs.writeFileSync(path, JSON.stringify(metrics, null, 2), 'utf8');
 
-	spinner.succeed(`Exporting Completed: ${path}`);
+	spinner.succeed(`Exporting Projects V2 Completed: ${path}`);
 };
 
 export function determineGraphQLEndpoint(url) {
@@ -384,7 +423,7 @@ export function fetchProjectsV2Options(
 		data: JSON.stringify({
 			query: `{
 				organization(login: "${org}") {
-					projectsV2(first: 5${cursor}) {
+					projectsV2(first: 2${cursor}) {
 						totalCount
 						pageInfo {
 							hasNextPage
@@ -440,7 +479,7 @@ export function fetchProjectsV2Options(
 								}
 							}
 							items(first: ${Number(opts.batchSize)}) {
-								${itemsGql()}
+								${projectV2ItemsGql()}
 							}
 							teams(first: 10) {
 								pageInfo {
