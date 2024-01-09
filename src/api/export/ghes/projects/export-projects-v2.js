@@ -266,16 +266,6 @@ const projectV2ItemsGql = () => {
 					__typename
 					number
 					title
-					resourcePath
-					body
-					bodyHTML
-					bodyText
-					assignees {
-						nodes {
-							name
-							id
-						}
-					}
 					repository {
 						name
 					}
@@ -284,19 +274,8 @@ const projectV2ItemsGql = () => {
 					number
 					id
 					__typename
+					number
 					title
-					body
-					bodyUrl
-					bodyHTML
-					bodyText
-					bodyResourcePath
-					databaseId
-					assignees {
-						nodes {
-							name
-							id
-						}
-					}
 					repository {
 						name
 					}
@@ -337,12 +316,14 @@ const fetchNextItems = async (cursor, id) => {
 
 export const fetchProjectV2Metrics = async (projectsV2, cursor) => {
 	for (const projectV2 of projectsV2) {
+		console.log(JSON.stringify(projectV2.items.pageInfo, null, 2))
+		console.log(projectV2.items.totalCount)
 		let hasNextItems = projectV2.items.pageInfo.hasNextPage;
 		let endCursor = cursor;
 
-		if (hasNextItems) {
+		while (hasNextItems) {
 			const { items, nextItemsPageInfo }  = await fetchNextItems(endCursor, projectV2.id);
-			projectV2.items.nodes.concat(items);
+			projectV2.items.nodes = [...projectV2.items.nodes, ...items];
 			hasNextItems = nextItemsPageInfo.hasNextPage;
 			endCursor = nextItemsPageInfo.endCursor;
 		}
@@ -423,7 +404,7 @@ export function fetchProjectsV2Options(
 		data: JSON.stringify({
 			query: `{
 				organization(login: "${org}") {
-					projectsV2(first: 2${cursor}) {
+					projectsV2(first: 2${cursor}, query: "Gudof") {
 						totalCount
 						pageInfo {
 							hasNextPage

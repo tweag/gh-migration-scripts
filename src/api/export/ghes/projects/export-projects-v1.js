@@ -84,13 +84,147 @@ export const fetchingController = async () => {
 	}
 };
 
+const convertProjectV1ToProjectV2 = (project) => {
+	const convertedProject = {
+		id: project.id,
+		totalCount: project.totalCount,
+		title: project.name,
+		shortDescription: project.body,
+		number: project.number,
+		readme: null,
+		fields: { nodes: [] },
+		items: { nodes: [] },
+		teams: { nodes: [] },
+		repositories: { nodes: [] },
+		workflows: { nodes: [] },
+		views: { nodes: [] },
+	};
+
+	for (const column of project.columns.nodes) {
+		const fieldValues = {
+			nodes: [
+				{
+					name: column.name,
+					__typename: 'ProjectV2ItemFieldSingleSelectValue',
+					field: {
+						name: 'Status'
+					},
+				},
+			],
+		};
+
+		for (const card of column.cards.nodes) {
+			const { state, note } = card;
+			const content = {
+				__typename: 'DraftIssue',
+			};
+
+			if (state === 'NOTE_ONLY') {
+				content.title = note,
+				content.body = note,
+				content.assignees = {
+					nodes: [],
+				};
+			} else {
+				content.__typename = card.content.__typename;
+				content.title = card.content.title;
+				content.number = card.content.number;
+			}
+
+			convertedProject.items.nodes.push({ fieldValues, content });
+		}
+	}
+
+	return convertedProject;
+}
+
+export const fetchNextColumnCards = async (projectId, columnId, endCursor) => {
+	const config = {
+		method: 'post',
+		maxBodyLength: Infinity,
+		headers: {
+			Authorization: `bearer ${opts.token}`,
+		},
+		data: JSON.stringify({
+			query: `{
+				node(id: "${projectId}") {
+					... on Project {
+						column(id: "${columnId}") {
+							cards(first: ${Number(opts.batchSize)}, after: "${endCursor}") {
+								totalCount
+								pageInfo {
+									hasNextPage
+									endCursor
+								}
+								nodes {
+									id
+									note
+									isArchived
+									state
+									content {
+										... on Issue {
+											id
+											title
+											__typename
+										}
+										... on PullRequest {
+											id
+											title
+											__typename
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}`,
+		}),
+	};
+	if (opts.allowUntrustedSslCertificates) {
+		config.httpsAgent = new https.Agent({ rejectUnauthorized: false });
+	}
+	config.url = determineGraphQLEndpoint(opts.serverUrl);
+	const result = await doRequest(config);
+	showGraphQLErrors(result);
+	return result;
+}
+
+const getNextColumnCards = async (columns, projectId) => {
+	let cardsCount = opts.batchSize;
+	const nextColumnCards = [];
+	for (const column of columns) {
+		const { hasNextPage, endCursor } = column.cards.pageInfo;
+		if (hasNextPage) {
+			spinner.start(
+				`(${cardsCount}/${column.cards.totalCount}) Fetching next ${opts.batchSize} cards`,
+			);
+			const result = await fetchNextColumnCards(
+				projectId,
+				column.id,
+				endCursor,
+			);
+			spinner.succeed(
+				`(${cardsCount}/${column.cards.totalCount}) Fetched next ${opts.batchSize} cards`,
+			);
+			await delay(opts.waitTime);
+			cardsCount += Number(opts.batchSize);
+			nextColumnCards.push(...result.data.data.node.cards.nodes);
+		}
+	}
+	return nextColumnCards;
+}
+
 export const fetchProjectV1Metrics = async (projectsV1, cursor) => {
 	for (const project of projectsV1) {
 		spinner.start(
 			`(${count}/${fetched.data.organization.projects.totalCount}) Fetching projects V1`,
 		);
 		count = count + 1;
-		metrics.push(project);
+		const nextColumnCards = await getNextColumnCards(project.columns.nodes, project.id);
+		project.columns.nodes.concat(nextColumnCards);
+		const convertedProject = convertProjectV1ToProjectV2(project);
+		metrics.push(convertedProject);
 		spinner.succeed(
 			`(${count}/${fetched.data.organization.projects.totalCount}) Fetching projects V1`,
 		);

@@ -27,6 +27,7 @@ import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
 import getGitlabTeamsMembers from './api/export/gitlab/teams/get-gitlab-team-members.js';
 import getGitlabUsers from './api/export/gitlab/users/get-gitlab-users.js';
 import getGHECMissingRepos from './api/import/ghec/repos/get-ghec-missing-repos.js';
+import exportProjectsV1 from './api/export/ghes/projects/export-projects-v1.js';
 import exportProjectsV2 from './api/export/ghes/projects/export-projects-v2.js';
 import createProjectsV2 from './api/import/ghec/projects/create-projects-v2.js';
 
@@ -435,6 +436,32 @@ program
 		'Fetches all teams of an organization along with repo team permissions and team memberships.',
 	)
 	.action(async (args) => commandController(process.env.PAT, args, getTeams));
+
+	program
+	.command(getFunctionName(exportProjectsV1))
+	.option(
+		args.allowUntrustedSslCertificates.argument,
+		args.allowUntrustedSslCertificates.description,
+	)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('epv1')
+	.description('Fetches all V1 projects of an organization')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, exportProjectsV1),
+	);
 
 program
 	.command(getFunctionName(exportProjectsV2))
