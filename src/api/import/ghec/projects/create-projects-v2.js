@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { doRequest } from '../../../../services/utils.js';
+import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
 
 let org;
 let token;
@@ -12,17 +13,18 @@ const getGraphQLConfig = (query) => {
 		headers: {
 			Authorization: `Bearer ${token}`,
 		},
-		data: JSON.stringify(query),
+		data: JSON.stringify({ query }),
+		url: GITHUB_GRAPHQL_API_URL,
 	};
 };
 
-const getOwnerId = async (organization) => {
+const getOwnerId = async () => {
 	const query = `query {
-    organization(login: "${organization}") {
+    organization(login: "${org}") {
       id
     }
   }`;
-	const config = getGraphQLConfig(query, token);
+	const config = getGraphQLConfig(query);
 	const response = await doRequest(config);
 	return response.data.data.organization.id;
 };
@@ -67,8 +69,8 @@ const createProjectV2 = async (ownerId, title) => {
 	const config = getGraphQLConfig(query, token);
 	const response = await doRequest(config);
 	return {
-		id: response.data.createProjectV2.projectV2.id,
-		fields: response.data.createProjectV2.projectV2.fields.nodes,
+		id: response.data.data.createProjectV2.projectV2.id,
+		fields: response.data.data.createProjectV2.projectV2.fields.nodes,
 	};
 };
 
@@ -77,7 +79,7 @@ const updateProjectV2 = async ({ isPublic, readme, shortDescription }) => {
     updateProjectV2(
       input: {
         projectId: "${projectId}",
-        public: "${isPublic}",
+        public: ${isPublic},
         readme: "${readme}",
         shortDescription: "${shortDescription}",
       }
@@ -89,190 +91,36 @@ const updateProjectV2 = async ({ isPublic, readme, shortDescription }) => {
   }`;
 	const config = getGraphQLConfig(query, token);
 	const response = await doRequest(config);
-	return response.data.organization.projectV2.id;
+	return response.data.data.updateProjectV2.projectV2.id;
 };
 
-const addField = async (name, dataType, options) => {
-	let query = `mutation {
-    createProjectV2Field(
-      input: {
-        projectId: "${projectId}",
-        name: "${name}",
-        dataType: ${dataType},
-      }
-    ) {
-      projectV2Field {
-        id
-      }
-     }
-  }`;
+const getStatuses = (fields) => {
+	const statusField = fields.find((field) => field.name === 'Status');
+	return statusField.options.map((option) => option.name);
+}
 
-	if (options) {
-		query = `mutation {
-      createProjectV2Field(
-        input: {
-          projectId: "${projectId}",
-          name: "${name}",
-          dataType: ${dataType},
-          options: "${options}",
-        }
-      ) {
-        projectV2Field {
-          id
-        }
-       }
-    }`;
-	}
-	const config = getGraphQLConfig(query);
-	const response = await doRequest(config);
-	return response.data.addProjectV2Field.projectV2Field.id;
-};
+const statusMapFunction = (status) => status.toLowerCase().replace(/\s+/, '');
 
-const addCustomFields = async (sourceFields, fields) => {
-	const fieldMap = new Map();
+const logMissingStatuses = (title, sourceStatuses, targetStatuses) => {
+	const missingStatuses = [];
+	const mappedTargetStatuses = targetStatuses.map(statusMapFunction);
 
-	for (const sourceField of sourceFields) {
-		const { name, dataType, __typename } = sourceField;
-		const field = fields.find(
-			(field) =>
-				field.name === name &&
-				field.dataType === dataType &&
-				field.__typename === __typename,
-		);
-
-		if (field) {
-			fieldMap.set(name, field.id);
-		} else {
-			let options;
-			if (dataType === 'SINGLE_SELECT') {
-				options = field.options;
-			}
-			const fieldId = await addField(name, dataType, options);
-			fieldMap.set(name, fieldId);
+	for (const status of sourceStatuses) {
+		const mappedStatus = statusMapFunction(status);
+		if (!mappedTargetStatuses.includes(mappedStatus)) {
+			missingStatuses.push(status);
 		}
 	}
-};
 
-const getFields = async (org) => {
-	const query = `
-    query {
-      organization(login: "${org}") {
-        projectV2(number: ${projectId}) {
-          fields(first: 20) {
-            nodes {
-              ... on ProjectV2FieldCommon {
-                id
-                __typename
-                name
-                dataType
-              }
-            }
-          }
-        }
-      }
-    }
-  `;
+	showMissingStatuses(title, missingStatuses);
+}
 
-	const config = getGraphQLConfig(query);
-	const response = await doRequest(config);
-	return response.data.organization.projectV2.fields.nodes;
-};
-
-const getIssueOrPullRequestId = async (repo, number) => {
-	const query = `
-    query {
-      organization(login: "${org}") {
-        repository(name: "${repo}") {
-          issueOrPullRequest(number: ${number}) {
-            ... on Issue {
-              id
-            }
-            ... on PullRequest {
-              id
-            }
-          }
-        }
-      }
-    }
-  `;
-
-	const config = getGraphQLConfig(query);
-	const response = await doRequest(config);
-	return response.data.organization.repository.issueOrPullRequest.id;
-};
-
-const addDraftIssue = async (title, body) => {
-	const query = `
-    mutation {
-      addProjectV2DraftIssue(input: {
-        projectId: "${projectId}",
-        title: "${title}",
-        body: "${body}",
-      }) {
-        projectItem {
-          id
-        }
-      })
-    }
-  `;
-	const config = getGraphQLConfig(query);
-	const response = await doRequest(config);
-	return response.data.addProjectV2DraftIssue.projectItem.id;
-};
-
-const addIssueOrPullRequestItem = async (itemId) => {
-	const query = `
-    mutation {
-      addProjectV2ItemById(input: {
-        projectId: "${projectId}",
-        contentId: "${itemId}",
-      }) {
-        item {
-          id
-        }
-      })
-    }
-  `;
-	const config = getGraphQLConfig(query);
-	const response = await doRequest(config);
-	return response.data.addProjectV2ItemById.item.id;
-};
-
-const addItemsToProjectV2 = async (items) => {
-	try {
-		for (const item of items) {
-			const { content } = item;
-			const { __typename, title } = content;
-
-			// TODO: add assignees
-			if (__typename === 'DraftIssue') {
-				const { body } = content;
-				const response = await addDraftIssue(title, body);
-
-				if (response) {
-					console.log(`Successfully added draft issue with title ${title}`);
-				} else {
-					throw new Error(`Failed to add draft issue with title ${title}`);
-				}
-			} else {
-				const { number, repository } = content;
-				const itemId = await getIssueOrPullRequestId(repository.name, number);
-				const response = await addIssueOrPullRequestItem(itemId);
-
-				if (response) {
-					console.log(`Successfully added item with title ${title}`);
-				} else {
-					throw new Error(`Failed to add item with title ${title}`);
-				}
-			}
-		}
-
-		return true;
-	} catch (e) {
-		console.log(e);
-		return false;
+const showMissingStatuses = (title, missingStatuses) => {
+	console.log(`For project v2 ${title} following statuses need to be added in the target first.`);
+	for (let i = 0; i < missingStatuses.length; i++) {
+		console.log(i + 1, ' ' + missingStatuses[i]);
 	}
-};
+}
 
 const addProjects = async (projects, ownerId) => {
 	for (const project of projects) {
@@ -282,9 +130,21 @@ const addProjects = async (projects, ownerId) => {
 			readme,
 			shortDescription,
 			fields: sourceFields,
-			items,
 		} = project;
+
+		const projectExistsArr = await checkIfProjectExists(title);
+		const sourceStatuses = getStatuses(sourceFields.nodes);
+
+		if (projectExistsArr.length > 0) {
+			const targetStatuses = getStatuses(projectExistsArr[0].fields.nodes);
+			logMissingStatuses(title, sourceStatuses, targetStatuses);
+			console.log(`Project already exists for  ${title}`);
+			continue;
+		}
+
 		const { id, fields } = await createProjectV2(ownerId, title);
+		const targetStatuses = getStatuses(fields);
+		logMissingStatuses(title, sourceStatuses, targetStatuses);
 		projectId = id;
 		const responseId = await updateProjectV2({
 			token,
@@ -294,33 +154,44 @@ const addProjects = async (projects, ownerId) => {
 		});
 
 		if (responseId) console.log('Successfully updated project: ', title);
-
-		const addFieldsResponse = await addCustomFields(sourceFields, fields);
-
-		if (addFieldsResponse) {
-			console.log('Successfully added fields to project: ', title);
-		} else {
-			throw new Error("Couldn't add fields to project: ", title);
-		}
-		// const fieldDetails = await getFields(organization);
-		const addItemsResponse = await addItemsToProjectV2(items.nodes);
-
-		if (addItemsResponse) {
-			console.log('Successfully added items to project: ', title);
-		} else {
-			throw new Error("Couldn't add items to project: ", title);
-		}
 	}
 };
+
+const checkIfProjectExists = async (title) => {
+	const query = `
+		query {
+			organization(login: "${org}") {
+				projectsV2(first: 1, query: "${title}") {
+					nodes {
+						fields(first: 20) {
+							nodes {
+								... on ProjectV2SingleSelectField {
+									id
+									name
+									options {
+										name
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	`;
+
+	const config = getGraphQLConfig(query);
+	const response = await doRequest(config);
+	return response.data.data.organization.projectsV2.nodes;
+}
 
 const createProjectsV2 = async (options) => {
 	try {
 		const { organization, inputFile, token: pat } = options;
 		org = organization;
 		token = pat;
-		const projectsData = JSON.parse(fs.readFileSync(inputFile, 'utf8'));
-		const projects = projectsData.data.organization.projectsV2.nodes;
-		const ownerId = await getOwnerId(organization);
+		const projects = JSON.parse(fs.readFileSync(inputFile, 'utf8'));
+		const ownerId = await getOwnerId();
 
 		await addProjects(projects, ownerId);
 	} catch (err) {
