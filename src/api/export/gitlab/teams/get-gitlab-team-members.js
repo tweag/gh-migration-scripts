@@ -55,7 +55,7 @@ const getTeamMembers = async (options, urlOpts) => {
 
 const columns = ['login', 'team', 'role'];
 
-const getGitlabTeamsMembers = async (options) => {
+const getGitlabTeamMembers = async (options) => {
 	const {
 		organization: org,
 		inputFile,
@@ -92,4 +92,4 @@ const getGitlabTeamsMembers = async (options) => {
 	stringifier.end();
 };
 
-export default getGitlabTeamsMembers;
+export default getGitlabTeamMembers;

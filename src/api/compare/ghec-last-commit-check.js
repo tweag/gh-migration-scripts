@@ -55,7 +55,13 @@ const getSourceRepos = async (options) => {
 };
 
 const getRepoBranchesConfig = (repo, options, page, serverUrl) => {
-	const { sourceOrg, sourceToken, ghecOrg, token, batchSize } = options;
+	const {
+		sourceOrg,
+		sourceToken,
+		organization: ghecOrg,
+		token,
+		batchSize,
+	} = options;
 	let url = `${GITHUB_API_URL}/repos/${ghecOrg}/${repo}/branches?per_page=${batchSize}&page=${page}`;
 	let bearerToken = token;
 
@@ -108,7 +114,7 @@ const compareBranches = (sourceBranches, targetBranches) => {
 };
 
 const ghecLastCommitCheck = async (options) => {
-	const { serverUrl, sourceOrg, ghecOrg, outputFile } = options;
+	const { serverUrl, sourceOrg, organization: ghecOrg, outputFile } = options;
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${sourceOrg}-${ghecOrg}-last-commit-check-${currentTime()}.csv`;

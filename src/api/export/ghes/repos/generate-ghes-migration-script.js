@@ -9,10 +9,10 @@ const spinner = Ora();
 const getScript = (repo, visibility, options) => {
 	const {
 		sourceOrg,
-		destinationOrg,
+		organization: destinationOrg,
 		visibility: repoVisibility,
 		sourceToken,
-		destinationToken,
+		token: destinationToken,
 		ghesUrl,
 	} = options;
 	const strArr = [
@@ -40,7 +40,7 @@ const getScript = (repo, visibility, options) => {
 };
 
 const saveScriptToFile = (scriptsArr, options) => {
-	const { sourceOrg, destinationOrg, outputFile } = options;
+	const { sourceOrg, organization: destinationOrg, outputFile } = options;
 	const path =
 		(outputFile && outputFile.endsWith('.sh') && outputFile) ||
 		`${sourceOrg}-${destinationOrg}-migration-script.sh`;
