@@ -75,7 +75,7 @@ export const ghesVsGhec = async (options) => {
 		serverUrl,
 		outputFile,
 	} = options;
-	const serverUrl = serverUrl;
+
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${ghecOrg}-${ghesOrg}-updated-details-${currentTime()}.csv`;

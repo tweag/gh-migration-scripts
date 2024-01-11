@@ -95,7 +95,7 @@ describe('deleteRepos', () => {
 
 // Mock data for the test
 const mockOptions = {
-  file: 'mockFile.csv',
+  inputFile: 'mockFile.csv',
   organization: 'mockOrg',
   outputFile: 'mockOutputFile.csv',
   waitTime: 1000,

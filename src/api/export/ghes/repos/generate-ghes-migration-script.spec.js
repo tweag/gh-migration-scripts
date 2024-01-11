@@ -54,7 +54,7 @@ describe('generateGHESMigrationScript', () => {
 
 // Mock data for the test
 const mockOptions = {
-  file: 'mockFile.csv',
+  inputFile: 'mockFile.csv',
   sourceOrg: 'mockSourceOrg',
   destinationOrg: 'mockDestinationOrg',
   outputFile: 'mockOutputFile.sh',

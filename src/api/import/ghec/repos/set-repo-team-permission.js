@@ -50,7 +50,7 @@ const setTeamPermission = async (details) => {
 export const setRepoTeamPermission = async (options) => {
 	try {
 		const {
-			file,
+			inputFile,
 			reposFile,
 			organization: org,
 			outputFile,
@@ -70,7 +70,7 @@ export const setRepoTeamPermission = async (options) => {
 			'errorMessage',
 		];
 		const stringifier = getStringifier(outputFileName, columns);
-		const fileStream = fs.createReadStream(file);
+		const fileStream = fs.createReadStream(inputFile);
 		let filterRepos = [];
 
 		if (reposFile) {

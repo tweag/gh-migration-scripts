@@ -44,13 +44,19 @@ const setMembership = async (login, options) => {
 
 export const setMembershipInOrg = async (options) => {
 	try {
-		const { file, organization: org, outputFile, waitTime, skip } = options;
+		const {
+			inputFile,
+			organization: org,
+			outputFile,
+			waitTime,
+			skip,
+		} = options;
 		const outputFileName =
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-set-membership-status-${currentTime()}.csv`;
 		const columns = ['login', 'status', 'statusText', 'errorMessage'];
 		const stringifier = getStringifier(outputFileName, columns);
-		const members = await getData(file);
+		const members = await getData(inputFile);
 		let index = 0;
 
 		for (const member of members) {

@@ -9,9 +9,9 @@ import {
 	doRequest,
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
+import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
 import https from 'https';
 const spinner = Ora();
-const githubGraphQL = 'https://api.github.com/graphql';
 
 /**
  * Running PullRequest and issues array
@@ -111,24 +111,25 @@ export const getRepos = async (options) => {
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
-	await fetchingController(options.serverUrl);
+	await fetchingController();
 
 	if (options.return) return metrics;
 };
 
 /**
  * Fetching and Storing metrics controller
- *
  */
 export const fetchingController = async () => {
 	// fetching PR and ISSUE metrics
 	await fetchRepoMetrics(fetched.data.organization.repositories.edges);
 
-	if (!opts.return && metrics) {
+	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
 		await storeRepoMetrics(org);
 		await storeOrgMetrics(org);
 	}
+
+	return metrics;
 };
 
 /**
@@ -213,12 +214,9 @@ export const fetchRepoMetrics = async (repositories) => {
 };
 
 /**
- * Call CSV service to export repository pull request information
+ * Call CSV service to export repository information
  *
  * @param {String} organization the organization
- * @param {[Object]} data the fetched repositories pr and issue data
- * @param {Object} mostPr the repository with most PR
- * @param {Object} mostIssue the repository with most issues
  */
 export const storeRepoMetrics = async (organization) => {
 	const today = getDate();
@@ -253,14 +251,25 @@ export const storeRepoMetrics = async (organization) => {
 	const path =
 		(opts.outputFile && opts.outputFile.endsWith('.csv') && opts.outputFile) ||
 		`${dir}/${organization}-repo-metrics-${suffix}.csv`;
+	const archivedPath = path.split('.csv')[0] + '-archived.csv';
+	const activePath = path.split('.csv')[0] + '-active.csv';
 	const stringifier = getStringifier(path, headers);
+	const archivedStringifier = getStringifier(archivedPath, headers);
+	const activeStringifier = getStringifier(activePath, headers);
 	spinner.start('Exporting...');
 
 	for (const metric of metrics) {
 		stringifier.write(metric);
+		if (metric.isArchived) {
+			archivedStringifier.write(metric);
+		} else {
+			activeStringifier.write(metric);
+		}
 	}
 
 	stringifier.end();
+	archivedStringifier.end();
+	activeStringifier.end();
 	spinner.succeed(`Exporting Completed: ${path}`);
 };
 
@@ -271,7 +280,7 @@ export const storeRepoMetrics = async (organization) => {
  */
 export function determineGraphQLEndpoint(serverUrl) {
 	if (!serverUrl) {
-		return githubGraphQL;
+		return GITHUB_GRAPHQL_API_URL;
 	} else {
 		return serverUrl + '/api/graphql';
 	}

@@ -1,6 +1,6 @@
 import { getData, getStringifier } from '../../../services/utils.js';
 
-export const compareTeams = async (options) => {
+const compareTeams = async (options) => {
 	const {
 		organization: org,
 		ghecFile,
@@ -196,3 +196,5 @@ export const compareTeams = async (options) => {
 	repoPermissionStringifier.end();
 	stringifier.end();
 };
+
+export default compareTeams;

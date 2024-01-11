@@ -77,14 +77,14 @@ const deleteMemberFromTeam = async (slug, member, options) => {
 
 export const createTeams = async (options) => {
 	try {
-		const { file, organization: org, outputFile, skip } = options;
+		const { inputFile, organization: org, outputFile, skip } = options;
 
 		const outputFileName =
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-create-teams-status-${currentTime()}.csv`;
 		const columns = ['team', 'status', 'statusText', 'errorMessage'];
 		const stringifier = getStringifier(outputFileName, columns);
-		const teams = await getData(file);
+		const teams = await getData(inputFile);
 
 		let index = 0;
 

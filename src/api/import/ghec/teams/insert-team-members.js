@@ -39,7 +39,13 @@ const insertTeamMember = async (details) => {
 
 export const insertTeamMembers = async (options) => {
 	try {
-		const { file, organization: org, outputFile, waitTime, skip } = options;
+		const {
+			inputFile,
+			organization: org,
+			outputFile,
+			waitTime,
+			skip,
+		} = options;
 		const outputFileName =
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-insert-team-members-status-${currentTime()}.csv`;
@@ -52,7 +58,7 @@ export const insertTeamMembers = async (options) => {
 			'errorMessage',
 		];
 		const stringifier = getStringifier(outputFileName, columns);
-		const rows = await getData(file);
+		const rows = await getData(inputFile);
 		let index = 0;
 
 		for (const row of rows) {

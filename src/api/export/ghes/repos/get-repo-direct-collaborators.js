@@ -42,7 +42,7 @@ const fetchRepoDirectCollaborators = async (repo, options) => {
 export const getReposDirectCollaborators = async (options) => {
 	try {
 		const {
-			file,
+			inputFile,
 			outsideCollaboratorsFile,
 			usersFile,
 			organization: org,
@@ -76,7 +76,7 @@ export const getReposDirectCollaborators = async (options) => {
 			outsideCollaborators = await getOutsideCollaborators(options);
 		}
 
-		const fileStream = fs.createReadStream(file);
+		const fileStream = fs.createReadStream(inputFile);
 
 		const rl = readline.createInterface({
 			input: fileStream,

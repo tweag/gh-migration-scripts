@@ -13,7 +13,7 @@ const mock = sinon.createSandbox();
 describe('getTeam', () => {
   const mockOptions = {
     organization: 'mockOrg',
-    githubUrl: 'mockGithubUrl',
+    serverUrl: 'mockServerUrl',
     token: 'mockToken',
     waitTime: 1,
   };

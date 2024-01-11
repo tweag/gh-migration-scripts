@@ -95,7 +95,12 @@ export const getStringifier = (fileName, columns) => {
 	return stringifier;
 };
 
-export const currentTime = () => new Date().toLocaleString();
+export const currentTime = () =>
+	new Date()
+		.toLocaleString()
+		.replace(', ', '-')
+		.replace(' ', '-')
+		.replace(/\//g, ':');
 
 export const showGraphQLErrors = (response) => {
 	if (response.errorMessage) {

@@ -41,7 +41,7 @@ export const setArchivedStatus = async (options) => {
 	try {
 		const {
 			repo,
-			file,
+			inputFile,
 			organization: org,
 			unarchive,
 			outputFile,
@@ -59,7 +59,7 @@ export const setArchivedStatus = async (options) => {
 		if (repo) {
 			repositories = [repo];
 		} else {
-			const repositoriesData = await getData(file);
+			const repositoriesData = await getData(inputFile);
 			repositories = repositoriesData.map((r) => r.repo);
 		}
 
