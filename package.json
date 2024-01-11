@@ -1,5 +1,5 @@
 {
-	"name": "mcafee",
+	"name": "gh-migration-scripts",
 	"version": "1.0.0",
 	"description": "",
 	"type": "module",
@@ -12,7 +12,7 @@
 		"analyze": "node index"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "ModusCreate",
 	"license": "ISC",
 	"dependencies": {
 		"@fast-csv/parse": "^4.3.6",
