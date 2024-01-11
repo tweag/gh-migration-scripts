@@ -282,8 +282,8 @@ const projectV2ItemsGql = () => {
 				}
 			}
 		}
-	`
-}
+	`;
+};
 
 const fetchNextItems = async (cursor, id) => {
 	const config = {
@@ -311,18 +311,24 @@ const fetchNextItems = async (cursor, id) => {
 
 	showGraphQLErrors(response);
 
-	return { items: response.data.data.node.items.nodes, nextItemsPageInfo: response.data.data.node.items.pageInfo };
-}
+	return {
+		items: response.data.data.node.items.nodes,
+		nextItemsPageInfo: response.data.data.node.items.pageInfo,
+	};
+};
 
 export const fetchProjectV2Metrics = async (projectsV2, cursor) => {
 	for (const projectV2 of projectsV2) {
-		console.log(JSON.stringify(projectV2.items.pageInfo, null, 2))
-		console.log(projectV2.items.totalCount)
+		console.log(JSON.stringify(projectV2.items.pageInfo, null, 2));
+		console.log(projectV2.items.totalCount);
 		let hasNextItems = projectV2.items.pageInfo.hasNextPage;
 		let endCursor = cursor;
 
 		while (hasNextItems) {
-			const { items, nextItemsPageInfo }  = await fetchNextItems(endCursor, projectV2.id);
+			const { items, nextItemsPageInfo } = await fetchNextItems(
+				endCursor,
+				projectV2.id,
+			);
 			projectV2.items.nodes = [...projectV2.items.nodes, ...items];
 			hasNextItems = nextItemsPageInfo.hasNextPage;
 			endCursor = nextItemsPageInfo.endCursor;
@@ -341,9 +347,7 @@ export const fetchProjectV2Metrics = async (projectsV2, cursor) => {
 	// paginating calls
 	// fetch the next 2 projects V2
 	if (metrics.length !== totalCount) {
-		spinner.start(
-			`(${count}/${totalCount}) Fetching next 2 projects V2`,
-		);
+		spinner.start(`(${count}/${totalCount}) Fetching next 2 projects V2`);
 		const result = await fetchProjectsV2InOrg(
 			opts.organization,
 			opts.token,
@@ -352,13 +356,12 @@ export const fetchProjectV2Metrics = async (projectsV2, cursor) => {
 			`, after: "${cursor}"`,
 		);
 
-		spinner.succeed(
-			`(${count}/${totalCount}) Fetched next 2 projects V2`,
-		);
+		spinner.succeed(`(${count}/${totalCount}) Fetched next 2 projects V2`);
 
 		await delay(opts.waitTime);
 		const nodes = result.data.data.organization.projectsV2.nodes;
-		const endCursor = result.data.data.organization.projectsV2.pageInfo.endCursor;
+		const endCursor =
+			result.data.data.organization.projectsV2.pageInfo.endCursor;
 		await fetchProjectV2Metrics(nodes, endCursor);
 	}
 };
@@ -370,7 +373,9 @@ export const storeProjectsV2Metrics = async (organization) => {
 		fs.mkdirSync(dir);
 	}
 
-	const suffix = opts.serverUrl ? `ghes-${currentTime()}` : `ghec-${currentTime()}`;
+	const suffix = opts.serverUrl
+		? `ghes-${currentTime()}`
+		: `ghec-${currentTime()}`;
 
 	const path = `${dir}/${organization}-projects-v2-${suffix}.json`;
 

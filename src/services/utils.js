@@ -7,6 +7,8 @@ import csv from 'fast-csv';
 import Ora from 'ora';
 import { stringify } from 'csv-stringify';
 import kebabCase from 'lodash.kebabcase';
+import figlet from 'figlet';
+import chalk from 'chalk';
 
 const spinner = Ora();
 
@@ -115,3 +117,7 @@ export const showGraphQLErrors = (response) => {
 };
 
 export const getFunctionName = (func) => kebabCase(func.name);
+
+export const showModusName = () => {
+	console.log(chalk.bgWhiteBright.yellow(figlet.textSync('ModusCreate')));
+};

@@ -34,8 +34,14 @@ const getMissingRepos = (repoNames, migratedRepos) => {
 };
 
 const getGHECMissingRepos = async (options) => {
-	const { sourceOrg, ghecOrg, gitHost, sourceFile, outputFile, token } =
-		options;
+	const {
+		sourceOrg,
+		organization: ghecOrg,
+		gitHost,
+		sourceFile,
+		outputFile,
+		token,
+	} = options;
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${sourceOrg}-${ghecOrg}-ghec-missing-repos-${currentTime()}.csv`;

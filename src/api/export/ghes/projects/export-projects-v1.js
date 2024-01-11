@@ -107,7 +107,7 @@ const convertProjectV1ToProjectV2 = (project) => {
 					name: column.name,
 					__typename: 'ProjectV2ItemFieldSingleSelectValue',
 					field: {
-						name: 'Status'
+						name: 'Status',
 					},
 				},
 			],
@@ -120,11 +120,11 @@ const convertProjectV1ToProjectV2 = (project) => {
 			};
 
 			if (state === 'NOTE_ONLY') {
-				content.title = note,
-				content.body = note,
-				content.assignees = {
-					nodes: [],
-				};
+				(content.title = note),
+					(content.body = note),
+					(content.assignees = {
+						nodes: [],
+					});
 			} else {
 				content.__typename = card.content.__typename;
 				content.title = card.content.title;
@@ -136,7 +136,7 @@ const convertProjectV1ToProjectV2 = (project) => {
 	}
 
 	return convertedProject;
-}
+};
 
 export const fetchNextColumnCards = async (projectId, columnId, endCursor) => {
 	const config = {
@@ -188,7 +188,7 @@ export const fetchNextColumnCards = async (projectId, columnId, endCursor) => {
 	const result = await doRequest(config);
 	showGraphQLErrors(result);
 	return result;
-}
+};
 
 const getNextColumnCards = async (columns, projectId) => {
 	let cardsCount = opts.batchSize;
@@ -213,7 +213,7 @@ const getNextColumnCards = async (columns, projectId) => {
 		}
 	}
 	return nextColumnCards;
-}
+};
 
 export const fetchProjectV1Metrics = async (projectsV1, cursor) => {
 	for (const project of projectsV1) {
@@ -221,7 +221,10 @@ export const fetchProjectV1Metrics = async (projectsV1, cursor) => {
 			`(${count}/${fetched.data.organization.projects.totalCount}) Fetching projects V1`,
 		);
 		count = count + 1;
-		const nextColumnCards = await getNextColumnCards(project.columns.nodes, project.id);
+		const nextColumnCards = await getNextColumnCards(
+			project.columns.nodes,
+			project.id,
+		);
 		project.columns.nodes.concat(nextColumnCards);
 		const convertedProject = convertProjectV1ToProjectV2(project);
 		metrics.push(convertedProject);
@@ -233,9 +236,7 @@ export const fetchProjectV1Metrics = async (projectsV1, cursor) => {
 	// paginating calls
 	// fetch the next 2 projects
 	if (metrics.length !== totalCount) {
-		spinner.start(
-			`(${count}/${totalCount}) Fetching next 2 projects V1`,
-		);
+		spinner.start(`(${count}/${totalCount}) Fetching next 2 projects V1`);
 		const result = await fetchProjectsV1InOrg(
 			opts.organization,
 			opts.token,
@@ -244,9 +245,7 @@ export const fetchProjectV1Metrics = async (projectsV1, cursor) => {
 			`, after: "${cursor}"`,
 		);
 
-		spinner.succeed(
-			`(${count}/${totalCount}) Fetched next 2 projects V1`,
-		);
+		spinner.succeed(`(${count}/${totalCount}) Fetched next 2 projects V1`);
 
 		await delay(opts.waitTime);
 		const nodes = result.data.data.organization.projects.nodes;
@@ -262,7 +261,9 @@ export const storeProjectsV1Metrics = async (organization) => {
 		fs.mkdirSync(dir);
 	}
 
-	const suffix = opts.serverUrl ? `ghes-${currentTime()}` : `ghec-${currentTime()}`;
+	const suffix = opts.serverUrl
+		? `ghes-${currentTime()}`
+		: `ghec-${currentTime()}`;
 
 	const path = `${dir}/${organization}-projects-v1-${suffix}.json`;
 

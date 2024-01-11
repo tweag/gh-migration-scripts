@@ -18,7 +18,8 @@ Hey there! 👋 Welcome to our migration tools repository – your go-to toolkit
 
 1. Clone the repo: git clone https://github.com/ModusCreateOrg/gh-migration-scripts.git
 2. Navigate to the tools directory: `cd gh-migration-scripts`
-3. Follow our detailed documentation for step-by-step instructions on using each tool.
+3. Run `npm install -g`
+4. Follow our detailed documentation for step-by-step instructions on using each tool.
 
 # Supported Features
 

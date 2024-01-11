@@ -65,54 +65,58 @@ const compareRepos = (ghecRepo, ghesRepo, ghesFile) => {
 };
 
 export const ghesVsGhec = async (options) => {
-	const {
-		ghecFile,
-		ghesFile,
-		ghecOrg,
-		ghesOrg,
-		ghecToken,
-		ghesToken,
-		serverUrl,
-		outputFile,
-	} = options;
+	try {
+		const {
+			ghecFile,
+			ghesFile,
+			ghecOrg,
+			ghesOrg,
+			ghecToken,
+			ghesToken,
+			serverUrl,
+			outputFile,
+		} = options;
 
-	const outputFileName =
-		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${ghecOrg}-${ghesOrg}-updated-details-${currentTime()}.csv`;
-	const stringifier = getStringifier(outputFileName, columns);
-	let ghecRepos = [];
-	let ghesRepos = [];
-	options.return = true;
+		const outputFileName =
+			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
+			`${ghecOrg}-${ghesOrg}-updated-details-${currentTime()}.csv`;
+		const stringifier = getStringifier(outputFileName, columns);
+		let ghecRepos = [];
+		let ghesRepos = [];
+		options.return = true;
 
-	if (ghecFile) {
-		ghecRepos = await getData(ghecFile);
-	} else {
-		options.token = ghecToken;
-		options.organization = ghecOrg;
-		options.serverUrl = undefined;
-		ghecRepos = await getRepos(options);
-	}
-
-	if (ghesFile) {
-		ghesRepos = await getData(ghesFile);
-	} else {
-		options.token = ghesToken;
-		options.organization = ghesOrg;
-		options.serverUrl = serverUrl;
-		ghesRepos = await getRepos(options);
-	}
-
-	for (let ghesRepo of ghesRepos) {
-		const found = ghecRepos.find((r) => r.repo === ghesRepo.repo);
-
-		if (found) {
-			compareRepos(found, ghesRepo, ghesFile);
+		if (ghecFile) {
+			ghecRepos = await getData(ghecFile);
 		} else {
-			ghesRepo.isNewRepo = true;
+			options.token = ghecToken;
+			options.organization = ghecOrg;
+			options.serverUrl = undefined;
+			ghecRepos = await getRepos(options);
 		}
 
-		stringifier.write(ghesRepo);
-	}
+		if (ghesFile) {
+			ghesRepos = await getData(ghesFile);
+		} else {
+			options.token = ghesToken;
+			options.organization = ghesOrg;
+			options.serverUrl = serverUrl;
+			ghesRepos = await getRepos(options);
+		}
 
-	stringifier.end();
+		for (let ghesRepo of ghesRepos) {
+			const found = ghecRepos.find((r) => r.repo === ghesRepo.repo);
+
+			if (found) {
+				compareRepos(found, ghesRepo, ghesFile);
+			} else {
+				ghesRepo.isNewRepo = true;
+			}
+
+			stringifier.write(ghesRepo);
+		}
+
+		stringifier.end();
+	} catch (error) {
+		console.log(error);
+	}
 };
