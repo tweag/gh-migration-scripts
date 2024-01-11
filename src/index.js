@@ -889,7 +889,7 @@ program
 		commandController('', args, generateBitbucketMigrationScript),
 	);
 
-	program
+program
 	.command(getFunctionName(getBitbucketEnterpriseUsers))
 	.option(
 		args.batchSize.argument,
@@ -915,7 +915,7 @@ program
 		commandController(process.env.PAT, args, getBitbucketEnterpriseUsers),
 	);
 
-	program
+program
 	.command(getFunctionName(getBitbucketProjectUsers))
 	.option(
 		args.batchSize.argument,
@@ -938,7 +938,7 @@ program
 		commandController(process.env.PAT, args, getBitbucketProjectUsers),
 	);
 
-	program
+program
 	.command(getFunctionName(getBitbucketRepositories))
 	.option(
 		args.batchSize.argument,
@@ -962,7 +962,7 @@ program
 		commandController(process.env.PAT, args, getBitbucketRepositories),
 	);
 
-	program
+program
 	.command(getFunctionName(getBitbucketReposDirectCollaborators))
 	.option(
 		args.batchSize.argument,
@@ -990,7 +990,7 @@ program
 		),
 	);
 
-	program
+program
 	.command(getFunctionName(getBitbucketTeams))
 	.option(
 		args.batchSize.argument,
@@ -1012,7 +1012,7 @@ program
 		commandController(process.env.PAT, args, getBitbucketTeams),
 	);
 
-	program
+program
 	.command(getFunctionName(getBitbucketReposTeamsPermissions))
 	.option(
 		args.batchSize.argument,

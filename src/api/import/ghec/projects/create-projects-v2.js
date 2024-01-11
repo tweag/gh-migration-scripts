@@ -97,7 +97,7 @@ const updateProjectV2 = async ({ isPublic, readme, shortDescription }) => {
 const getStatuses = (fields) => {
 	const statusField = fields.find((field) => field.name === 'Status');
 	return statusField.options.map((option) => option.name);
-}
+};
 
 const statusMapFunction = (status) => status.toLowerCase().replace(/\s+/, '');
 
@@ -113,14 +113,16 @@ const logMissingStatuses = (title, sourceStatuses, targetStatuses) => {
 	}
 
 	showMissingStatuses(title, missingStatuses);
-}
+};
 
 const showMissingStatuses = (title, missingStatuses) => {
-	console.log(`For project v2 ${title} following statuses need to be added in the target first.`);
+	console.log(
+		`For project v2 ${title} following statuses need to be added in the target first.`,
+	);
 	for (let i = 0; i < missingStatuses.length; i++) {
 		console.log(i + 1, ' ' + missingStatuses[i]);
 	}
-}
+};
 
 const addProjects = async (projects, ownerId) => {
 	for (const project of projects) {
@@ -183,7 +185,7 @@ const checkIfProjectExists = async (title) => {
 	const config = getGraphQLConfig(query);
 	const response = await doRequest(config);
 	return response.data.data.organization.projectsV2.nodes;
-}
+};
 
 const createProjectsV2 = async (options) => {
 	try {

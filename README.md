@@ -25,19 +25,19 @@ Hey there! 👋 Welcome to our migration tools repository – your go-to toolkit
 
 ## Export
 
-| Features                              | GHES                                                                                                                     | Bitbucket Server (WIP) | GitLab (WIP) |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------- | ------------ |
-| 1. Fetch repositories                 | ✅ [get-repos](https://github.com/ModusCreateOrg/gh-migration-scripts#get-repos)                                         | ✅                     | ✅           |
-| 2. Fetch repositories members         | ✅ [get-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts#get-repo-direct-collaborators) | ✅                     | ✅           |
-| 3. Fetch teams                        | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅                     | ✅           |
-| 4. Fetch team members                 | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅                     | ✅           |
-| 5. Fetch team repositories permission | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅                     | ✅           |
-| 6. Fetch organization users           | ✅ [get-org-users](https://github.com/ModusCreateOrg/gh-migration-scripts#get-org-users)                                 | ✅                     | ✅           |
-| 7. Fetch enterprise users             | ✅ [get-enterprise-users](https://github.com/ModusCreateOrg/gh-migration-scripts#get-enterprise-users)                   | ✅                     | ✅           |
-| 8. Fetch organization projects        | ❌                                                                                                                       | ❌                     | ❌           |
-| 9. Check repositories last commits    | ✅ [ghec-last-commit-check](https://github.com/ModusCreateOrg/gh-migration-scripts#ghec-last-commit-check)               | ❌                     | ❌           |
-| 10. Delete repositories               | ✅ [delete-repos](https://github.com/ModusCreateOrg/gh-migration-scripts#2-delete-repos)                                 | ❌                     | ❌           |
-| 11. Fetch outside collaborators       | ✅ [get-outside-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts#3-get-outside-collaborators)       | ❌                     | ❌           |
+| Features                              | GHES                                                                                                                     | Bitbucket Server | GitLab |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------- | ------ |
+| 1. Fetch repositories                 | ✅ [get-repos](https://github.com/ModusCreateOrg/gh-migration-scripts#get-repos)                                         | ✅               | ✅     |
+| 2. Fetch repositories members         | ✅ [get-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts#get-repo-direct-collaborators) | ✅               | ✅     |
+| 3. Fetch teams                        | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅               | ✅     |
+| 4. Fetch team members                 | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅               | ✅     |
+| 5. Fetch team repositories permission | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#get-teams)                                         | ✅               | ✅     |
+| 6. Fetch organization users           | ✅ [get-org-users](https://github.com/ModusCreateOrg/gh-migration-scripts#get-org-users)                                 | ✅               | ✅     |
+| 7. Fetch enterprise users             | ✅ [get-enterprise-users](https://github.com/ModusCreateOrg/gh-migration-scripts#get-enterprise-users)                   | ✅               | ✅     |
+| 8. Fetch organization projects        | ❌                                                                                                                       | ❌               | ❌     |
+| 9. Check repositories last commits    | ✅ [ghec-last-commit-check](https://github.com/ModusCreateOrg/gh-migration-scripts#ghec-last-commit-check)               | ❌               | ❌     |
+| 10. Delete repositories               | ✅ [delete-repos](https://github.com/ModusCreateOrg/gh-migration-scripts#2-delete-repos)                                 | ❌               | ❌     |
+| 11. Fetch outside collaborators       | ✅ [get-outside-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts#3-get-outside-collaborators)       | ❌               | ❌     |
 
 ## Import
 
@@ -52,22 +52,19 @@ Hey there! 👋 Welcome to our migration tools repository – your go-to toolkit
 | 7. Set organization memberships        | ✅ [set-membership-in-org](https://github.com/ModusCreateOrg/gh-migration-scripts#set-membership-in-org)       |
 | 8. Add organization projects           | ❌                                                                                                             |
 
-#### Required Arguments
+#### Arguments
 
 1. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
-2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
-4. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. Default file name is `<organization>-metrics/<organization>-repo-metrics-<date>-<target>.csv`.
+2. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
+3. `-b` or `--batch-size` - Batch size for GraphQL request.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. Default file name is `<organization>-metrics/<organization>-repo-metrics-<date>-<target>.csv`.
    _date_ - Format is DD/MM/YYYY - The date is when the file is created
    _target_ - ghes or ghec
-5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-7. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+9. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -87,20 +84,17 @@ Fetches the direct collaborators of repositories in an organization.
 node src/index.js get-repo-direct-collaborators -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--file` - Input file with repository names.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `c` or `--outside-collaborators-file` - Outside collaborators files to filter out the result. The api for repository directory collaborators returns outside collaborators as well. The CSV file should have a column with the name `login`.
-2. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-3. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-repo-direct-collaborators-<timestamp>.csv`.
-4. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-5. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-6. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-7. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `c` or `--outside-collaborators-file` - Outside collaborators files to filter out the result. The api for repository directory collaborators returns outside collaborators as well. The CSV file should have a column with the name `login`.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-repo-direct-collaborators-<timestamp>.csv`.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+9. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -140,20 +134,17 @@ Fetches all teams of an organization along with team memberships and repo team p
 node src/index.js get-teams -o <organization>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
-2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
-4. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. The default file name is applicable only for the team metrics file.
-5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-7. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+2. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
+3. `-b` or `--batch-size` - Batch size for GraphQL request.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. The default file name is applicable only for the team metrics file.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+9. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -247,19 +238,16 @@ Fetches users details in an organization.
 node src/index.js get-org-users -o <organization-name>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
-2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-metrics/<organization>-user-metrics-13-11-2023-ghes.csv`. If the target is GHEC, then the end part of the file will be 'ghec' instead of 'ghes'. Moreover, the date part in the output file is `DD/MM/YYYY`.
-5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-6. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-7. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+2. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
+3. `-b` or `--batch-size` - Batch size for GraphQL request.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-metrics/<organization>-user-metrics-13-11-2023-ghes.csv`. If the target is GHEC, then the end part of the file will be 'ghec' instead of 'ghes'. Moreover, the date part in the output file is `DD/MM/YYYY`.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -291,19 +279,16 @@ Adds or removes members from an organization.
 node src/index.js set-membership-in-org -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--file` - Input file name with member name.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-d` or `--delete-member` - Boolean flag. If set then it will remove the members from the organization.
-2. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-3. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-membership-in-org-status-<timestamp>.csv`. The output files logs the successfully deleted organization members.
-4. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-5. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-6. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `-d` or `--delete-member` - Boolean flag. If set then it will remove the members from the organization.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-membership-in-org-status-<timestamp>.csv`. The output files logs the successfully deleted organization members.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -329,19 +314,16 @@ Create teams in an organization.
 node src/index.js create-teams -o <organization> -f <file> -z <github-user>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--file` - Input file name with teams info.
 2. `-o` or `--organization` - Organization name.
 3. `-z` or `--github-user` - GitHub username who is performing the operation, to delete the user after the team is created, because by default when a team is created, the user who created it will be added to the team.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-create-teams-status-<timestamp>.csv`. The output file logs the names of the successfully migrated team names.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-5. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-create-teams-status-<timestamp>.csv`. The output file logs the names of the successfully migrated team names.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -376,18 +358,15 @@ Inserts members to teams with the specified roles.
 node src/index.js insert-team-members -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--file` - Input file name with teams, member, and roles.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-insert-team-members-status-<timestamp>.csv`. The output files logs the successfully inserted teams members.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-5. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-insert-team-members-status-<timestamp>.csv`. The output files logs the successfully inserted teams members.
+5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+7. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -413,22 +392,19 @@ Fetches all repositories of an organization
 node src/index.js get-repos -o <organization>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
-2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
-4. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. Default file name is `<organization>-metrics/<organization>-repo-metrics-<date>-<target>.csv`.
+2. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
+3. `-b` or `--batch-size` - Batch size for GraphQL request.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. Default file name is `<organization>-metrics/<organization>-repo-metrics-<date>-<target>.csv`.
    _date_ - Format is DD/MM/YYYY - The date is when the file is created
    _target_ - ghes or ghec
-5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-7. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+9. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -448,20 +424,17 @@ Fetches the direct collaborators of repositories in an organization.
 node src/index.js get-repo-direct-collaborators -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--input-file` - Input file with repository names.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `c` or `--outside-collaborators-file` - Outside collaborators files to filter out the result. The api for repository directory collaborators returns outside collaborators as well. The CSV file should have a column with the name `login`.
-2. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-3. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-repo-direct-collaborators-<timestamp>.csv`.
-4. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-5. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-6. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-7. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `c` or `--outside-collaborators-file` - Outside collaborators files to filter out the result. The api for repository directory collaborators returns outside collaborators as well. The CSV file should have a column with the name `login`.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-repo-direct-collaborators-<timestamp>.csv`.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+9. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -501,20 +474,17 @@ Fetches all teams of an organization along with team memberships and repo team p
 node src/index.js get-teams -o <organization>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
-2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
-4. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. The default file name is applicable only for the team metrics file.
-5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-7. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+2. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
+3. `-b` or `--batch-size` - Batch size for GraphQL request.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. The default file name is applicable only for the team metrics file.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+9. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -608,19 +578,16 @@ Fetches users details in an organization.
 node src/index.js get-org-users -o <organization-name>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
-2. `-b` or `--batch-size` - Batch size for GraphQL request.
-3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-metrics/<organization>-user-metrics-13-11-2023-ghes.csv`. If the target is GHEC, then the end part of the file will be 'ghec' instead of 'ghes'. Moreover, the date part in the output file is `DD/MM/YYYY`.
-5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-6. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-7. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+2. `-a` or `--allow-untrusted-ssl-certificates` - Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA.
+3. `-b` or `--batch-size` - Batch size for GraphQL request.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-metrics/<organization>-user-metrics-13-11-2023-ghes.csv`. If the target is GHEC, then the end part of the file will be 'ghec' instead of 'ghes'. Moreover, the date part in the output file is `DD/MM/YYYY`.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -656,19 +623,16 @@ Adds or removes members from an organization.
 node src/index.js set-membership-in-org -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--input-file` - Input file name with member name.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-d` or `--delete-member` - Boolean flag. If set then it will remove the members from the organization.
-2. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-3. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-membership-in-org-status-<timestamp>.csv`. The output files logs the successfully deleted organization members.
-4. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-5. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-6. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `-d` or `--delete-member` - Boolean flag. If set then it will remove the members from the organization.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-membership-in-org-status-<timestamp>.csv`. The output files logs the successfully deleted organization members.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -694,19 +658,16 @@ Create teams in an organization.
 node src/index.js create-teams -o <organization> -f <file> -z <github-user>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--input-file` - Input file name with teams info.
 2. `-o` or `--organization` - Organization name.
 3. `-z` or `--github-user` - GitHub username who is performing the operation, to delete the user after the team is created, because by default when a team is created, the user who created it will be added to the team.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-create-teams-status-<timestamp>.csv`. The output file logs the names of the successfully migrated team names.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-5. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+4. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+5. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-create-teams-status-<timestamp>.csv`. The output file logs the names of the successfully migrated team names.
+6. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -741,18 +702,15 @@ Inserts members to teams with the specified roles.
 node src/index.js insert-team-members -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--input-file` - Input file name with teams, member, and roles.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-insert-team-members-status-<timestamp>.csv`. The output files logs the successfully inserted teams members.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-5. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-insert-team-members-status-<timestamp>.csv`. The output files logs the successfully inserted teams members.
+5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+7. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -780,19 +738,16 @@ Adds or removes direct collaborators of repositories in an organization.
 node src/index.js set-repo-collaborators -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--input-file` - Input file name with repo, collaborators & roles info.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-repo-collaborators-status-<timestamp>.csv`. This output file logs the successful collaborators requests to repositories.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-r` or `--repos-file` - File with repos names so only those repos will be considered. Should have the column `repos`.
-5. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-6. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-repo-collaborators-status-<timestamp>.csv`. This output file logs the successful collaborators requests to repositories.
+5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+6. `-r` or `--repos-file` - File with repos names so only those repos will be considered. Should have the column `repos`.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -818,19 +773,16 @@ Add teams with permissions to the repositories in an organization.
 node src/index.js set-repo-team-permission -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--input-file` - Input file name with repo, team & permission info.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-repo-team-permission-status-<timestamp>.csv`. This output file logs the successful teams permissions added to repositories.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-r` or `--repos-file` - File with repos names so only those repos will be considered. Should have the column `repos`.
-5. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-6. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-repo-team-permission-status-<timestamp>.csv`. This output file logs the successful teams permissions added to repositories.
+5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+6. `-r` or `--repos-file` - File with repos names so only those repos will be considered. Should have the column `repos`.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -854,16 +806,13 @@ Compares team metrics for GHES and GHEC for an organization.
 node src/index.js compare-teams -c <ghec-file> -s <ghes-file> -o <organization>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-c` or `--ghec-file` - GHEC team metrics file.
 2. `-s` or `--ghes-file` - GHES team metrics file.
 3. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-y` or `--output-file` - Output file to save the operation results. Default file names are discussed on the output section.
-2. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+4. `-y` or `--output-file` - Output file to save the operation results. Default file names are discussed on the output section.
+5. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
 
 #### Input
 
@@ -917,16 +866,13 @@ Compares repo direct collaborators between GHES and GHEC in an organization.
 node src/index.js compare-repo-direct-collaborators -c <ghec-file> -s <ghes-file> -o <organization>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-c` or `--ghec-file` - GHEC repo direct collaborators file.
 2. `-s` or `--ghes-file` - GHES repo direct collaborators file.
 3. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-2. `z` or `--outside-collaborators-file` - File with outside collaborators names to not be included.
+4. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+5. `z` or `--outside-collaborators-file` - File with outside collaborators names to not be included.
 
 #### Input
 
@@ -970,22 +916,19 @@ Compares the last commits of all branches of every repositories between source a
 node src/index.js ghec-last-commit-check -p <ghec-organization> -q <source-organization> -h <source token> -t <target-token> -g <server-url>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-o` or `--organization` - Organization name.
 2. `-f` or `--input-file` - Input file name with teams, member, and roles.
 3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will be the cloud instance.
 4. `p` or `--source-organization` - Source organization name.
 5. `q` or `--target-organization` - Target (GHEC) organization name
-
-#### Optional Arguments
-
-1. `-b` or `--batch-size` - Batch size for GraphQL request.
-2. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. Default file name is `<organization>-metrics/<source-organization>-<target-organization>-last-commit-check-<date>.csv`.
+6. `-b` or `--batch-size` - Batch size for GraphQL request.
+7. `-y` or `--output-file` - Output file to save the operation results. The default format is discussed below. Default file name is `<organization>-metrics/<source-organization>-<target-organization>-last-commit-check-<date>.csv`.
    _date_ - Format is DD/MM/YYYY
-3. `-t` or `--token` - Personal access token of the target organization- If not provided, then the user wil be prompted to input the token.
-4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-5. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+8. `-t` or `--token` - Personal access token of the target organization- If not provided, then the user wil be prompted to input the token.
+9. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+10. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -1007,19 +950,16 @@ Archive or unarchive repositories in an organization.
 node src/index.js set-archived-status -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--input-file` - Input file name with repo, team & permission info.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-archived-status-<timestamp>.csv`. This output file logs the successful requests.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-5. `-u` or `--unarchive` - Boolean value, if set it will unarchive archived repos, if not set it will archive repos.
-6. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-archived-status-<timestamp>.csv`. This output file logs the successful requests.
+5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+7. `-u` or `--unarchive` - Boolean value, if set it will unarchive archived repos, if not set it will archive repos.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -1043,18 +983,15 @@ Delete repositories in an organization.
 node src/index.js delete-repos -o <organization> -f <file>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-f` or `--input-file` - Input file name with repository names to delete.
 2. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-delete-repos-status-<timestamp>.csv`. This output file logs the successful repositories deleted from the organization.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
-5. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-delete-repos-status-<timestamp>.csv`. This output file logs the successful repositories deleted from the organization.
+5. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+6. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+7. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
@@ -1078,17 +1015,14 @@ Fetches outside collaborators of an organization.
 node src/index.js get-outside-collaborators -o <organization>
 ```
 
-#### Required Arguments
+#### Arguments
 
 1. `-o` or `--organization` - Organization name.
-
-#### Optional Arguments
-
-1. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
-2. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-outside-collaborators-<timestamp>.csv`.
-3. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
-4. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
-5. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+2. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+3. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-outside-collaborators-<timestamp>.csv`.
+4. `-t` or `--token` - Personal access token - If not provided, then the user wil be prompted to input the token.
+5. `-u` or `--users-file` - File with user names so only those users will be considered. Should have the column name `login`.
+6. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
 
 #### Input
 
