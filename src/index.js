@@ -28,6 +28,16 @@ import getGitlabTeamsMembers from './api/export/gitlab/teams/get-gitlab-team-mem
 import getGitlabUsers from './api/export/gitlab/users/get-gitlab-users.js';
 import getGHECMissingRepos from './api/import/ghec/repos/get-ghec-missing-repos.js';
 
+// Bitbucket
+import generateBitbucketMigrationScript from './api/export/bitbucket/repos/generate-bitbucket-migration-script.js';
+import getBitbucketReposTeamsPermissions from './api/export/bitbucket/repos/get-bitbucket-repo-team-permissions.js';
+import getBitbucketRepositories from './api/export/bitbucket/repos/get-bitbucket-repos.js';
+import getBitbucketReposDirectCollaborators from './api/export/bitbucket/repos/get-bitbucket-repo-direct-collaborators.js';
+import getBitbucketTeams from './api/export/bitbucket/teams/get-bitbucket-teams.js';
+import getBitbucketTeamsMembers from './api/export/bitbucket/teams/get-bitbucket-teams-members.js';
+import getBitbucketProjectUsers from './api/export/bitbucket/users/get-bitbucket-project-users.js';
+import getBitbucketEnterpriseUsers from './api/export/bitbucket/users/get-bitbucket-enterprise-users.js';
+
 const args = {
 	allowUntrustedSslCertificates: {
 		argument: '-a, --allow-untrusted-ssl-certificates',
@@ -783,6 +793,221 @@ program
 	.description('Fetches all users of a Gitlab organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, getGitlabUsers),
+	);
+
+// Bitbucket
+
+program
+	.command(getFunctionName(generateBitbucketMigrationScript))
+	.option(
+		'-a, --archive <ARCHIVE>',
+		'Generate script for archive repositories only',
+	)
+	.option(
+		'-u, --unarchive <UNARCHIVE>',
+		'Generate script for un-archived repositories only',
+	)
+	.requiredOption(
+		'-c, --destination-org <DESTINATION ORGANIZATION>',
+		'GHEC destination organization name',
+	)
+	.requiredOption(
+		'-w, --aws-bucket-name <AWS BUCKET NAME>',
+		'AWS bucket name to store the repository data',
+	)
+	.requiredOption('-h, --ssh-user <SSH USER>', 'Ssh user')
+	.requiredOption(args.file.argument, 'Input file name with repository info')
+	.requiredOption(
+		'-s, --bitbucket-project <BITBUCKET PROJECT>',
+		'Bitbucket source project name',
+	)
+	.requiredOption(
+		'-d, --destination-token <DESTINATION TOKEN>',
+		'GHEC destination token',
+	)
+	.requiredOption(
+		'-t, --source-token <SOURCE TOKEN>',
+		'Bitbucket destination token',
+	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.option(
+		'-v, --visibility <VISIBILITY>',
+		'Visibility of the repositories on the GHEC server',
+	)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.alias('gbms')
+	.description('Generates Bitbucket migration script')
+	.action(async (args) =>
+		commandController('', args, generateBitbucketMigrationScript),
+	);
+
+	program
+	.command(getFunctionName(getBitbucketEnterpriseUsers))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(
+		'-e, --enterprise-organizations <ENTERPRISE ORGANIZATION...>',
+		'List of organizations on the enterprise',
+	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(args.usersFile.argument, args.usersFile.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbeu')
+	.description('Fetches all users on the Bitbucket enterprise')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketEnterpriseUsers),
+	);
+
+	program
+	.command(getFunctionName(getBitbucketProjectUsers))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(args.usersFile.argument, args.usersFile.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbpu')
+	.description("Fetches users' details in a Bitbucket project")
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketProjectUsers),
+	);
+
+	program
+	.command(getFunctionName(getBitbucketRepositories))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbr')
+	.description(
+		'Fetches all repositories of a bitbucket organization (workspace)',
+	)
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketRepositories),
+	);
+
+	program
+	.command(getFunctionName(getBitbucketReposDirectCollaborators))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbrdc')
+	.description(
+		'Fetches users permissions of all repositories of a bitbucket organization (workspace)',
+	)
+	.action(async (args) =>
+		commandController(
+			process.env.PAT,
+			args,
+			getBitbucketReposDirectCollaborators,
+		),
+	);
+
+	program
+	.command(getFunctionName(getBitbucketTeams))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbt')
+	.description('Fetches all teams of a Bitbucket project.')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketTeams),
+	);
+
+	program
+	.command(getFunctionName(getBitbucketReposTeamsPermissions))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbrtp')
+	.description(
+		'Fetches team permissions of all repositories of a bitbucket project',
+	)
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketReposTeamsPermissions),
+	);
+
+program
+	.command(getFunctionName(getBitbucketTeamsMembers))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('gbtm')
+	.description('Fetches team of a bitbucket project')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, getBitbucketTeamsMembers),
 	);
 
 program.parse(process.argv);
