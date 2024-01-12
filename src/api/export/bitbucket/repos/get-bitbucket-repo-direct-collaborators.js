@@ -62,12 +62,12 @@ const getReposDirectCollaborators = async (options, urlOpts) => {
 
 const columns = ['repo', 'login', 'role'];
 
-const getBitbucketReposDirectCollaborators = async (options) => {
+const getBitbucketRepoDirectCollaborators = async (options) => {
 	const { organization: org, inputFile, outputFile, waitTime } = options;
 	const repos = (await getData(inputFile)).map((row) => row.repo);
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${org}-bitbucket-repos-direct-collaborators-${currentTime()}.csv`;
+		`${org}-bitbucket-repo-direct-collaborators-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const repo of repos) {
@@ -88,4 +88,4 @@ const getBitbucketReposDirectCollaborators = async (options) => {
 	stringifier.end();
 };
 
-export default getBitbucketReposDirectCollaborators;
+export default getBitbucketRepoDirectCollaborators;

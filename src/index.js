@@ -21,23 +21,25 @@ import { insertTeamMembers } from './api/import/ghec/teams/insert-team-members.j
 import { setMembershipInOrg } from './api/import/ghec/users/set-memberships-in-org.js';
 import { getFunctionName, showModusName } from './services/utils.js';
 import ghecLastCommitCheck from './api/compare/ghec-last-commit-check.js';
-import getGitlabRepositories from './api/export/gitlab/repos/get-gitlab-repos.js';
-import getGitlabReposDirectCollaborators from './api/export/gitlab/repos/get-gitlab-repo-direct-collaborators.js';
-import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
-import getGitlabTeamMembers from './api/export/gitlab/teams/get-gitlab-team-members.js';
-import getGitlabUsers from './api/export/gitlab/users/get-gitlab-users.js';
 import getGHECMissingRepos from './api/import/ghec/repos/get-ghec-missing-repos.js';
 import exportProjectsV1 from './api/export/ghes/projects/export-projects-v1.js';
 import exportProjectsV2 from './api/export/ghes/projects/export-projects-v2.js';
 import createProjectsV2 from './api/import/ghec/projects/create-projects-v2.js';
 
+// GitLab
+import getGitlabRepositories from './api/export/gitlab/repos/get-gitlab-repos.js';
+import getGitlabRepoDirectCollaborators from './api/export/gitlab/repos/get-gitlab-repo-direct-collaborators.js';
+import getGitlabTeams from './api/export/gitlab/teams/get-gitlab-teams.js';
+import getGitlabTeamMembers from './api/export/gitlab/teams/get-gitlab-team-members.js';
+import getGitlabUsers from './api/export/gitlab/users/get-gitlab-users.js';
+
 // Bitbucket
 import generateBitbucketMigrationScript from './api/export/bitbucket/repos/generate-bitbucket-migration-script.js';
-import getBitbucketReposTeamsPermissions from './api/export/bitbucket/repos/get-bitbucket-repo-team-permissions.js';
+import getBitbucketRepoTeamPermissions from './api/export/bitbucket/repos/get-bitbucket-repo-team-permissions.js';
 import getBitbucketRepositories from './api/export/bitbucket/repos/get-bitbucket-repos.js';
-import getBitbucketReposDirectCollaborators from './api/export/bitbucket/repos/get-bitbucket-repo-direct-collaborators.js';
+import getBitbucketRepoDirectCollaborators from './api/export/bitbucket/repos/get-bitbucket-repo-direct-collaborators.js';
 import getBitbucketTeams from './api/export/bitbucket/teams/get-bitbucket-teams.js';
-import getBitbucketTeamsMembers from './api/export/bitbucket/teams/get-bitbucket-teams-members.js';
+import getBitbucketTeamMembers from './api/export/bitbucket/teams/get-bitbucket-teams-members.js';
 import getBitbucketProjectUsers from './api/export/bitbucket/users/get-bitbucket-project-users.js';
 import getBitbucketEnterpriseUsers from './api/export/bitbucket/users/get-bitbucket-enterprise-users.js';
 
@@ -61,7 +63,7 @@ const args = {
 	serverUrl: {
 		argument: '-g, --server-url <GITHUB SERVER URL>',
 		description:
-			'The target GHES server endpoint url, for eg. https://github.gh-services-partners.com.',
+			'The server endpoint url, for eg. https://github.gh-services-partners.com.',
 		defaultValue: '',
 	},
 	organization: {
@@ -588,13 +590,17 @@ program
 	.option(args.organization.argument, args.organization.description)
 	.option(args.inputFile.argument, 'Input file name with projects info')
 	.option(args.outputFile.argument, args.outputFile.description)
-	.option(args.waitTime.argument, args.waitTime.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
 	.option(args.token.argument, args.token.description)
 	.option(args.skip.argument, args.skip.description, args.skip.defaultValue)
 	.alias('cpv2')
 	.description('Creates V2 projects in an organization')
 	.action(async (args) =>
-		commandController(process.env.PAT, args, exportProjectsV2),
+		commandController(process.env.PAT, args, createProjectsV2),
 	);
 
 program
@@ -746,13 +752,13 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggr')
-	.description('Fetches all repositories of a Gitlab organization')
+	.description('Fetches all repositories of a Gitlab organization.')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, getGitlabRepositories),
 	);
 
 program
-	.command(getFunctionName(getGitlabReposDirectCollaborators))
+	.command(getFunctionName(getGitlabRepoDirectCollaborators))
 	.option(
 		args.batchSize.argument,
 		args.batchSize.description,
@@ -770,10 +776,10 @@ program
 	)
 	.alias('ggrdc')
 	.description(
-		'Fetches direct collaborators of all repositories of a Gitlab organization',
+		'Fetches direct collaborators of all repositories of a Gitlab organization.',
 	)
 	.action(async (args) =>
-		commandController(process.env.PAT, args, getGitlabReposDirectCollaborators),
+		commandController(process.env.PAT, args, getGitlabRepoDirectCollaborators),
 	);
 
 program
@@ -793,7 +799,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggt')
-	.description('Fetches all teams of a Gitlab organization')
+	.description('Fetches all teams of a Gitlab organization.')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, getGitlabTeams),
 	);
@@ -963,12 +969,13 @@ program
 	);
 
 program
-	.command(getFunctionName(getBitbucketReposDirectCollaborators))
+	.command(getFunctionName(getBitbucketRepoDirectCollaborators))
 	.option(
 		args.batchSize.argument,
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
+	.option(args.inputFile.argument, 'Input file with repository names')
 	.requiredOption(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
@@ -986,7 +993,7 @@ program
 		commandController(
 			process.env.PAT,
 			args,
-			getBitbucketReposDirectCollaborators,
+			getBitbucketRepoDirectCollaborators,
 		),
 	);
 
@@ -1013,12 +1020,13 @@ program
 	);
 
 program
-	.command(getFunctionName(getBitbucketReposTeamsPermissions))
+	.command(getFunctionName(getBitbucketRepoTeamPermissions))
 	.option(
 		args.batchSize.argument,
 		args.batchSize.description,
 		args.batchSize.defaultValue,
 	)
+	.option(args.inputFile.argument, 'Input file with repository names')
 	.option(args.serverUrl.argument, args.serverUrl.description)
 	.requiredOption(args.organization.argument, args.organization.description)
 	.option(args.outputFile.argument, args.outputFile.description)
@@ -1033,11 +1041,11 @@ program
 		'Fetches team permissions of all repositories of a bitbucket project',
 	)
 	.action(async (args) =>
-		commandController(process.env.PAT, args, getBitbucketReposTeamsPermissions),
+		commandController(process.env.PAT, args, getBitbucketRepoTeamPermissions),
 	);
 
 program
-	.command(getFunctionName(getBitbucketTeamsMembers))
+	.command(getFunctionName(getBitbucketTeamMembers))
 	.option(
 		args.batchSize.argument,
 		args.batchSize.description,
@@ -1053,9 +1061,9 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('gbtm')
-	.description('Fetches team of a bitbucket project')
+	.description('Fetches team members of a bitbucket project.')
 	.action(async (args) =>
-		commandController(process.env.PAT, args, getBitbucketTeamsMembers),
+		commandController(process.env.PAT, args, getBitbucketTeamMembers),
 	);
 
 showModusName();

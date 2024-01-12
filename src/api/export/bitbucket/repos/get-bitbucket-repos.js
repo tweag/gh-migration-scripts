@@ -50,7 +50,7 @@ const getBitbucketRepositories = async (options) => {
 	const { organization: project, outputFile, waitTime } = options;
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${project}-bitbucket-repos-${currentTime()}.csv`;
+		`${project}-bitbucket-repo-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 	let reposInfo = await getRepositories(options, { nextPageStart: null });
 	processRepositories(reposInfo.values, stringifier);

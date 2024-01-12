@@ -36,14 +36,14 @@ const getEnterpriseUsers = async (options, urlOpts) => {
 	return doRequest(config);
 };
 
-const columns = ['repo', 'login', 'role'];
+const columns = ['login'];
 
 const getBitbucketEnterpriseUsers = async (options) => {
 	let users = [];
 	const { organization: org, outputFile, waitTime } = options;
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${org}-bitbucket-cloud-organization-users-${currentTime()}.csv`;
+		`${org}-bitbucket-enterprise-users-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 	let usersInfo = await getEnterpriseUsers(options, { nextPageStart: null });
 	processUsers(usersInfo.values, stringifier);
