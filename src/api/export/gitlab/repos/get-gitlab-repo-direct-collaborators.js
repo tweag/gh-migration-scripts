@@ -57,7 +57,7 @@ const getReposDirectCollaborators = async (options, urlOpts) => {
 
 const columns = ['repo', 'login', 'role'];
 
-const getGitlabReposDirectCollaborators = async (options) => {
+const getGitlabRepoDirectCollaborators = async (options) => {
 	const {
 		organization: org,
 		inputFile,
@@ -69,7 +69,7 @@ const getGitlabReposDirectCollaborators = async (options) => {
 	const repos = await getData(inputFile);
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${org}-gitlab-repos-direct-collaborators-${currentTime()}.csv`;
+		`${org}-gitlab-repo-direct-collaborators-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const repo of repos) {
@@ -96,4 +96,4 @@ const getGitlabReposDirectCollaborators = async (options) => {
 	stringifier.end();
 };
 
-export default getGitlabReposDirectCollaborators;
+export default getGitlabRepoDirectCollaborators;

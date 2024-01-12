@@ -44,12 +44,12 @@ const getReposTeamsPermissions = async (options, urlOpts) => {
 
 const columns = ['repo', 'team', 'permission'];
 
-const getBitbucketReposTeamsPermissions = async (options) => {
+const getBitbucketRepoTeamPermissions = async (options) => {
 	const { organization: project, inputFile, outputFile, waitTime } = options;
 	const repos = (await getData(inputFile)).map((row) => row.repo);
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${project}-bitbucket-repos-teams-permissions-${currentTime()}.csv`;
+		`${project}-bitbucket-repo-teams-permissions-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const repo of repos) {
@@ -70,4 +70,4 @@ const getBitbucketReposTeamsPermissions = async (options) => {
 	stringifier.end();
 };
 
-export default getBitbucketReposTeamsPermissions;
+export default getBitbucketRepoTeamPermissions;

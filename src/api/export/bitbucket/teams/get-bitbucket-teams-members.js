@@ -41,9 +41,9 @@ const getTeamMembers = async (options, urlOpts) => {
 	return doRequest(config);
 };
 
-const columns = ['user', 'team', 'role'];
+const columns = ['member', 'team', 'role'];
 
-const getBitbucketTeamsMembers = async (options) => {
+const getBitbucketTeamMembers = async (options) => {
 	const { organization: org, inputFile, outputFile, waitTime } = options;
 	const teams = (await getData(inputFile)).map((row) => row.team);
 	const outputFileName =
@@ -69,4 +69,4 @@ const getBitbucketTeamsMembers = async (options) => {
 	stringifier.end();
 };
 
-export default getBitbucketTeamsMembers;
+export default getBitbucketTeamMembers;
