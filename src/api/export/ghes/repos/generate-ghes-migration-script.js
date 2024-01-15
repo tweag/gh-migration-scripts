@@ -3,6 +3,7 @@
 import Ora from 'ora';
 import fs from 'node:fs';
 import { getData } from '../../../../services/utils.js';
+import * as speak from '../../../../services/speak.js';
 
 const spinner = Ora();
 
@@ -48,23 +49,29 @@ const saveScriptToFile = (scriptsArr, options) => {
 	for (const script of scriptsArr) {
 		fs.appendFileSync(path, script);
 	}
+
+	speak.success(`${scriptsArr.length} repositories migration script saved to ${path} for (${sourceOrg} -> ${destinationOrg}))`);
 };
 
 const generateGHESMigrationScript = async (options) => {
-	spinner.start('Generating GHES migration script');
-	const { inputFile } = options;
+	try {
+		spinner.start(speak.successColor('Generating GHES migration script'));
+		const { inputFile } = options;
 
-	const rows = await getData(inputFile);
-	const scriptsArr = [];
+		const rows = await getData(inputFile);
+		const scriptsArr = [];
 
-	for (const row of rows) {
-		const { repo, visibility } = row;
-		const script = getScript(repo, visibility, options);
-		scriptsArr.push(script);
+		for (const row of rows) {
+			const { repo, visibility } = row;
+			const script = getScript(repo, visibility, options);
+			scriptsArr.push(script);
+		}
+
+		saveScriptToFile(scriptsArr, options);
+	} catch (error) {
+		speak.error(error);
+		spinner.fail(speak.errorColor('Failed to generate GHES migration script'));
 	}
-
-	saveScriptToFile(scriptsArr, options);
-	spinner.succeed('Completed generation of migration script');
 };
 
 export default generateGHESMigrationScript;

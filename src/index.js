@@ -282,7 +282,7 @@ program
 		'AWS bucket name to store the repository data',
 	)
 	.requiredOption('-h, --ssh-user <SSH USER>', 'Ssh user')
-	.requiredOption(args.file.argument, 'Input file name with repository info')
+	.requiredOption(args.inputFile.argument, 'Input file name with repository info')
 	.requiredOption(
 		'-s, --bitbucket-project <BITBUCKET PROJECT>',
 		'Bitbucket source project name',
@@ -870,7 +870,7 @@ program
 		'AWS bucket name to store the repository data',
 	)
 	.requiredOption('-h, --ssh-user <SSH USER>', 'Ssh user')
-	.requiredOption(args.file.argument, 'Input file name with repository info')
+	.requiredOption(args.inputFile.argument, 'Input file name with repository info')
 	.requiredOption(
 		'-s, --bitbucket-project <BITBUCKET PROJECT>',
 		'Bitbucket source project name',

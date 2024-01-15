@@ -11,7 +11,10 @@ import {
 } from '../../../../services/utils.js';
 import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
 import https from 'https';
+import progress from 'cli-progress';
+
 const spinner = Ora();
+const progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
 
 /**
  * Running PullRequest and issues array
@@ -108,10 +111,12 @@ export const getRepos = async (options) => {
 
 	showGraphQLErrors(response);
 	fetched = response.data;
+	progressBar.start(fetched.data.organization.repositories.totalCount, 0);
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
 	await fetchingController();
+	progressBar.stop();
 
 	if (options.return) return metrics;
 };
@@ -186,6 +191,7 @@ export const fetchRepoMetrics = async (repositories) => {
 		spinner.succeed(
 			`(${count}/${fetched.data.organization.repositories.totalCount}) Fetching metrics for repo ${repo.node.name}`,
 		);
+		progressBar.update(count);
 	}
 
 	// paginating calls

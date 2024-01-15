@@ -2,18 +2,17 @@
 
 import Ora from 'ora';
 import fs from 'node:fs';
-import { getData } from '../../../../services/utils';
+import { getData } from '../../../../services/utils.js';
 
 const spinner = Ora();
 
 const getScript = (repo, options) => {
 	const {
 		destinationOrg,
-    serverUrl,
-    bitbucketProject,
-    repo,
-    sshUser,
-    awsBucketName,
+		serverUrl,
+		bitbucketProject,
+		sshUser,
+		awsBucketName,
 	} = options;
 	const strArr = [
 		'gh',

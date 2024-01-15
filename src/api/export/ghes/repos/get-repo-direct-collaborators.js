@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import fs from 'node:fs';
-import readline from 'node:readline';
+import ora from 'ora';
+import progress from 'cli-progress';
+import * as speak from '../../../../services/speak.js';
 import {
 	doRequest,
 	getData,
@@ -14,6 +15,8 @@ import {
 	SUCCESS_STATUS,
 } from '../../../../services/constants.js';
 import { getOutsideCollaborators } from '../users/get-outside-collaborators.js';
+
+const spinner = new ora();
 
 const getReposDirectCollaboratorsConfig = (repo, options) => {
 	const { organization: org, serverUrl, token } = options;
@@ -51,6 +54,9 @@ export const getReposDirectCollaborators = async (options) => {
 			skip,
 		} = options;
 
+		const progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
+		spinner.start(speak.successColor(`Started fetching repositories direct collaborators for ${org}`));
+
 		const columns = ['repo', 'login', 'role'];
 		const statusColumns = ['repo', 'status', 'statusText', 'errorMessage'];
 		const outputFileName =
@@ -76,27 +82,15 @@ export const getReposDirectCollaborators = async (options) => {
 			outsideCollaborators = await getOutsideCollaborators(options);
 		}
 
-		const fileStream = fs.createReadStream(inputFile);
-
-		const rl = readline.createInterface({
-			input: fileStream,
-			crlfDelay: Infinity,
-		});
-
-		let firstLine = true;
 		let index = 0;
 
-		for await (const line of rl) {
-			if (firstLine) {
-				firstLine = false;
-				continue;
-			}
+		let repos = await getData(inputFile);
+		repos = repos.slice(skip);
+		repos = repos.map((row) => row.repo);
+		progressBar.start(repos.length, 0);
 
-			const rowArr = line.split(',');
-			const repo = rowArr[0];
-			console.log(++index);
-
-			if (skip >= index) continue;
+		for (const repo of repos) {
+			speak.info(++index);
 
 			const response = await fetchRepoDirectCollaborators(repo, options);
 			console.log(JSON.stringify(response, null, 2));
@@ -128,11 +122,15 @@ export const getReposDirectCollaborators = async (options) => {
 			}
 
 			statusStringifier.write({ repo, status, statusText, errorMessage });
+			progressBar.increment();
 			await delay(waitTime);
 		}
 
 		stringifier.end();
+		spinner.succeed(speak.successColor(`Successfully saved repositories's direct collaborators to ${outputFileName}`));
+		progressBar.stop();
 	} catch (error) {
-		console.error(error);
+		speak.error(error);
+		spinner.fail(speak.errorColor('Failed to get repositories direct collaborators'));
 	}
 };
