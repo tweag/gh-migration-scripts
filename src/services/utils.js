@@ -85,7 +85,7 @@ export const getDate = () => {
 
 export const delay = (sec = 1) => {
 	return new Promise((resolve) => {
-		const delayMsg = 'delay: ' + sec + ' seconds\n';
+		const delayMsg = '\ndelay: ' + sec + ' seconds\n';
 		speak.warn(delayMsg);
 		setTimeout(resolve, sec * 1000);
 	});
