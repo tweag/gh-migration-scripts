@@ -2,6 +2,7 @@
 
 import { program } from 'commander';
 import { commandController } from './commands/commands.js';
+import { getFunctionName } from './services/utils.js';
 
 // GitHub
 import importGithubRepoDirectCollaborators from './api/import/github/repos/import-github-repo-direct-collaborators.js';
@@ -21,7 +22,6 @@ import exportGithubTeamsAndPermissions from './api/export/github/teams/export-gi
 import exportGithubReposMigrationStatus from './api/export/github/repos/export-github-repos-migration-status.js';
 import importGithubTeamMembers from './api/import/github/teams/import-github-team-members.js';
 import importGithubMembershipInOrg from './api/import/github/users/import-github-memberships-in-org.js';
-import { getFunctionName } from './services/utils.js';
 import ghecLastCommitCheck from './api/compare/ghec-last-commit-check.js';
 import exportGithubMissingRepos from './api/export/github/repos/export-github-missing-repos.js';
 import exportGithubProjectsV1 from './api/export/github/projects/export-github-projects-v1.js';
@@ -38,7 +38,7 @@ import exportGitlabUsers from './api/export/gitlab/users/export-gitlab-users.js'
 // Bitbucket
 import generateBitbucketMigrationScript from './api/export/bitbucket/repos/generate-bitbucket-migration-script.js';
 import exportBitbucketRepoTeamPermissions from './api/export/bitbucket/repos/export-bitbucket-repo-team-permissions.js';
-import exportBitbucketRepositories from './api/export/bitbucket/repos/export-bitbucket-repos.js';
+import exportBitbucketRepo from './api/export/bitbucket/repos/export-bitbucket-repos.js';
 import exportBitbucketRepoDirectCollaborators from './api/export/bitbucket/repos/export-bitbucket-repo-direct-collaborators.js';
 import exportBitbucketTeams from './api/export/bitbucket/teams/export-bitbucket-teams.js';
 import exportBitbucketTeamMembers from './api/export/bitbucket/teams/export-bitbucket-teams-members.js';
@@ -947,7 +947,7 @@ program
 	);
 
 program
-	.command(getFunctionName(exportBitbucketRepositories))
+	.command(getFunctionName(exportBitbucketRepo))
 	.option(
 		args.batchSize.argument,
 		args.batchSize.description,
@@ -967,7 +967,7 @@ program
 		'Fetches all repositories of a bitbucket organization (workspace)',
 	)
 	.action(async (args) =>
-		commandController(process.env.PAT, args, exportBitbucketRepositories),
+		commandController(process.env.PAT, args, exportBitbucketRepo),
 	);
 
 program

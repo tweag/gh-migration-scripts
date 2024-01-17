@@ -12,7 +12,7 @@
 		"analyze": "node index"
 	},
 	"bin": {
-		"modus": "src/index.js"
+		"git-migrator": "src/index.js"
 	},
 	"keywords": [],
 	"author": "ModusCreate",

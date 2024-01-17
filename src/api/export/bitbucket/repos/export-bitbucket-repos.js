@@ -46,7 +46,7 @@ const getRepositories = async (options, urlOpts) => {
 
 const columns = ['repo', 'isArchived', 'visibility'];
 
-const exportBitbucketRepositories = async (options) => {
+const exportBitbucketRepos = async (options) => {
 	const { organization: project, outputFile, waitTime } = options;
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
@@ -67,4 +67,4 @@ const exportBitbucketRepositories = async (options) => {
 	stringifier.end();
 };
 
-export default exportBitbucketRepositories;
+export default exportBitbucketRepos;
