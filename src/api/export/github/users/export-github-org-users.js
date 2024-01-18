@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
+import progress from 'cli-progress';
 import fs from 'fs';
 import {
 	delay,
@@ -31,6 +32,8 @@ let fetched = {};
  * Count number of users
  */
 let count = 0;
+
+let progressBar;
 
 export const fetchUsersInOrg = async (
 	org,
@@ -63,6 +66,9 @@ const exportGithubOrgUsers = async (options) => {
 
 	showGraphQLErrors(response);
 	fetched = response.data;
+	totalCount = fetched.data.organization.membersWithRole.totalCount;
+	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
+	progressBar.start(totalCount, 0);
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -73,6 +79,7 @@ const exportGithubOrgUsers = async (options) => {
 
 export const fetchingController = async () => {
 	await fetchUsersMetrics(fetched.data.organization.membersWithRole.edges);
+	progressBar.stop();
 
 	if (!opts.return && metrics) {
 		const org = opts.organization.replace(/\s/g, '');
@@ -82,8 +89,9 @@ export const fetchingController = async () => {
 
 export const fetchUsersMetrics = async (users) => {
 	for (const user of users) {
+		progressBar.increment();
 		spinner.start(
-			`(${count}/${fetched.data.organization.membersWithRole.totalCount}) Fetching metrics for user ${user.node.login}`,
+			`(${count}/${totalCount}) Fetching metrics for user ${user.node.login}`,
 		);
 
 		const userInfo = {
@@ -107,7 +115,7 @@ export const fetchUsersMetrics = async (users) => {
 		count = count + 1;
 		metrics.push(userInfo);
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.membersWithRole.totalCount}) Fetching metrics for user ${user.node.login}`,
+			`(${count}/${totalCount}) Fetching metrics for user ${user.node.login}`,
 		);
 	}
 
@@ -117,7 +125,7 @@ export const fetchUsersMetrics = async (users) => {
 	if (users.length == opts.batchSize) {
 		// get cursor to last user
 		spinner.start(
-			`(${count}/${fetched.data.organization.membersWithRole.totalCount}) Fetching next ${opts.batchSize} users`,
+			`(${count}/${totalCount}) Fetching next ${opts.batchSize} users`,
 		);
 		const cursor = users[users.length - 1].cursor;
 		const result = await fetchUsersInOrg(
@@ -129,7 +137,7 @@ export const fetchUsersMetrics = async (users) => {
 		);
 
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.membersWithRole.totalCount}) Fetched next ${opts.batchSize} users`,
+			`(${count}/${totalCount}) Fetched next ${opts.batchSize} users`,
 		);
 
 		await delay(opts.waitTime);

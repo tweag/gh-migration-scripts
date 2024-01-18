@@ -131,7 +131,11 @@ program
 		'Adds or deletes direct collaborators of repositories in an organization',
 	)
 	.action(async (args) =>
-		commandController(process.env.PAT, args, importGithubRepoDirectCollaborators),
+		commandController(
+			process.env.PAT,
+			args,
+			importGithubRepoDirectCollaborators,
+		),
 	);
 
 program
@@ -284,7 +288,10 @@ program
 		'AWS bucket name to store the repository data',
 	)
 	.requiredOption('-h, --ssh-user <SSH USER>', 'Ssh user')
-	.requiredOption(args.inputFile.argument, 'Input file name with repository info')
+	.requiredOption(
+		args.inputFile.argument,
+		'Input file name with repository info',
+	)
 	.requiredOption(
 		'-s, --bitbucket-project <BITBUCKET PROJECT>',
 		'Bitbucket source project name',
@@ -456,7 +463,11 @@ program
 		'Fetches the direct collaborators of repositories in an organization',
 	)
 	.action(async (args) =>
-		commandController(process.env.PAT, args, exportGithubRepoDirectCollaborators),
+		commandController(
+			process.env.PAT,
+			args,
+			exportGithubRepoDirectCollaborators,
+		),
 	);
 
 program
@@ -481,7 +492,9 @@ program
 	)
 	.alias('gr')
 	.description('Fetches all repositories of an organization')
-	.action(async (args) => commandController(process.env.PAT, args, exportGithubRepos));
+	.action(async (args) =>
+		commandController(process.env.PAT, args, exportGithubRepos),
+	);
 
 program
 	.command(getFunctionName(exportGithubReposMigrationStatus))
@@ -533,7 +546,9 @@ program
 	.description(
 		'Fetches all teams of an organization along with repo team permissions and team memberships.',
 	)
-	.action(async (args) => commandController(process.env.PAT, args, exportGithubTeamsAndPermissions));
+	.action(async (args) =>
+		commandController(process.env.PAT, args, exportGithubTeamsAndPermissions),
+	);
 
 program
 	.command(getFunctionName(exportGithubProjectsV1))
@@ -715,7 +730,9 @@ program
 	.description(
 		'Fetches the missing repositories in GHEC during and after migration',
 	)
-	.action(async (args) => commandController('', args, exportGithubMissingRepos));
+	.action(async (args) =>
+		commandController('', args, exportGithubMissingRepos),
+	);
 
 program
 	.command(getFunctionName(compareRepoDirectCollaborators))
@@ -781,7 +798,11 @@ program
 		'Fetches direct collaborators of all repositories of a Gitlab organization.',
 	)
 	.action(async (args) =>
-		commandController(process.env.PAT, args, exportGitlabRepoDirectCollaborators),
+		commandController(
+			process.env.PAT,
+			args,
+			exportGitlabRepoDirectCollaborators,
+		),
 	);
 
 program
@@ -872,7 +893,10 @@ program
 		'AWS bucket name to store the repository data',
 	)
 	.requiredOption('-h, --ssh-user <SSH USER>', 'Ssh user')
-	.requiredOption(args.inputFile.argument, 'Input file name with repository info')
+	.requiredOption(
+		args.inputFile.argument,
+		'Input file name with repository info',
+	)
 	.requiredOption(
 		'-s, --bitbucket-project <BITBUCKET PROJECT>',
 		'Bitbucket source project name',
@@ -1043,7 +1067,11 @@ program
 		'Fetches team permissions of all repositories of a bitbucket project',
 	)
 	.action(async (args) =>
-		commandController(process.env.PAT, args, exportBitbucketRepoTeamPermissions),
+		commandController(
+			process.env.PAT,
+			args,
+			exportBitbucketRepoTeamPermissions,
+		),
 	);
 
 program

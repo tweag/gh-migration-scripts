@@ -1,6 +1,8 @@
 import { jest } from '@jest/globals';
 import { doRequest, getData } from '../../../../services/utils.js';
-import setGithubArchivedStatus, { archiveRequest } from './set-github-archived-status.js';
+import setGithubArchivedStatus, {
+	archiveRequest,
+} from './set-github-archived-status.js';
 
 // Mocking necessary dependencies
 jest.mock('../../../../services/utils.js');

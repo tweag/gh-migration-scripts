@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import ora from 'ora';
 import progress from 'cli-progress';
 import * as speak from '../../../../services/speak.js';
 import {
@@ -52,8 +51,9 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 			skip,
 		} = options;
 
-		const progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
-		speak.success(`Started fetching repositories direct collaborators for ${org}`)
+		speak.success(
+			`Started fetching repositories direct collaborators for ${org}`,
+		);
 
 		const columns = ['repo', 'login', 'role'];
 		const statusColumns = ['repo', 'status', 'statusText', 'errorMessage'];
@@ -85,6 +85,10 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 		let repos = await getData(inputFile);
 		repos = repos.slice(skip);
 		repos = repos.map((row) => row.repo);
+		const progressBar = new progress.SingleBar(
+			{},
+			progress.Presets.shades_classic,
+		);
 		progressBar.start(repos.length, 0);
 
 		for (const repo of repos) {
@@ -125,7 +129,9 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 		}
 
 		stringifier.end();
-		speak.success(`Successfully saved repositories direct collaborators to ${outputFileName}`);
+		speak.success(
+			`Successfully saved repositories direct collaborators to ${outputFileName}`,
+		);
 		progressBar.stop();
 	} catch (error) {
 		speak.error(error);

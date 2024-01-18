@@ -14,7 +14,7 @@ import https from 'https';
 import progress from 'cli-progress';
 
 const spinner = Ora();
-const progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
+let progressBar;
 
 /**
  * Running PullRequest and issues array
@@ -111,7 +111,9 @@ const exportGithubRepos = async (options) => {
 
 	showGraphQLErrors(response);
 	fetched = response.data;
-	progressBar.start(fetched.data.organization.repositories.totalCount, 0);
+	totalCount = fetched.data.organization.repositories.totalCount;
+	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
+	progressBar.start(totalCount, 0);
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -144,8 +146,9 @@ export const fetchingController = async () => {
  */
 export const fetchRepoMetrics = async (repositories) => {
 	for (const repo of repositories) {
+		progressBar.increment();
 		spinner.start(
-			`(${count}/${fetched.data.organization.repositories.totalCount}) Fetching metrics for repo ${repo.node.name}`,
+			`(${count}/${totalCount}) Fetching metrics for repo ${repo.node.name}`,
 		);
 		const repoInfo = {
 			repo: repo.node.name,
@@ -189,9 +192,8 @@ export const fetchRepoMetrics = async (repositories) => {
 		count = count + 1;
 		metrics.push(repoInfo);
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.repositories.totalCount}) Fetching metrics for repo ${repo.node.name}`,
+			`(${count}/${totalCount}) Fetching metrics for repo ${repo.node.name}`,
 		);
-		progressBar.update(count);
 	}
 
 	// paginating calls
@@ -200,7 +202,7 @@ export const fetchRepoMetrics = async (repositories) => {
 	if (repositories.length == opts.batchSize) {
 		// get cursor to last repository
 		spinner.start(
-			`(${count}/${fetched.data.organization.repositories.totalCount}) Fetching next ${opts.batchSize} repos`,
+			`(${count}/${totalCount}) Fetching next ${opts.batchSize} repos`,
 		);
 		const cursor = repositories[repositories.length - 1].cursor;
 		const result = await fetchRepoInOrg(
@@ -211,7 +213,7 @@ export const fetchRepoMetrics = async (repositories) => {
 			`, after: "${cursor}"`,
 		);
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.repositories.totalCount}) Fetched next ${opts.batchSize} repos`,
+			`(${count}/${totalCount}) Fetched next ${opts.batchSize} repos`,
 		);
 
 		await delay(opts.waitTime);

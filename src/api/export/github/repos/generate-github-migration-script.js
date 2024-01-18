@@ -50,7 +50,9 @@ const saveScriptToFile = (scriptsArr, options) => {
 		fs.appendFileSync(path, script);
 	}
 
-	speak.success(`${scriptsArr.length} repositories migration script saved to ${path} for (${sourceOrg} -> ${destinationOrg}))`);
+	speak.success(
+		`${scriptsArr.length} repositories migration script saved to ${path} for (${sourceOrg} -> ${destinationOrg}))`,
+	);
 };
 
 const generateGithubMigrationScript = async (options) => {

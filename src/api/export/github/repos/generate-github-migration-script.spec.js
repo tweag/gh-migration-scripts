@@ -3,9 +3,6 @@ import { jest } from '@jest/globals';
 import { generateGithubMigrationScript } from './generate-github-migration-script.js';
 import * as utils from '../../../../services/utils.js';
 
-// Mocking the node:fs module
-jest.mock('node:fs');
-
 // Mocking the Ora module
 jest.mock('ora');
 

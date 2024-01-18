@@ -1,15 +1,7 @@
-import fs from 'node:fs';
-import readline from 'node:readline';
 import { jest } from '@jest/globals';
 import exportGithubRepoDirectCollaborators from './export-github-repo-direct-collaborators.js';
 import * as utils from '../../../../services/utils.js';
 import * as outsideCollaboratorsModule from '../users/export-github-outside-collaborators.js';
-
-// Mocking the node:fs module
-jest.mock('node:fs');
-
-// Mocking the node:readline module
-jest.mock('node:readline');
 
 // Mocking the services/utils.js functions
 jest.mock('../../services/utils.js');
@@ -40,21 +32,6 @@ describe('exportGithubRepoDirectCollaborators', () => {
 			},
 		);
 
-		// Mocking the fs.createReadStream function
-		const mockStream = {
-			on: jest.fn().mockImplementationOnce((event, callback) => {
-				if (event === 'line') {
-					callback('repo1,some,data');
-					callback('repo2,more,data');
-					// Add more mock lines as needed
-				}
-				if (event === 'close') {
-					callback();
-				}
-			}),
-		};
-		fs.createReadStream.mockReturnValueOnce(mockStream);
-
 		// Mocking the fetchRepoDirectCollaborators function
 		utils.fetchRepoDirectCollaborators.mockImplementation((repo, options) => {
 			return Promise.resolve({
@@ -82,9 +59,6 @@ describe('exportGithubRepoDirectCollaborators', () => {
 		expect(
 			outsideCollaboratorsModule.getOutsideCollaborators,
 		).toHaveBeenCalledWith(mockOptions);
-
-		// Check if createReadStream is called with the correct file path
-		expect(fs.createReadStream).toHaveBeenCalledWith('mockFile.csv');
 
 		// Check if fetchRepoDirectCollaborators is called for each repo
 		expect(utils.fetchRepoDirectCollaborators).toHaveBeenCalledWith(

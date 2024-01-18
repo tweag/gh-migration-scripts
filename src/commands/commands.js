@@ -92,7 +92,10 @@ const sourceOrgScripts = [
 	ghecLastCommitCheck,
 ];
 
-const sourceTokenScripts = [exportGithubMissingRepos, generateGithubMigrationScript];
+const sourceTokenScripts = [
+	exportGithubMissingRepos,
+	generateGithubMigrationScript,
+];
 
 const fileScripts = [compareRepoDirectCollaborators, compareTeams];
 

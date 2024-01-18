@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
+import progress from 'cli-progress';
 import fs from 'fs';
 import {
 	delay,
@@ -35,6 +36,8 @@ let count = 0;
  */
 let totalCount = 0;
 
+let progressBar;
+
 export const fetchProjectsV2InOrg = async (
 	org,
 	token,
@@ -67,6 +70,8 @@ const exportGithubProjectsV2 = async (options) => {
 	showGraphQLErrors(response);
 	fetched = response.data;
 	totalCount = fetched.data.organization.projectsV2.totalCount;
+	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
+	progressBar.start(totalCount, 0);
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -77,6 +82,7 @@ export const fetchingController = async () => {
 	const nodes = fetched.data.organization.projectsV2.nodes;
 	const cursor = fetched.data.organization.projectsV2.pageInfo.endCursor;
 	await fetchProjectV2Metrics(nodes, cursor);
+	progressBar.stop();
 
 	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
@@ -319,8 +325,7 @@ const fetchNextItems = async (cursor, id) => {
 
 export const fetchProjectV2Metrics = async (projectsV2, cursor) => {
 	for (const projectV2 of projectsV2) {
-		console.log(JSON.stringify(projectV2.items.pageInfo, null, 2));
-		console.log(projectV2.items.totalCount);
+		progressBar.increment();
 		let hasNextItems = projectV2.items.pageInfo.hasNextPage;
 		let endCursor = cursor;
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
+import progress from 'cli-progress';
 import fs from 'fs';
 import {
 	delay,
@@ -32,6 +33,8 @@ let fetched = {};
  * Count number of teams
  */
 let count = 0;
+
+let progressBar;
 
 export const fetchTeamInOrg = async (
 	org,
@@ -104,6 +107,9 @@ const exportGithubTeamsAndPermissions = async (options) => {
 
 	showGraphQLErrors(response);
 	fetched = response.data;
+	totalCount = fetched.data.organization.teams.totalCount;
+	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
+	progressBar.start(totalCount, 0);
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -112,6 +118,7 @@ const exportGithubTeamsAndPermissions = async (options) => {
 
 export const fetchingController = async () => {
 	await fetchTeamMetrics(fetched.data.organization.teams.edges);
+	progressBar.stop();
 
 	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
@@ -133,8 +140,9 @@ const processMembers = (edges) => {
 
 export const fetchTeamMetrics = async (teams) => {
 	for (const team of teams) {
+		progressBar.increment();
 		spinner.start(
-			`(${count}/${fetched.data.organization.teams.totalCount}) Fetching metrics for team ${team.node.name}`,
+			`(${count}/${totalCount}) Fetching metrics for team ${team.node.name}`,
 		);
 
 		let members = team.node.members.edges;
@@ -206,7 +214,7 @@ export const fetchTeamMetrics = async (teams) => {
 		count = count + 1;
 		metrics.push(teamInfo);
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.teams.totalCount}) Fetching metrics for team ${team.node.name}`,
+			`(${count}/${totalCount}) Fetching metrics for team ${team.node.name}`,
 		);
 	}
 
@@ -216,7 +224,7 @@ export const fetchTeamMetrics = async (teams) => {
 	if (teams.length == opts.batchSize) {
 		// get cursor to last team
 		spinner.start(
-			`(${count}/${fetched.data.organization.teams.totalCount}) Fetching next ${opts.batchSize} teams`,
+			`(${count}/${totalCount}) Fetching next ${opts.batchSize} teams`,
 		);
 		const cursor = teams[teams.length - 1].cursor;
 		const result = await fetchTeamInOrg(
@@ -228,7 +236,7 @@ export const fetchTeamMetrics = async (teams) => {
 		);
 
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.teams.totalCount}) Fetched next ${opts.batchSize} teams`,
+			`(${count}/${totalCount}) Fetched next ${opts.batchSize} teams`,
 		);
 
 		await delay(opts.waitTime);

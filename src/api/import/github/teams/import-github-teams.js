@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	getData,
 	getStringifier,
@@ -84,14 +85,19 @@ const importGithubTeams = async (options) => {
 			`${org}-create-teams-status-${currentTime()}.csv`;
 		const columns = ['team', 'status', 'statusText', 'errorMessage'];
 		const stringifier = getStringifier(outputFileName, columns);
-		const teams = await getData(inputFile);
+		let teams = await getData(inputFile);
+		teams = teams.slice(skip);
+		const progressBar = new progress.SingleBar(
+			{},
+			progress.Presets.shades_classic,
+		);
+		progressBar.start(teams.length, 0);
 
 		let index = 0;
 
 		for (const team of teams) {
+			progressBar.increment();
 			console.log(++index);
-
-			if (skip > index) continue;
 
 			const { parentTeam } = team;
 			let parentTeamId;
@@ -118,13 +124,19 @@ const importGithubTeams = async (options) => {
 			await createOperations(options, team, parentTeamId, stringifier);
 		}
 
+		progressBar.stop();
 		stringifier.end();
 	} catch (error) {
 		console.error(error);
 	}
 };
 
-export const createOperations = async (options, team, parentTeamId, stringifier) => {
+export const createOperations = async (
+	options,
+	team,
+	parentTeamId,
+	stringifier,
+) => {
 	const { waitTime, githubUser } = options;
 	const { name, description, privacy } = team;
 

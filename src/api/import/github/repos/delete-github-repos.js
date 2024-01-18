@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	doRequest,
 	getData,
@@ -46,6 +47,9 @@ const deleteGithubRepos = async (options) => {
 			waitTime,
 			skip,
 		} = options;
+		let isMultiple = true;
+
+		if (repo) isMultiple = false;
 
 		const columns = ['repo', 'status', 'statusText', 'errorMessage'];
 		const outputFileName =
@@ -59,15 +63,20 @@ const deleteGithubRepos = async (options) => {
 			repositories = [repo];
 		} else {
 			const repositoriesData = await getData(inputFile);
-			repositories = repositoriesData.map((r) => r.repo);
+			repositories = repositoriesData.map((r) => r.repo).slice(skip);
 		}
 		let index = 0;
+		let progressBar;
+
+		if (isMultiple) {
+			const totalCount = repositories.length;
+			progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
+			progressBar.start(totalCount, 0);
+		}
 
 		for (const repo of repositories) {
+			if (isMultiple) progressBar.increment();
 			console.log(++index);
-
-			if (skip >= index) continue;
-
 			const response = await deleteRequest(repo, options);
 			console.log(JSON.stringify(response, null, 2));
 			let status = SUCCESS_STATUS;
@@ -84,6 +93,8 @@ const deleteGithubRepos = async (options) => {
 			stringifier.write({ repo, status, statusText, errorMessage });
 			await delay(waitTime);
 		}
+
+		if (isMultiple) progressBar.stop();
 
 		stringifier.end();
 	} catch (error) {

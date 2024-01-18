@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	getData,
 	getStringifier,
@@ -11,6 +12,15 @@ import {
 	GITHUB_API_URL,
 	SUCCESS_STATUS,
 } from '../../../../services/constants.js';
+
+const columns = [
+	'member',
+	'team',
+	'role',
+	'status',
+	'statusText',
+	'errorMessage',
+];
 
 const getInsertTeamMembersConfig = ({ member, team, role, options }) => {
 	const { organization: org, serverUrl, token } = options;
@@ -49,22 +59,20 @@ const importGithubTeamMembers = async (options) => {
 		const outputFileName =
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-insert-team-members-status-${currentTime()}.csv`;
-		const columns = [
-			'member',
-			'team',
-			'role',
-			'status',
-			'statusText',
-			'errorMessage',
-		];
+
 		const stringifier = getStringifier(outputFileName, columns);
-		const rows = await getData(inputFile);
+		let rows = await getData(inputFile);
+		rows = rows.slice(skip);
+		const progressBar = new progress.SingleBar(
+			{},
+			progress.Presets.shades_classic,
+		);
+		progressBar.start(rows.length, 0);
 		let index = 0;
 
 		for (const row of rows) {
+			progressBar.increment();
 			console.log(++index);
-
-			if (skip > index) continue;
 
 			const { member, team, role } = row;
 			console.log(JSON.stringify(row, null, 2));
@@ -99,6 +107,7 @@ const importGithubTeamMembers = async (options) => {
 			await delay(waitTime);
 		}
 
+		progressBar.stop();
 		stringifier.end();
 	} catch (error) {
 		console.error(error);

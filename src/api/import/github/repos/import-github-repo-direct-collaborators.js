@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-import fs from 'node:fs';
-import readline from 'node:readline';
+import progress from 'cli-progress';
 import {
 	doRequest,
 	delay,
@@ -52,7 +51,6 @@ const setDirectCollaborator = async (details) => {
 
 const importGithubRepoDirectCollaborators = async (options) => {
 	try {
-		let filterRepos = [];
 		const {
 			organization: org,
 			inputFile,
@@ -62,9 +60,13 @@ const importGithubRepoDirectCollaborators = async (options) => {
 			skip,
 		} = options;
 
+		let reposData = await getData(inputFile);
+		reposData = reposData.slice(skip);
+
 		if (reposFile) {
 			const data = await getData(reposFile);
-			filterRepos = data.map((row) => row.repo);
+			const filterRepos = data.map((row) => row.repo);
+			reposData = reposData.filter((row) => filterRepos.includes(row.repo));
 		}
 
 		const output = outputFile;
@@ -80,87 +82,73 @@ const importGithubRepoDirectCollaborators = async (options) => {
 			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 			`${org}-set-repo-collaborators-status-${currentTime()}.csv`;
 		const stringifier = getStringifier(outputFileName, columns);
-		const fileStream = fs.createReadStream(inputFile);
-
-		const rl = readline.createInterface({
-			input: fileStream,
-			crlfDelay: Infinity,
-		});
-
-		let firstLine = true;
+		const progressBar = new progress.SingleBar(
+			{},
+			progress.Presets.shades_classic,
+		);
+		progressBar.start(reposData.length, 0);
 		let index = 0;
 
-		for await (const line of rl) {
-			if (firstLine) {
-				firstLine = false;
-				continue;
-			}
-
+		for (const repoData of reposData) {
 			console.log(++index);
 
-			const rowArr = line.split(',');
-			const repo = rowArr[0];
-			const login = rowArr[1];
-			let role = rowArr[2];
+			const { repo, login, role } = repoData;
+			const response = await setDirectCollaborator({
+				options,
+				repo,
+				login,
+				role,
+			});
+			console.log(JSON.stringify(response, null, 2));
+			let status = SUCCESS_STATUS;
+			let statusText = '';
+			let errorMessage = '';
 
-			if (!reposFile || filterRepos.includes(repo)) {
-				if (index > skip) {
-					const response = await setDirectCollaborator({
-						options,
-						repo,
-						login,
-						role,
-					});
-					console.log(JSON.stringify(response, null, 2));
-					let status = SUCCESS_STATUS;
-					let statusText = '';
-					let errorMessage = '';
+			if (!response.data) {
+				status = response.status;
+				statusText = response.statusText;
+				errorMessage = response.errorMessage;
+			}
 
-					if (!response.data) {
-						status = response.status;
-						statusText = response.statusText;
-						errorMessage = response.errorMessage;
-					}
+			if (
+				status === ARCHIVE_STATUS_CODE &&
+				errorMessage === ARCHIVE_ERROR_MESSAGE
+			) {
+				await archiveFunction(options, repo, output, true);
+				const retryResponse = await setDirectCollaborator({
+					options,
+					repo,
+					login,
+					role,
+				});
+				await archiveFunction(options, repo, output, false);
 
-					if (
-						status === ARCHIVE_STATUS_CODE &&
-						errorMessage === ARCHIVE_ERROR_MESSAGE
-					) {
-						await archiveFunction(options, repo, output, true);
-						const retryResponse = await setDirectCollaborator({
-							options,
-							repo,
-							login,
-							role,
-						});
-						await archiveFunction(options, repo, output, false);
-
-						if (!retryResponse.data) {
-							status = retryResponse.status;
-							statusText = retryResponse.statusText;
-							errorMessage = retryResponse.errorMessage;
-						} else {
-							status = SUCCESS_STATUS;
-							statusText = '';
-							errorMessage = '';
-						}
-					}
-
-					console.log({ repo, login, role });
-					stringifier.write({
-						repo,
-						login,
-						role,
-						status,
-						statusText,
-						errorMessage,
-					});
-
-					await delay(waitTime);
+				if (!retryResponse.data) {
+					status = retryResponse.status;
+					statusText = retryResponse.statusText;
+					errorMessage = retryResponse.errorMessage;
+				} else {
+					status = SUCCESS_STATUS;
+					statusText = '';
+					errorMessage = '';
 				}
 			}
+
+			console.log({ repo, login, role });
+			stringifier.write({
+				repo,
+				login,
+				role,
+				status,
+				statusText,
+				errorMessage,
+			});
+
+			progressBar.increment();
+			await delay(waitTime);
 		}
 
+		progressBar.stop();
 		stringifier.end();
 	} catch (error) {
 		console.error(error);

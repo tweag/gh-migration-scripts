@@ -65,7 +65,7 @@ const exportGithubOutsideCollaborators = async (options) => {
 				for (const user of responseData) {
 					let { login } = user;
 					login = login.toLowerCase();
-					speak.info(`login: ${login}`)
+					speak.info(`login: ${login}`);
 
 					if (enterpriseUsers.length > 0) {
 						if (enterpriseUsers.includes(login)) {
@@ -86,7 +86,7 @@ const exportGithubOutsideCollaborators = async (options) => {
 		stringifier.end();
 
 		if (outsideCollaborators.length === 0) {
-			speak.warn(`No outside collaborators found`);
+			speak.warn('No outside collaborators found');
 		} else {
 			speak.success(
 				`Found ${outsideCollaborators.length} outside collaborators`,
@@ -94,7 +94,11 @@ const exportGithubOutsideCollaborators = async (options) => {
 		}
 
 		speak.success(`Written results to output file: ${outputFileName}`);
-		spinner.succeed(speak.successColor(`Successfully process outside collaborators for ${org}`));
+		spinner.succeed(
+			speak.successColor(
+				`Successfully process outside collaborators for ${org}`,
+			),
+		);
 		return outsideCollaborators;
 	} catch (error) {
 		speak.error(error);
