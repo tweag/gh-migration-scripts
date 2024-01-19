@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
-import * as speak from '../../../../services/speak.js';
+import * as speak from '../../../../services/style-utils.js';
 import {
 	delay,
 	doRequest,

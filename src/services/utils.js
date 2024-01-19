@@ -9,7 +9,7 @@ import { stringify } from 'csv-stringify';
 import kebabCase from 'lodash.kebabcase';
 import figlet from 'figlet';
 import chalk from 'chalk';
-import * as speak from './speak.js';
+import * as speak from './style-utils.js';
 
 const spinner = Ora();
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	doRequest,
 	delay,
@@ -56,13 +57,17 @@ const importGithubMembershipInOrg = async (options) => {
 			`${org}-set-membership-status-${currentTime()}.csv`;
 		const columns = ['login', 'status', 'statusText', 'errorMessage'];
 		const stringifier = getStringifier(outputFileName, columns);
-		const members = await getData(inputFile);
+		let members = await getData(inputFile);
+		members = members.slice(Number(skip));
+		const progressBar = new progress.SingleBar(
+			{},
+			progress.Presets.shades_classic,
+		);
+		progressBar.start(members.length, 0);
 		let index = 0;
 
 		for (const member of members) {
 			console.log(++index);
-
-			if (skip > index) continue;
 
 			const { login } = member;
 			const response = await setMembership(login, options);
@@ -80,8 +85,12 @@ const importGithubMembershipInOrg = async (options) => {
 			}
 
 			stringifier.write({ login, status, statusText, errorMessage });
+			progressBar.increment();
 			await delay(waitTime);
 		}
+
+		progressBar.stop();
+		stringifier.end();
 	} catch (error) {
 		console.error(error);
 	}

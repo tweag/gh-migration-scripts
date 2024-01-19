@@ -71,7 +71,6 @@ const importGithubTeamMembers = async (options) => {
 		let index = 0;
 
 		for (const row of rows) {
-			progressBar.increment();
 			console.log(++index);
 
 			const { member, team, role } = row;
@@ -104,6 +103,7 @@ const importGithubTeamMembers = async (options) => {
 				statusText,
 				errorMessage,
 			});
+			progressBar.increment();
 			await delay(waitTime);
 		}
 

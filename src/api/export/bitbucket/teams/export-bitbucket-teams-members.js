@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	doRequest,
 	getStringifier,
@@ -44,8 +45,16 @@ const getTeamMembers = async (options, urlOpts) => {
 const columns = ['member', 'team', 'role'];
 
 const exportBitbucketTeamMembers = async (options) => {
-	const { organization: org, inputFile, outputFile, waitTime } = options;
-	const teams = (await getData(inputFile)).map((row) => row.team);
+	const { organization: org, inputFile, outputFile, waitTime, skip } = options;
+	const teams = (await getData(inputFile))
+		.map((row) => row.team)
+		.slice(Number(skip));
+	const progressBar = new progress.SingleBar(
+		{},
+		progress.Presets.shades_classic,
+	);
+	progressBar.start(teams.length, 0);
+
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${org}-bitbucket-team-members-${currentTime()}.csv`;
@@ -64,8 +73,11 @@ const exportBitbucketTeamMembers = async (options) => {
 			processTeamMembers(team, teamMembersInfo.values, stringifier);
 			await delay(waitTime);
 		}
+
+		progressBar.increment();
 	}
 
+	progressBar.stop();
 	stringifier.end();
 };
 

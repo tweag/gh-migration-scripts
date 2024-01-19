@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	doRequest,
 	getData,
@@ -62,8 +63,15 @@ const exportGitlabTeamMembers = async (options) => {
 		outputFile,
 		waitTime,
 		batchSize,
+		skip,
 	} = options;
-	const teams = await getData(inputFile);
+	const teams = (await getData(inputFile)).slice(Number(skip));
+	const progressBar = new progress.SingleBar(
+		{},
+		progress.Presets.shades_classic,
+	);
+	progressBar.start(teams.length, 0);
+
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${org}-gitlab-teams-members-${currentTime()}.csv`;

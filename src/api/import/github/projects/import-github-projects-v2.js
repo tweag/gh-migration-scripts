@@ -1,4 +1,5 @@
 import fs from 'fs';
+import progress from 'cli-progress';
 import { doRequest } from '../../../../services/utils.js';
 import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
 
@@ -124,7 +125,14 @@ const showMissingStatuses = (title, missingStatuses) => {
 	}
 };
 
-const addProjects = async (projects, ownerId) => {
+const addProjects = async (projects, ownerId, skip) => {
+	projects = projects.slice(skip);
+	const progressBar = new progress.SingleBar(
+		{},
+		progress.Presets.shades_classic,
+	);
+	progressBar.start(projects.length, 0);
+
 	for (const project of projects) {
 		const {
 			title,
@@ -156,7 +164,10 @@ const addProjects = async (projects, ownerId) => {
 		});
 
 		if (responseId) console.log('Successfully updated project: ', title);
+		progressBar.increment();
 	}
+
+	progressBar.stop();
 };
 
 const checkIfProjectExists = async (title) => {
@@ -189,13 +200,13 @@ const checkIfProjectExists = async (title) => {
 
 const importGithubProjectsV2 = async (options) => {
 	try {
-		const { organization, inputFile, token: pat } = options;
+		const { organization, inputFile, token: pat, skip } = options;
 		org = organization;
 		token = pat;
 		const projects = JSON.parse(fs.readFileSync(inputFile, 'utf8'));
 		const ownerId = await getOwnerId();
 
-		await addProjects(projects, ownerId);
+		await addProjects(projects, ownerId, Number(skip));
 	} catch (err) {
 		console.log(err);
 	}

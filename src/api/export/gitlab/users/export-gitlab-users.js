@@ -39,11 +39,14 @@ const getUsersRequest = async (options, urlOpts) => {
 
 const columns = ['login'];
 
+const getOutputFileName = (outputFile, org) => {
+	if (outputFile && outputFile.endsWith('.csv')) return outputFile;
+	return `${org}-gitlab-users-${currentTime()}.csv`;
+};
+
 const getGitlabUsers = async (options) => {
 	const { organization: org, outputFile, waitTime, batchSize } = options;
-	const outputFileName =
-		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${org}-gitlab-users-${currentTime()}.csv`;
+	const outputFileName = getOutputFileName(outputFile, org);
 	const stringifier = getStringifier(outputFileName, columns);
 
 	let { data: usersInfo } = await getUsersRequest(options, { idAfter: null });

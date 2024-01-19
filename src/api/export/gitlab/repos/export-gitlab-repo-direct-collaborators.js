@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	doRequest,
 	getData,
@@ -57,6 +58,11 @@ const getReposDirectCollaborators = async (options, urlOpts) => {
 
 const columns = ['repo', 'login', 'role'];
 
+const getOutputFileName = (outputFile, org) => {
+	if (outputFile && outputFile.endsWith('.csv')) return outputFile;
+	return `${org}-gitlab-repo-direct-collaborators-${currentTime()}.csv`;
+};
+
 const exportGitlabRepoDirectCollaborators = async (options) => {
 	const {
 		organization: org,
@@ -64,12 +70,17 @@ const exportGitlabRepoDirectCollaborators = async (options) => {
 		outputFile,
 		waitTime,
 		batchSize,
+		skip,
 	} = options;
-	console.log({ inputFile });
-	const repos = await getData(inputFile);
-	const outputFileName =
-		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${org}-gitlab-repo-direct-collaborators-${currentTime()}.csv`;
+
+	const repos = (await getData(inputFile)).slice(Number(skip));
+	const progressBar = new progress.SingleBar(
+		{},
+		progress.Presets.shades_classic,
+	);
+	progressBar.start(repos.length, 0);
+
+	const outputFileName = getOutputFileName(outputFile, org);
 	const stringifier = getStringifier(outputFileName, columns);
 
 	for (const repo of repos) {
@@ -91,8 +102,11 @@ const exportGitlabRepoDirectCollaborators = async (options) => {
 			reposLength = repoUsersInfo.length;
 			await delay(waitTime);
 		}
+
+		progressBar.increment();
 	}
 
+	progressBar.stop();
 	stringifier.end();
 };
 

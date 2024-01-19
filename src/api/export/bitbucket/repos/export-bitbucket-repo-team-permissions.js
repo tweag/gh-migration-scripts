@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	doRequest,
 	getStringifier,
@@ -45,12 +46,25 @@ const getReposTeamsPermissions = async (options, urlOpts) => {
 const columns = ['repo', 'team', 'permission'];
 
 const exportBitbucketRepoTeamPermissions = async (options) => {
-	const { organization: project, inputFile, outputFile, waitTime } = options;
-	const repos = (await getData(inputFile)).map((row) => row.repo);
+	const {
+		organization: project,
+		inputFile,
+		outputFile,
+		waitTime,
+		skip,
+	} = options;
+	const repos = (await getData(inputFile))
+		.map((row) => row.repo)
+		.slice(Number(skip));
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${project}-bitbucket-repo-teams-permissions-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
+	const progressBar = new progress.SingleBar(
+		{},
+		progress.Presets.shades_classic,
+	);
+	progressBar.start(repos.length, 0);
 
 	for (const repo of repos) {
 		let repoTeamsInfo = await getReposTeamsPermissions(options, { repo });
@@ -65,8 +79,11 @@ const exportBitbucketRepoTeamPermissions = async (options) => {
 			processReposTeamsPermissions(repo, repoTeamsInfo.values, stringifier);
 			await delay(waitTime);
 		}
+
+		progressBar.increment();
 	}
 
+	progressBar.stop();
 	stringifier.end();
 };
 

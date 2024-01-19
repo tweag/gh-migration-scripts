@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import progress from 'cli-progress';
+import Table from 'cli-table';
 import {
 	doRequest,
 	getData,
@@ -8,6 +9,8 @@ import {
 	delay,
 	currentTime,
 } from '../../../../services/utils.js';
+import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 import {
 	GITHUB_API_URL,
 	SUCCESS_STATUS,
@@ -37,6 +40,18 @@ const deleteRequest = async (repo, options) => {
 	return doRequest(config);
 };
 
+const getOutputFileName = (outputFile, org) => {
+	if (outputFile && outputFile.endsWith('.csv')) return outputFile;
+	return `${org}-delete-repos-status-${currentTime()}.csv`;
+};
+
+const columns = ['repo', 'status', 'statusText', 'errorMessage'];
+const tableHead = [
+	'Organization',
+	'Total no. of repos',
+	'No. of repos deleted',
+].map((h) => speak.successColor(h));
+
 const deleteGithubRepos = async (options) => {
 	try {
 		const {
@@ -51,11 +66,12 @@ const deleteGithubRepos = async (options) => {
 
 		if (repo) isMultiple = false;
 
-		const columns = ['repo', 'status', 'statusText', 'errorMessage'];
-		const outputFileName =
-			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-			`${org}-delete-repos-status-${currentTime()}.csv`;
+		const outputFileName = getOutputFileName(outputFile, org);
 		const stringifier = getStringifier(outputFileName, columns);
+		const table = new Table({
+			chars: tableChars,
+			head: tableHead,
+		});
 
 		let repositories;
 
@@ -66,10 +82,12 @@ const deleteGithubRepos = async (options) => {
 			repositories = repositoriesData.map((r) => r.repo).slice(skip);
 		}
 		let index = 0;
+		let failedRequests = 0;
 		let progressBar;
+		let totalCount = 1;
 
 		if (isMultiple) {
-			const totalCount = repositories.length;
+			totalCount = repositories.length;
 			progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
 			progressBar.start(totalCount, 0);
 		}
@@ -84,6 +102,7 @@ const deleteGithubRepos = async (options) => {
 			let errorMessage = '';
 
 			if (!response.data) {
+				failedRequests++;
 				status = response.status;
 				statusText = response.statusText;
 				errorMessage = response.errorMessage;
@@ -96,6 +115,7 @@ const deleteGithubRepos = async (options) => {
 
 		if (isMultiple) progressBar.stop();
 
+		if (isMultiple) table.push([org, totalCount, totalCount - failedRequests]);
 		stringifier.end();
 	} catch (error) {
 		console.error(error);

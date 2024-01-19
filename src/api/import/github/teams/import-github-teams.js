@@ -96,7 +96,6 @@ const importGithubTeams = async (options) => {
 		let index = 0;
 
 		for (const team of teams) {
-			progressBar.increment();
 			console.log(++index);
 
 			const { parentTeam } = team;
@@ -121,6 +120,7 @@ const importGithubTeams = async (options) => {
 				}
 			}
 
+			progressBar.increment();
 			await createOperations(options, team, parentTeamId, stringifier);
 		}
 

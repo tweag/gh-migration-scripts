@@ -19,3 +19,21 @@ export const json = (msg) => console.log(msg, null, 2);
 export const warn = (msg) => console.log(warnColor(msg));
 
 export const info = (msg) => console.log(infoColor(msg));
+
+export const tableChars = {
+	top: '═',
+	'top-mid': '╤',
+	'top-left': '╔',
+	'top-right': '╗',
+	bottom: '═',
+	'bottom-mid': '╧',
+	'bottom-left': '╚',
+	'bottom-right': '╝',
+	left: '║',
+	'left-mid': '╟',
+	mid: '─',
+	'mid-mid': '┼',
+	right: '║',
+	'right-mid': '╢',
+	middle: '│',
+};

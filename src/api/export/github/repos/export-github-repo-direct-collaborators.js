@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import progress from 'cli-progress';
-import * as speak from '../../../../services/speak.js';
+import * as speak from '../../../../services/style-utils.js';
 import {
 	doRequest,
 	getData,

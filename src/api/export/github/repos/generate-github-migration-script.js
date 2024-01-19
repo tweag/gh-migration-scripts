@@ -3,7 +3,7 @@
 import Ora from 'ora';
 import fs from 'node:fs';
 import { getData } from '../../../../services/utils.js';
-import * as speak from '../../../../services/speak.js';
+import * as speak from '../../../../services/style-utils.js';
 
 const spinner = Ora();
 

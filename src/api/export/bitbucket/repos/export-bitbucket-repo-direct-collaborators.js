@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import progress from 'cli-progress';
 import {
 	doRequest,
 	getStringifier,
@@ -63,12 +64,19 @@ const getReposDirectCollaborators = async (options, urlOpts) => {
 const columns = ['repo', 'login', 'role'];
 
 const exportBitbucketRepoDirectCollaborators = async (options) => {
-	const { organization: org, inputFile, outputFile, waitTime } = options;
-	const repos = (await getData(inputFile)).map((row) => row.repo);
+	const { organization: org, inputFile, outputFile, waitTime, skip } = options;
+	const repos = (await getData(inputFile))
+		.map((row) => row.repo)
+		.slice(Number(skip));
 	const outputFileName =
 		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
 		`${org}-bitbucket-repo-direct-collaborators-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
+	const progressBar = new progress.SingleBar(
+		{},
+		progress.Presets.shades_classic,
+	);
+	progressBar.start(repos.length, 0);
 
 	for (const repo of repos) {
 		let repoUsersInfo = await getReposDirectCollaborators(options, { repo });
@@ -83,8 +91,11 @@ const exportBitbucketRepoDirectCollaborators = async (options) => {
 			processReposDirectCollaborators(repo, repoUsersInfo.values, stringifier);
 			await delay(waitTime);
 		}
+
+		progressBar.increment();
 	}
 
+	progressBar.stop();
 	stringifier.end();
 };
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import progress from 'cli-progress';
+import Table from 'cli-table';
 import {
 	doRequest,
 	delay,
@@ -9,6 +10,8 @@ import {
 	currentTime,
 } from '../../../../services/utils.js';
 import { archiveFunction } from './utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
+import * as speak from '../../../../services/style-utils.js';
 import {
 	ARCHIVE_ERROR_MESSAGE,
 	ARCHIVE_STATUS_CODE,
@@ -16,6 +19,20 @@ import {
 	SUCCESS_STATUS,
 } from '../../../../services/constants.js';
 
+const columns = [
+	'repo',
+	'login',
+	'role',
+	'status',
+	'statusText',
+	'errorMessage',
+];
+
+const tableHead = [
+	'Repo',
+	'No. of collaborators added',
+	'No. of failedRequests',
+].map((h) => speak.successColor(h));
 const getUsersRepoConfig = ({ options, repo, login, role }) => {
 	const { organization: org, serverUrl, token } = options;
 	let url = `${GITHUB_API_URL}/repos/${org}/${repo}/collaborators/${login}`;
@@ -49,6 +66,42 @@ const setDirectCollaborator = async (details) => {
 	return doRequest(config);
 };
 
+const getOutputFileName = (outputFile, org) => {
+	if (outputFile && outputFile.endsWith('.csv')) return outputFile;
+	return `${org}-set-repo-collaborators-status-${currentTime()}.csv`;
+};
+
+const setReposMap = (reposMap, repo, type) => {
+	if (type === 'succeeded') {
+		if (!reposMap.has(repo)) {
+			reposMap.set(repo, [1, 0]);
+		} else {
+			const [succeededNum, failedNum] = reposMap.get(repo);
+			reposMap.set(repo, [succeededNum + 1, failedNum]);
+		}
+	} else {
+		if (!reposMap.has(repo)) {
+			reposMap.set(repo, [0, 1]);
+		} else {
+			const [succeededNum, failedNum] = reposMap.get(repo);
+			reposMap.set(repo, [succeededNum, failedNum + 1]);
+		}
+	}
+};
+
+const printTable = (reposMap) => {
+	const table = new Table({
+		chars: tableChars,
+		head: tableHead,
+	});
+
+	for (const [repo, count] of reposMap) {
+		table.push([repo, count[0], count[1]]);
+	}
+
+	console.log(table.toString());
+};
+
 const importGithubRepoDirectCollaborators = async (options) => {
 	try {
 		const {
@@ -70,17 +123,7 @@ const importGithubRepoDirectCollaborators = async (options) => {
 		}
 
 		const output = outputFile;
-		const columns = [
-			'repo',
-			'login',
-			'role',
-			'status',
-			'statusText',
-			'errorMessage',
-		];
-		const outputFileName =
-			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-			`${org}-set-repo-collaborators-status-${currentTime()}.csv`;
+		const outputFileName = getOutputFileName(output, org);
 		const stringifier = getStringifier(outputFileName, columns);
 		const progressBar = new progress.SingleBar(
 			{},
@@ -88,6 +131,7 @@ const importGithubRepoDirectCollaborators = async (options) => {
 		);
 		progressBar.start(reposData.length, 0);
 		let index = 0;
+		const reposMap = new Map();
 
 		for (const repoData of reposData) {
 			console.log(++index);
@@ -108,6 +152,9 @@ const importGithubRepoDirectCollaborators = async (options) => {
 				status = response.status;
 				statusText = response.statusText;
 				errorMessage = response.errorMessage;
+				setReposMap(reposMap, repo, 'failed');
+			} else {
+				setReposMap(reposMap, repo, 'succeeded');
 			}
 
 			if (
@@ -148,6 +195,7 @@ const importGithubRepoDirectCollaborators = async (options) => {
 			await delay(waitTime);
 		}
 
+		printTable(reposMap);
 		progressBar.stop();
 		stringifier.end();
 	} catch (error) {
