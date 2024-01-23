@@ -2,10 +2,14 @@
 
 import Ora from 'ora';
 import fs from 'node:fs';
+import Table from 'cli-table';
 import { getData } from '../../../../services/utils.js';
 import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 
 const spinner = Ora();
+
+const tableHead = ['No.', 'Repo'].map((h) => speak.successColor(h));
 
 const getScript = (repo, visibility, options) => {
 	const {
@@ -57,19 +61,25 @@ const saveScriptToFile = (scriptsArr, options) => {
 
 const generateGithubMigrationScript = async (options) => {
 	try {
+		const table = new Table({
+			chars: tableChars,
+			head: tableHead,
+		});
 		spinner.start(speak.successColor('Generating GHES migration script'));
 		const { inputFile } = options;
 
 		const rows = await getData(inputFile);
 		const scriptsArr = [];
 
-		for (const row of rows) {
-			const { repo, visibility } = row;
+		for (let i = 0; i < rows.length; i++) {
+			const { repo, visibility } = rows[i];
 			const script = getScript(repo, visibility, options);
 			scriptsArr.push(script);
+			table.push([i + 1, repo]);
 		}
 
 		saveScriptToFile(scriptsArr, options);
+		console.log(table.toString());
 	} catch (error) {
 		speak.error(error);
 		spinner.fail(speak.errorColor('Failed to generate GHES migration script'));

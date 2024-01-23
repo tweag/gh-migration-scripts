@@ -1,8 +1,13 @@
+import Table from 'cli-table';
 import exportGithubRepos from './export-github-repos.js';
 import getGitlabRepositories from '../../gitlab/repos/export-gitlab-repos.js';
 import exportGithubReposMigrationStatus from './export-github-repos-migration-status.js';
 import { GITHUB_HOST, GITLAB_HOST } from '../../../../services/constants.js';
 import { getStringifier, getData } from '../../../../services/utils.js';
+import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
+
+const tableHead = ['No.', 'Missing Repos'].map((h) => speak.successColor(h));
 
 const getRepoNames = async (options, gitHost, sourceFile) => {
 	if (sourceFile) {
@@ -34,27 +39,41 @@ const getMissingRepos = (repoNames, migratedRepos) => {
 };
 
 const exportGithubMissingRepos = async (options) => {
-	const {
-		sourceOrg,
-		organization: ghecOrg,
-		gitHost,
-		sourceFile,
-		outputFile,
-		token,
-	} = options;
-	const outputFileName =
-		(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-		`${sourceOrg}-${ghecOrg}-ghec-missing-repos-${currentTime()}.csv`;
-	const stringifier = getStringifier(outputFileName, ['repo']);
-	const repoNames = await getRepoNames(options, gitHost, sourceFile);
+	try {
+		const {
+			sourceOrg,
+			organization: ghecOrg,
+			gitHost,
+			sourceFile,
+			outputFile,
+			token,
+		} = options;
+		const outputFileName =
+			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
+			`${sourceOrg}-${ghecOrg}-ghec-missing-repos-${currentTime()}.csv`;
+		const stringifier = getStringifier(outputFileName, ['repo']);
+		const table = new Table({
+			chars: tableChars,
+			head: tableHead,
+		});
+		const repoNames = await getRepoNames(options, gitHost, sourceFile);
 
-	options.organization = ghecOrg;
-	options.token = token;
-	const migratedRepos = await exportGithubReposMigrationStatus(options);
-	const missingRepos = getMissingRepos(repoNames, migratedRepos);
-	missingRepos.forEach((repoName) => stringifier.write({ repo: repoName }));
+		options.organization = ghecOrg;
+		options.token = token;
+		const migratedRepos = await exportGithubReposMigrationStatus(options);
+		const missingRepos = getMissingRepos(repoNames, migratedRepos);
 
-	stringifier.end();
+		for (let i = 0; i < missingRepos.length; i++) {
+			const repoName = missingRepos[i];
+			table.push([i + 1, repoName]);
+			stringifier.write({ repo: repoName });
+		}
+
+		stringifier.end();
+		console.log(table.toString());
+	} catch (error) {
+		speak.error(error);
+	}
 };
 
 export default exportGithubMissingRepos;

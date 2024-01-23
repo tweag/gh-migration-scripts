@@ -10,8 +10,11 @@ import {
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
 import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 import https from 'https';
 import progress from 'cli-progress';
+import Table from 'cli-table';
 
 const spinner = Ora();
 let progressBar;
@@ -35,6 +38,14 @@ let fetched = {};
  * Count number of repo
  */
 let count = 0;
+
+let totalCount = 0;
+
+let table;
+
+const tableHead = ['Organization', 'No. of repositories'].map((h) =>
+	speak.successColor(h),
+);
 
 /**
  * Org metrics
@@ -99,6 +110,10 @@ export const fetchOrgInfo = async (
  * @param {object} options the options
  */
 const exportGithubRepos = async (options) => {
+	table = new Table({
+		chars: tableChars,
+		head: tableHead,
+	});
 	count = 0;
 	opts = options;
 	const response = await fetchRepoInOrg(
@@ -129,12 +144,15 @@ const exportGithubRepos = async (options) => {
 export const fetchingController = async () => {
 	// fetching PR and ISSUE metrics
 	await fetchRepoMetrics(fetched.data.organization.repositories.edges);
+	const org = opts.organization.replace(/\s/g, '');
 
 	if (metrics) {
-		const org = opts.organization.replace(/\s/g, '');
 		await storeRepoMetrics(org);
 		await storeOrgMetrics(org);
 	}
+
+	table.push([org, metrics.length]);
+	console.log(table.toString());
 
 	return metrics;
 };

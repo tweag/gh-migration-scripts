@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 import progress from 'cli-progress';
+import Table from 'cli-table';
 import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 import {
 	doRequest,
 	getData,
@@ -39,6 +41,15 @@ const fetchRepoDirectCollaborators = async (repo, options) => {
 	return doRequest(config);
 };
 
+const getOutputFileName = (org, outputFile) => {
+	if (outputFile && outputFile.endsWith('.csv')) return outputFile;
+	return `${org}-repo-direct-collaborators-${currentTime()}.csv`;
+};
+
+const tableHead = ['Repo', 'No. of direct collaborators'].map((h) =>
+	speak.successColor(h),
+);
+
 const exportGithubRepoDirectCollaborators = async (options) => {
 	try {
 		const {
@@ -57,14 +68,16 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 
 		const columns = ['repo', 'login', 'role'];
 		const statusColumns = ['repo', 'status', 'statusText', 'errorMessage'];
-		const outputFileName =
-			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-			`${org}-repo-direct-collaborators-${currentTime()}.csv`;
+		const outputFileName = getOutputFileName(org, outputFile);
 		const stringifier = getStringifier(outputFileName, columns);
 		const statusStringifier = getStringifier(
 			`${org}-repo-direct-collaborators-status.csv`,
 			statusColumns,
 		);
+		const table = new Table({
+			head: tableHead,
+			chars: tableChars,
+		});
 		let enterpriseUsers = [];
 		let outsideCollaborators = [];
 
@@ -100,6 +113,7 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 			let status = response.status;
 			let statusText = response.statusText;
 			let errorMessage = response.errorMessage;
+			let collaboratorsCount = 0;
 
 			if (response.data) {
 				const directCollaborators = response.data;
@@ -119,12 +133,14 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 
 					(status = SUCCESS_STATUS), (statusText = '');
 					errorMessage = '';
+					collaboratorsCount++;
 					stringifier.write({ repo, login, role });
 				}
 			}
 
 			statusStringifier.write({ repo, status, statusText, errorMessage });
 			progressBar.increment();
+			table.push([repo, collaboratorsCount]);
 			await delay(waitTime);
 		}
 
@@ -133,6 +149,7 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 			`Successfully saved repositories direct collaborators to ${outputFileName}`,
 		);
 		progressBar.stop();
+		console.log(table.toString());
 	} catch (error) {
 		speak.error(error);
 		speak.error('Failed to get repositories direct collaborators');

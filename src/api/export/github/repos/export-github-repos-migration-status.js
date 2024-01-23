@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
+import Table from 'cli-table';
 import fs from 'fs';
 import {
 	delay,
@@ -10,6 +11,8 @@ import {
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
 import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 import https from 'https';
 const spinner = Ora();
 
@@ -32,6 +35,10 @@ let fetched = {};
  * Count number of repo
  */
 let count = 0;
+
+let table;
+
+const tableHead = ['Repo', 'Failure Reason'].map((h) => speak.successColor(h));
 
 /**
  * Fetch batchSize migration repositories at a cursor given Organization and valid PAT
@@ -66,6 +73,10 @@ export const fetchMigrationsepoIsnOrg = async (
  * @param {object} options the options
  */
 const exportGithubReposMigrationStatus = async (options) => {
+	table = new Table({
+		head: tableHead,
+		chars: tableChars,
+	});
 	count = 0;
 	opts = options;
 	const response = await fetchMigrationRepoInOrg(
@@ -92,6 +103,7 @@ export const fetchingController = async () => {
 
 	const org = opts.organization.replace(/\s/g, '');
 	await storeMigrationRepoMetrics(org);
+	console.log(table.toString());
 };
 
 /**
@@ -183,6 +195,7 @@ export const storeMigrationRepoMetrics = async (organization) => {
 		stringifier.write(metric);
 
 		if (metric.state === 'failed') {
+			table.push([metric.repositoryName, metric.failureReason]);
 			failedStringifier.write(metric);
 		}
 	}

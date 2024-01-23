@@ -115,7 +115,10 @@ const deleteGithubRepos = async (options) => {
 
 		if (isMultiple) progressBar.stop();
 
-		if (isMultiple) table.push([org, totalCount, totalCount - failedRequests]);
+		if (isMultiple) {
+			table.push([org, totalCount, totalCount - failedRequests]);
+			console.log(table.toString());
+		}
 		stringifier.end();
 	} catch (error) {
 		console.error(error);

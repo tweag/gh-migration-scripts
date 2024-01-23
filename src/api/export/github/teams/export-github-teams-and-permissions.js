@@ -2,6 +2,7 @@
 
 import Ora from 'ora';
 import progress from 'cli-progress';
+import Table from 'cli-table';
 import fs from 'fs';
 import {
 	delay,
@@ -13,6 +14,8 @@ import {
 import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
 import processTeamsMembers from '../../../../services/process-teams-members.js';
 import processTeamsRepos from '../../../../services/process-teams-repos.js';
+import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 import https from 'https';
 
 const spinner = Ora();
@@ -35,6 +38,10 @@ let fetched = {};
 let count = 0;
 
 let progressBar;
+
+let table;
+
+const tableHead = ['No.', 'Team'].map((h) => speak.successColor(h));
 
 export const fetchTeamInOrg = async (
 	org,
@@ -95,6 +102,10 @@ export const fetchMembersInTeam = async (
 };
 
 const exportGithubTeamsAndPermissions = async (options) => {
+	table = new Table({
+		chars: tableChars,
+		head: tableHead,
+	});
 	count = 0;
 	opts = options;
 	const response = await fetchTeamInOrg(
@@ -269,8 +280,9 @@ export const storeTeamMetrics = async (organization) => {
 	const stringifier = getStringifier(path);
 	spinner.start('Exporting...');
 
-	for (const metric of metrics) {
-		stringifier.write(metric);
+	for (let i = 0; i < metrics.length; i++) {
+		stringifier.write(metrics[i]);
+		table.push([i + 1, metrics[i].name]);
 	}
 
 	processTeamsMembers(metrics, membersPath, opts);

@@ -2,6 +2,7 @@
 
 import Ora from 'ora';
 import progress from 'cli-progress';
+import Table from 'cli-table';
 import fs from 'fs';
 import {
 	delay,
@@ -10,6 +11,8 @@ import {
 	currentTime,
 } from '../../../../services/utils.js';
 import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 import https from 'https';
 
 const spinner = Ora();
@@ -37,6 +40,9 @@ let count = 0;
 let totalCount = 0;
 
 let progressBar;
+let table;
+
+const tableHead = ['No.', 'Project V1 Title'].map((h) => speak.successColor(h));
 
 export const fetchProjectsV1InOrg = async (
 	org,
@@ -57,6 +63,10 @@ export const fetchProjectsV1InOrg = async (
 };
 
 const exportGithubProjectsV1 = async (options) => {
+	table = new Table({
+		chars: tableChars,
+		head: tableHead,
+	});
 	count = 0;
 	opts = options;
 	const response = await fetchProjectsV1InOrg(
@@ -88,6 +98,12 @@ export const fetchingController = async () => {
 		const org = opts.organization.replace(/\s/g, '');
 		await storeProjectsV1Metrics(org);
 	}
+
+	for (let i = 0; i < metrics.length; i++) {
+		table.push([i + 1, metrics[i].title]);
+	}
+
+	console.log(table.toString());
 };
 
 const convertProjectV1ToProjectV2 = (project) => {
