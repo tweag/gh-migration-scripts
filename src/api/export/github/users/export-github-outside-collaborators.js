@@ -96,7 +96,7 @@ const exportGithubOutsideCollaborators = async (options) => {
 		speak.success(`Written results to output file: ${outputFileName}`);
 		spinner.succeed(
 			speak.successColor(
-				`Successfully process outside collaborators for ${org}`,
+				`Successfully processed outside collaborators for ${org}`,
 			),
 		);
 		return outsideCollaborators;

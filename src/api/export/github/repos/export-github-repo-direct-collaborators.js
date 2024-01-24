@@ -116,6 +116,8 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 			let collaboratorsCount = 0;
 
 			if (response.data) {
+				(status = SUCCESS_STATUS), (statusText = '');
+				errorMessage = '';
 				const directCollaborators = response.data;
 				const directUsers = directCollaborators.map((user) => {
 					user.login = user.login.toLowerCase();
@@ -131,8 +133,6 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 					if (enterpriseUsers.length > 0 && !enterpriseUsers.includes(login))
 						continue;
 
-					(status = SUCCESS_STATUS), (statusText = '');
-					errorMessage = '';
 					collaboratorsCount++;
 					stringifier.write({ repo, login, role });
 				}

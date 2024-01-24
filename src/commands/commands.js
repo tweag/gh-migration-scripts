@@ -11,6 +11,8 @@ import {
 	handleOrg,
 	handleUsername,
 } from './handlers.js';
+import exportGithubRepoBranches from '../api/export/github/repos/export-github-repo-branches.js';
+import exportGithubSelfHostedRunners from '../api/export/github/actions/export-github-self-hosted-runners.js';
 import exportGithubRepoDirectCollaborators from '../api/export/github/repos/export-github-repo-direct-collaborators.js';
 import importGithubRepoDirectCollaborators from '../api/import/github/repos/import-github-repo-direct-collaborators.js';
 import importGithubRepoTeamPermission from '../api/import/github/repos/import-github-repo-team-permission.js';
@@ -34,6 +36,7 @@ import exportGitlabTeams from '../api/export/gitlab/teams/export-gitlab-teams.js
 import exportGitlabUsers from '../api/export/gitlab/users/export-gitlab-users.js';
 
 const inputFileScripts = [
+	exportGithubRepoBranches,
 	importGithubRepoDirectCollaborators,
 	importGithubRepoTeamPermission,
 	setGithubArchivedStatus,
@@ -49,6 +52,8 @@ const inputFileScripts = [
 ];
 
 const orgScripts = [
+	exportGithubRepoBranches,
+	exportGithubSelfHostedRunners,
 	importGithubRepoDirectCollaborators,
 	importGithubRepoTeamPermission,
 	setGithubArchivedStatus,
@@ -78,6 +83,8 @@ const orgScripts = [
 ];
 
 const serverUrlScripts = [
+	exportGithubRepoBranches,
+	exportGithubSelfHostedRunners,
 	ghecLastCommitCheck,
 	exportGitlabRepositories,
 	exportGitlabTeams,
