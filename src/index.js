@@ -31,6 +31,7 @@ import importGithubProjectsV2 from './api/import/github/projects/import-github-p
 // GitLab
 import exportGitlabRepositories from './api/export/gitlab/repos/export-gitlab-repos.js';
 import exportGitlabRepoDirectCollaborators from './api/export/gitlab/repos/export-gitlab-repo-direct-collaborators.js';
+import exportGitlabRepoBranches from './api/export/gitlab/repos/export-gitlab-repo-branches.js';
 import exportGitlabTeams from './api/export/gitlab/teams/export-gitlab-teams.js';
 import exportGitlabTeamMembers from './api/export/gitlab/teams/export-gitlab-team-members.js';
 import exportGitlabUsers from './api/export/gitlab/users/export-gitlab-users.js';
@@ -774,6 +775,29 @@ program
 	.description('Fetches all repositories of a Gitlab organization.')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGitlabRepositories),
+	);
+
+program
+	.command(getFunctionName(exportGitlabRepoBranches))
+	.option(
+		args.batchSize.argument,
+		args.batchSize.description,
+		args.batchSize.defaultValue,
+	)
+	.option(args.inputFile.argument, 'Input file with repositories names')
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('egrb')
+	.description('Exports branches of every repos of a Gitlab organization.')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, exportGitlabRepoBranches),
 	);
 
 program

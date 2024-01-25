@@ -38,8 +38,6 @@ const getReposDirectCollaboratorsConfig = (options, urlOpts) => {
 
 	if (idAfter) url = url + `&id_after=${idAfter}`;
 
-	console.log({ url, token, batchSize, serverUrl });
-
 	return {
 		method: 'get',
 		maxBodyLength: Infinity,
