@@ -34,6 +34,7 @@ import exportGithubProjectsV2 from '../api/export/github/projects/export-github-
 import exportGitlabRepositories from '../api/export/gitlab/repos/export-gitlab-repos.js';
 import exportGitlabTeams from '../api/export/gitlab/teams/export-gitlab-teams.js';
 import exportGitlabUsers from '../api/export/gitlab/users/export-gitlab-users.js';
+import exportBitbucketRepoBranches from '../api/export/bitbucket/repos/export-bitbucket-repo-branches.js';
 
 const inputFileScripts = [
 	exportGithubRepoBranches,
@@ -49,6 +50,7 @@ const inputFileScripts = [
 	importGithubMembershipInOrg,
 	exportGitlabReposDirectCollaborators,
 	exportGitlabTeamMembers,
+	exportBitbucketRepoBranches,
 ];
 
 const orgScripts = [
@@ -80,6 +82,7 @@ const orgScripts = [
 	generateGithubMigrationScript,
 	ghecLastCommitCheck,
 	exportGithubMissingRepos,
+	exportBitbucketRepoBranches,
 ];
 
 const serverUrlScripts = [
@@ -91,6 +94,7 @@ const serverUrlScripts = [
 	exportGitlabTeamMembers,
 	exportGitlabUsers,
 	generateGithubMigrationScript,
+	exportBitbucketRepoBranches,
 ];
 
 const sourceOrgScripts = [

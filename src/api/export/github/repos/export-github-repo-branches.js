@@ -3,6 +3,7 @@
 import progress from 'cli-progress';
 import Table from 'cli-table';
 import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 import {
 	delay,
 	doRequest,

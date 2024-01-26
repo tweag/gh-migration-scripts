@@ -37,6 +37,7 @@ import exportGitlabTeamMembers from './api/export/gitlab/teams/export-gitlab-tea
 import exportGitlabUsers from './api/export/gitlab/users/export-gitlab-users.js';
 
 // Bitbucket
+import exportBitbucketRepoBranches from './api/export/bitbucket/repos/export-bitbucket-repo-branches.js';
 import generateBitbucketMigrationScript from './api/export/bitbucket/repos/generate-bitbucket-migration-script.js';
 import exportBitbucketRepoTeamPermissions from './api/export/bitbucket/repos/export-bitbucket-repo-team-permissions.js';
 import exportBitbucketRepo from './api/export/bitbucket/repos/export-bitbucket-repos.js';
@@ -1067,6 +1068,25 @@ program
 	.description('Fetches all teams of a Bitbucket project.')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketTeams),
+	);
+
+program
+	.command(getFunctionName(exportBitbucketRepoBranches))
+	.option(args.inputFile.argument, 'Input file with repository names')
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.requiredOption(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(args.skip.argument, args.skip.description, args.skip.defaultValue)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('ebrb')
+	.description('Fetches branches of all repositories of a bitbucket project')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, exportBitbucketRepoBranches),
 	);
 
 program
