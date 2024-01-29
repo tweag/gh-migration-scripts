@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { GIT_HOST, GITHUB_HOST, GITLAB_HOST } from '../services/constants.js';
 
 // Prompt for Personal Access Token
@@ -32,7 +31,7 @@ export const promptForInputFile = (msg) => {
 		{
 			type: 'text',
 			name: 'inputFile',
-			message: chalk.bgBlue.red(msg),
+			message: msg,
 		},
 	];
 };

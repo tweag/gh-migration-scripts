@@ -7,7 +7,7 @@ import { getStringifier, getData } from '../../../../services/utils.js';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
 
-const tableHead = ['No.', 'Missing Repos'].map((h) => speak.successColor(h));
+const tableHead = ['No.', 'Missing Repository'].map((h) => speak.successColor(h));
 
 const getRepoNames = async (options, gitHost, sourceFile) => {
 	if (sourceFile) {
@@ -38,6 +38,11 @@ const getMissingRepos = (repoNames, migratedRepos) => {
 	return repoNames.filter((repo) => !migratedRepoNames.includes(repo.name));
 };
 
+const getOutputFileName = (outputFile, sourceOrg, ghecOrg) => {
+	if (outputFile && outputFile.endsWith('.csv')) return outputFile;
+	return `${sourceOrg}-${ghecOrg}-ghec-missing-repos-${currentTime()}.csv`
+}
+
 const exportGithubMissingRepos = async (options) => {
 	try {
 		const {
@@ -48,9 +53,7 @@ const exportGithubMissingRepos = async (options) => {
 			outputFile,
 			token,
 		} = options;
-		const outputFileName =
-			(outputFile && outputFile.endsWith('.csv') && outputFile) ||
-			`${sourceOrg}-${ghecOrg}-ghec-missing-repos-${currentTime()}.csv`;
+		const outputFileName = getOutputFileName(outputFile, sourceOrg, ghecOrg);
 		const stringifier = getStringifier(outputFileName, ['repo']);
 		const table = new Table({
 			chars: tableChars,
@@ -65,12 +68,12 @@ const exportGithubMissingRepos = async (options) => {
 
 		for (let i = 0; i < missingRepos.length; i++) {
 			const repoName = missingRepos[i];
-			table.push([i + 1, repoName]);
+			table.push([`${i + 1}.`, repoName]);
 			stringifier.write({ repo: repoName });
 		}
 
 		stringifier.end();
-		console.log(table.toString());
+		console.log('\n' + table.toString());
 	} catch (error) {
 		speak.error(error);
 	}

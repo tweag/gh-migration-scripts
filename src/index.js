@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-undef */
 
 import { program } from 'commander';
 import { commandController } from './commands/commands.js';
@@ -27,6 +28,7 @@ import exportGithubMissingRepos from './api/export/github/repos/export-github-mi
 import exportGithubProjectsV1 from './api/export/github/projects/export-github-projects-v1.js';
 import exportGithubProjectsV2 from './api/export/github/projects/export-github-projects-v2.js';
 import importGithubProjectsV2 from './api/import/github/projects/import-github-projects-v2.js';
+import exportGithubRepoBranches from './api/export/github/repos/export-github-repo-branches.js';
 
 // GitLab
 import exportGitlabRepositories from './api/export/gitlab/repos/export-gitlab-repos.js';
@@ -51,6 +53,7 @@ const args = {
 	allowUntrustedSslCertificates: {
 		argument: '-a, --allow-untrusted-ssl-certificates',
 		description:
+			// eslint-disable-next-line quotes
 			"Allow connections to a GitHub API endpoint that presents a SSL certificate that isn't issued by a trusted CA",
 		defaultValue: false,
 	},
@@ -331,7 +334,7 @@ program
 	)
 	.option(
 		'-e, --enterprise-organizations <ENTERPRISE ORGANIZATION...>',
-		'List of organizations on the enterprise',
+		'List of organizations on the enterprise. Usage: -e org1 org2 org3',
 	)
 	.option(args.serverUrl.argument, args.serverUrl.description)
 	.option(args.outputFile.argument, args.outputFile.description)
@@ -342,8 +345,8 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('geu')
-	.description('Fetches all users on the enterprise')
+	.alias('egeu')
+	.description('Exports all users on the enterprise')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubEnterpriseUsers),
 	);
@@ -369,7 +372,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('gbeu')
-	.description('Fetches all users on the Bitbucket enterprise')
+	.description('Exports all users on the Bitbucket enterprise')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketEnterpriseUsers),
 	);
@@ -395,8 +398,9 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('gou')
-	.description("Fetches users' details in an organization")
+	.alias('egou')
+	// eslint-disable-next-line quotes
+	.description(`Exports users' details in an organization`)
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubOrgUsers),
 	);
@@ -419,7 +423,8 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('gbpu')
-	.description("Fetches users' details in a Bitbucket project")
+	// eslint-disable-next-line quotes
+	.description("Exports users' details in a Bitbucket project")
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketProjectUsers),
 	);
@@ -436,10 +441,28 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('goc')
-	.description('Fetches outside collaborators of an organization')
+	.alias('egoc')
+	.description('Exports outside collaborators of an organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubOutsideCollaborators),
+	);
+
+program
+	.command(getFunctionName(exportGithubRepoBranches))
+	.option(args.inputFile.argument, 'Input file name with repository names')
+	.option(args.serverUrl.argument, args.serverUrl.description)
+	.option(args.organization.argument, args.organization.description)
+	.option(args.outputFile.argument, args.outputFile.description)
+	.option(args.token.argument, args.token.description)
+	.option(
+		args.waitTime.argument,
+		args.waitTime.description,
+		args.waitTime.defaultValue,
+	)
+	.alias('egrb')
+	.description('Exports branches of given repositories of an organization')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, exportGithubRepoBranches),
 	);
 
 program
@@ -460,9 +483,9 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('grdc')
+	.alias('egrdc')
 	.description(
-		'Fetches the direct collaborators of repositories in an organization',
+		'Exports the direct collaborators of repositories in an organization',
 	)
 	.action(async (args) =>
 		commandController(
@@ -492,8 +515,8 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('gr')
-	.description('Fetches all repositories of an organization')
+	.alias('egr')
+	.description('Exports all repositories of an organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubRepos),
 	);
@@ -517,8 +540,8 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('gpms')
-	.description('Fetches migration status of repositories in an organization')
+	.alias('egrms')
+	.description('Exports migration status of repositories in an organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubReposMigrationStatus),
 	);
@@ -544,9 +567,9 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('gt')
+	.alias('egtp')
 	.description(
-		'Fetches all teams of an organization along with repo team permissions and team memberships.',
+		'Exports all teams of an organization along with repo team permissions and team memberships.',
 	)
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubTeamsAndPermissions),
@@ -572,8 +595,8 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('epv1')
-	.description('Fetches all V1 projects of an organization')
+	.alias('egpv1')
+	.description('Exports all V1 projects of an organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubProjectsV1),
 	);
@@ -598,8 +621,8 @@ program
 		args.waitTime.description,
 		args.waitTime.defaultValue,
 	)
-	.alias('epv2')
-	.description('Fetches all V2 projects of an organization')
+	.alias('egpv2')
+	.description('Exports all V2 projects of an organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubProjectsV2),
 	);
@@ -699,6 +722,7 @@ program
 	)
 	.alias('glcc')
 	.description(
+		// eslint-disable-next-line quotes
 		"Compares corresponding repositories' between source and GHEC for an organization for last updates and optionally deletes out-of-sync repositories in GHEC",
 	)
 	.action(async (args) => commandController('', args, ghecLastCommitCheck));
@@ -730,7 +754,7 @@ program
 	.option('-h --git-host <GIT HOST>', 'Git host name, eg. github, gitlab, etc.')
 	.alias('ghmr')
 	.description(
-		'Fetches the missing repositories in GHEC during and after migration',
+		'Exports the missing repositories in GHEC during and after migration',
 	)
 	.action(async (args) =>
 		commandController('', args, exportGithubMissingRepos),
@@ -773,7 +797,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggr')
-	.description('Fetches all repositories of a Gitlab organization.')
+	.description('Exports all repositories of a Gitlab organization.')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGitlabRepositories),
 	);
@@ -820,7 +844,7 @@ program
 	)
 	.alias('ggrdc')
 	.description(
-		'Fetches direct collaborators of all repositories of a Gitlab organization.',
+		'Exports direct collaborators of all repositories of a Gitlab organization.',
 	)
 	.action(async (args) =>
 		commandController(
@@ -847,7 +871,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggt')
-	.description('Fetches all teams of a Gitlab organization.')
+	.description('Exports all teams of a Gitlab organization.')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGitlabTeams),
 	);
@@ -870,7 +894,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggtm')
-	.description('Fetches members of all teams of a Gitlab organization')
+	.description('Exports members of all teams of a Gitlab organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGitlabTeamMembers),
 	);
@@ -892,7 +916,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ggu')
-	.description('Fetches all users of a Gitlab organization')
+	.description('Exports all users of a Gitlab organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGitlabUsers),
 	);
@@ -967,7 +991,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('gbeu')
-	.description('Fetches all users on the Bitbucket enterprise')
+	.description('Exports all users on the Bitbucket enterprise')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketEnterpriseUsers),
 	);
@@ -990,7 +1014,8 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('gbpu')
-	.description("Fetches users' details in a Bitbucket project")
+	// eslint-disable-next-line quotes
+	.description("Exports users' details in a Bitbucket project")
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketProjectUsers),
 	);
@@ -1013,7 +1038,7 @@ program
 	)
 	.alias('gbr')
 	.description(
-		'Fetches all repositories of a bitbucket organization (workspace)',
+		'Exports all repositories of a bitbucket organization (workspace)',
 	)
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketRepo),
@@ -1038,7 +1063,7 @@ program
 	)
 	.alias('gbrdc')
 	.description(
-		'Fetches users permissions of all repositories of a bitbucket organization (workspace)',
+		'Exports users permissions of all repositories of a bitbucket organization (workspace)',
 	)
 	.action(async (args) =>
 		commandController(
@@ -1065,7 +1090,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('gbt')
-	.description('Fetches all teams of a Bitbucket project.')
+	.description('Exports all teams of a Bitbucket project.')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketTeams),
 	);
@@ -1084,7 +1109,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('ebrb')
-	.description('Fetches branches of all repositories of a bitbucket project')
+	.description('Exports branches of all repositories of a bitbucket project')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketRepoBranches),
 	);
@@ -1108,7 +1133,7 @@ program
 	)
 	.alias('gbrtp')
 	.description(
-		'Fetches team permissions of all repositories of a bitbucket project',
+		'Exports team permissions of all repositories of a bitbucket project',
 	)
 	.action(async (args) =>
 		commandController(
@@ -1135,7 +1160,7 @@ program
 		args.waitTime.defaultValue,
 	)
 	.alias('gbtm')
-	.description('Fetches team members of a bitbucket project.')
+	.description('Exports team members of a bitbucket project.')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportBitbucketTeamMembers),
 	);

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import progress from 'cli-progress';
+import progressBar from 'progress-bar-cli';
 import Table from 'cli-table';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
@@ -14,6 +14,7 @@ import {
 import {
 	GITHUB_API_URL,
 	SUCCESS_STATUS,
+	PROGRESS_BAR_CLEAR_NUM,
 } from '../../../../services/constants.js';
 
 const columns = ['repo', 'branch', 'commit', 'protected'];
@@ -72,22 +73,18 @@ const exportGithubRepoBranches = async (options) => {
 			statusColumns,
 		);
 		const repos = (await getData(inputFile))
-			.map((repo) => repo.name)
-			.skip(Number(skip));
-		const progressBar = new progress.SingleBar(
-			{},
-			progress.Presets.shades_classic,
-		);
-		progressBar.start(repos.length, 0);
+			.map((repo) => repo.repo)
+			.slice(Number(skip));
 		let index = 0;
 
 		for (const repo of repos) {
+			progressBar.progressBar(index, repos.length, new Date(), PROGRESS_BAR_CLEAR_NUM);
 			const response = await fetchRepoBranches(repo, options);
 			const responseData = response.data;
 			let status = response.status;
 			let statusText = response.statusText;
 			let errorMessage = response.errorMessage;
-			console.log(index++);
+			index++;
 
 			if (responseData) {
 				status = SUCCESS_STATUS;
@@ -99,11 +96,12 @@ const exportGithubRepoBranches = async (options) => {
 					commit: branch.commit.sha,
 					protected: branch.protected,
 				}));
+				const branchesLength = branches.length;
 
-				table.push([index, repo, branches.length]);
+				table.push([index, repo, branchesLength]);
 				branches.forEach((branch) => stringifier.write(branch));
 				speak.success(
-					`Successfully exported branches for repo ${repo} (${index}/${repos.length})`,
+					`\nSuccessfully exported ${branchesLength} branches for repo: ` + speak.infoColor(`${repo}`),
 				);
 			}
 
@@ -115,12 +113,10 @@ const exportGithubRepoBranches = async (options) => {
 				errorMessage,
 			});
 			await delay(waitTime);
-			progressBar.increment();
 		}
 
-		console.log(table.toString());
+		console.log('\n' + table.toString());
 		stringifier.end();
-		progressBar.stop();
 
 		speak.success(`Written results to output file: ${outputFileName}`);
 		speak.success(`Successfully processed repos branches for ${org}`);

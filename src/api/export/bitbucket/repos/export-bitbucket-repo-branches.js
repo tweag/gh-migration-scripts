@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import progress from 'cli-progress';
+import progressBar from 'progress-bar-cli';
 import Table from 'cli-table';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
@@ -10,7 +10,7 @@ import {
 	currentTime,
 	delay,
 } from '../../../../services/utils.js';
-import { SUCCESS_STATUS } from '../../../../services/constants.js';
+import { SUCCESS_STATUS, PROGRESS_BAR_CLEAR_NUM } from '../../../../services/constants.js';
 
 const processRepoBranches = (repo, branches, stringifier) => {
 	for (const branch of branches) {
@@ -77,11 +77,6 @@ const exportBitbucketRepoBranches = async (options) => {
 			`status-${outputFileName}`,
 			statusColumns,
 		);
-		const progressBar = new progress.SingleBar(
-			{},
-			progress.Presets.shades_classic,
-		);
-		progressBar.start(repos.length, 0);
 		speak.success('Getting repos branches');
 		const table = new Table({
 			head: tableHead,
@@ -90,7 +85,8 @@ const exportBitbucketRepoBranches = async (options) => {
 		let index = 0;
 
 		for (const repo of repos) {
-			console.log(++index);
+			progressBar.progressBar(index, repos.length, new Date(), PROGRESS_BAR_CLEAR_NUM);
+			++index;
 			const response = await getRepoBranches(options, repo);
 
 			const responseData = response.data;

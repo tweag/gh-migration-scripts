@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
-import progress from 'cli-progress';
+import { progressBar } from 'progress-bar-cli';
 import Table from 'cli-table';
 import fs from 'fs';
 import {
@@ -10,7 +10,7 @@ import {
 	showGraphQLErrors,
 	currentTime,
 } from '../../../../services/utils.js';
-import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import { GITHUB_GRAPHQL_API_URL, PROGRESS_BAR_CLEAR_NUM } from '../../../../services/constants.js';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
 import https from 'https';
@@ -39,7 +39,6 @@ let count = 0;
  */
 let totalCount = 0;
 
-let progressBar;
 let table;
 
 const tableHead = ['No.', 'Project V2 Title'].map((h) => speak.successColor(h));
@@ -80,8 +79,11 @@ const exportGithubProjectsV2 = async (options) => {
 	showGraphQLErrors(response);
 	fetched = response.data;
 	totalCount = fetched.data.organization.projectsV2.totalCount;
-	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
-	progressBar.start(totalCount, 0);
+
+	if (totalCount === 0) {
+		speak.warn(`No projects V2 found for organization ${options.organization}`);
+		return;
+	}
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -92,7 +94,6 @@ export const fetchingController = async () => {
 	const nodes = fetched.data.organization.projectsV2.nodes;
 	const cursor = fetched.data.organization.projectsV2.pageInfo.endCursor;
 	await fetchProjectV2Metrics(nodes, cursor);
-	progressBar.stop();
 
 	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
@@ -103,7 +104,7 @@ export const fetchingController = async () => {
 		table.push([i + 1, metrics[i].title]);
 	}
 
-	console.log(table.toString());
+	console.log('\n' + table.toString());
 };
 
 const projectV2ItemsGql = () => {
@@ -341,7 +342,6 @@ const fetchNextItems = async (cursor, id) => {
 
 export const fetchProjectV2Metrics = async (projectsV2, cursor) => {
 	for (const projectV2 of projectsV2) {
-		progressBar.increment();
 		let hasNextItems = projectV2.items.pageInfo.hasNextPage;
 		let endCursor = cursor;
 
@@ -364,6 +364,8 @@ export const fetchProjectV2Metrics = async (projectsV2, cursor) => {
 			`(${count}/${fetched.data.organization.projectsV2.totalCount}) Fetching projects v2`,
 		);
 	}
+
+	progressBar(count - 1, totalCount, new Date(), PROGRESS_BAR_CLEAR_NUM);
 
 	// paginating calls
 	// fetch the next 2 projects V2
@@ -430,7 +432,7 @@ export function fetchProjectsV2Options(
 		data: JSON.stringify({
 			query: `{
 				organization(login: "${org}") {
-					projectsV2(first: 2${cursor}, query: "Gudof") {
+					projectsV2(first: 2${cursor}) {
 						totalCount
 						pageInfo {
 							hasNextPage

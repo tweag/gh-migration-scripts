@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
+import { progressBar } from 'progress-bar-cli';
 import Table from 'cli-table';
 import fs from 'fs';
 import {
@@ -10,7 +11,7 @@ import {
 	doRequest,
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
-import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import { GITHUB_GRAPHQL_API_URL, PROGRESS_BAR_CLEAR_NUM } from '../../../../services/constants.js';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
 import https from 'https';
@@ -35,10 +36,11 @@ let fetched = {};
  * Count number of repo
  */
 let count = 0;
+let totalCount = 0;
 
 let table;
 
-const tableHead = ['Repo', 'Failure Reason'].map((h) => speak.successColor(h));
+const tableHead = ['No.', 'Repo', 'Failure Reason'].map((h) => speak.successColor(h));
 
 /**
  * Fetch batchSize migration repositories at a cursor given Organization and valid PAT
@@ -49,7 +51,7 @@ const tableHead = ['Repo', 'Failure Reason'].map((h) => speak.successColor(h));
  * @param {string} cursor the last repository fetched
  * @returns {[Objects]} the fetched repo information
  */
-export const fetchMigrationsepoIsnOrg = async (
+export const fetchMigrationsRepoInOrg = async (
 	org,
 	token,
 	allowUntrustedSslCertificates,
@@ -79,15 +81,21 @@ const exportGithubReposMigrationStatus = async (options) => {
 	});
 	count = 0;
 	opts = options;
-	const response = await fetchMigrationRepoInOrg(
+	const response = await fetchMigrationsRepoInOrg(
 		options.organization,
 		options.token,
 		options.allowUntrustedSslCertificates,
 		'',
 	);
-
+		console.log(JSON.stringify(response, null, 2));
 	showGraphQLErrors(response);
 	fetched = response.data;
+	totalCount = fetched.data.organization.repositoryMigrations.totalCount;
+
+	if (totalCount === 0) {
+		speak.warn(`No migrations returned for organization ${options.organization}`);
+		return;
+	}
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -99,11 +107,11 @@ const exportGithubReposMigrationStatus = async (options) => {
  *
  */
 export const fetchingController = async () => {
-	await fetchMigrationRepoMetrics(fetched.data.organization.repositories.edges);
+	await fetchMigrationRepoMetrics(fetched.data.organization.repositoryMigrations.edges);
 
 	const org = opts.organization.replace(/\s/g, '');
 	await storeMigrationRepoMetrics(org);
-	console.log(table.toString());
+	console.log('\n' + table.toString());
 };
 
 /**
@@ -114,7 +122,7 @@ export const fetchingController = async () => {
 export const fetchMigrationRepoMetrics = async (repositories) => {
 	for (const repo of repositories) {
 		spinner.start(
-			`(${count}/${fetched.data.organization.repositoryMigrations.totalCount}) Fetching metrics for repo ${repo.node.name}`,
+			`(${count}/${totalCount}) Fetching metrics for repo ${repo.node.name}`,
 		);
 		const repoInfo = {
 			repo: repo.node.repositoryName,
@@ -129,9 +137,11 @@ export const fetchMigrationRepoMetrics = async (repositories) => {
 		count = count + 1;
 		metrics.push(repoInfo);
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.repositories.totalCount}) Fetching metrics for repo ${repo.node.name}`,
+			`(${count}/${totalCount}) Fetching metrics for repo ${repo.node.name}`,
 		);
 	}
+
+	progressBar(count - 1, totalCount, new Date(), PROGRESS_BAR_CLEAR_NUM);
 
 	// paginating calls
 	// if there are more than batchSize repos
@@ -139,17 +149,17 @@ export const fetchMigrationRepoMetrics = async (repositories) => {
 	if (repositories.length == opts.batchSize) {
 		// get cursor to last repository
 		spinner.start(
-			`(${count}/${fetched.data.organization.repositoryMigrations.totalCount}) Fetching next ${opts.batchSize} repos`,
+			`(${count}/${totalCount}) Fetching next ${opts.batchSize} repos`,
 		);
 		const cursor = repositories[repositories.length - 1].cursor;
-		const result = await fetchMigrationRepoInOrg(
+		const result = await fetchMigrationsRepoInOrg(
 			opts.organization,
 			opts.token,
 			opts.allowUntrustedSslCertificates,
 			`, after: "${cursor}"`,
 		);
 		spinner.succeed(
-			`(${count}/${fetched.data.organization.repositoryMigrations.totalCount}) Fetched next ${opts.batchSize} repos`,
+			`(${count}/${totalCount}) Fetched next ${opts.batchSize} repos`,
 		);
 
 		await delay(opts.waitTime);
@@ -191,11 +201,13 @@ export const storeMigrationRepoMetrics = async (organization) => {
 	const failedStringifier = getStringifier(failedPath, headers);
 	spinner.start('Exporting...');
 
-	for (const metric of metrics) {
+	const metricsLength = metrics.length;
+	for (let i = 0; i < metricsLength; i++) {
+		const metric = metrics[i];
 		stringifier.write(metric);
 
 		if (metric.state === 'failed') {
-			table.push([metric.repositoryName, metric.failureReason]);
+			table.push([`${i + 1}.`, metric.repositoryName, metric.failureReason]);
 			failedStringifier.write(metric);
 		}
 	}

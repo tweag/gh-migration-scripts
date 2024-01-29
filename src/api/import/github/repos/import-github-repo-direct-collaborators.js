@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import progress from 'cli-progress';
+import { progressBar } from 'progress-bar-cli';
 import Table from 'cli-table';
 import {
 	doRequest,
@@ -17,6 +17,7 @@ import {
 	ARCHIVE_STATUS_CODE,
 	GITHUB_API_URL,
 	SUCCESS_STATUS,
+	PROGRESS_BAR_CLEAR_NUM,
 } from '../../../../services/constants.js';
 
 const columns = [
@@ -99,7 +100,7 @@ const printTable = (reposMap) => {
 		table.push([repo, count[0], count[1]]);
 	}
 
-	console.log(table.toString());
+	console.log('\n' + table.toString());
 };
 
 const importGithubRepoDirectCollaborators = async (options) => {
@@ -113,6 +114,7 @@ const importGithubRepoDirectCollaborators = async (options) => {
 			skip,
 		} = options;
 
+		speak.success(`Started importing repositories' direct collaborators for org: ${org}`);
 		let reposData = await getData(inputFile);
 		reposData = reposData.slice(skip);
 
@@ -125,16 +127,12 @@ const importGithubRepoDirectCollaborators = async (options) => {
 		const output = outputFile;
 		const outputFileName = getOutputFileName(output, org);
 		const stringifier = getStringifier(outputFileName, columns);
-		const progressBar = new progress.SingleBar(
-			{},
-			progress.Presets.shades_classic,
-		);
-		progressBar.start(reposData.length, 0);
 		let index = 0;
 		const reposMap = new Map();
 
 		for (const repoData of reposData) {
-			console.log(++index);
+			progressBar(index, reposLength, new Date(), PROGRESS_BAR_CLEAR_NUM);
+			++index;
 
 			const { repo, login, role } = repoData;
 			const response = await setDirectCollaborator({
@@ -191,15 +189,15 @@ const importGithubRepoDirectCollaborators = async (options) => {
 				errorMessage,
 			});
 
-			progressBar.increment();
 			await delay(waitTime);
 		}
 
 		printTable(reposMap);
-		progressBar.stop();
+		speak.success(`Successfully imported repositories direct collaborators for ${org}`);
 		stringifier.end();
 	} catch (error) {
-		console.error(error);
+		speak.error(error);
+		speak.error('Failed to import repository direct collaborators');
 	}
 };
 

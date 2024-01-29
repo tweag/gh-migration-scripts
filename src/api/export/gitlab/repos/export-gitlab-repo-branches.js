@@ -118,7 +118,7 @@ const exportGitlabRepoBranches = async (options) => {
 		progressBar.increment();
 	}
 
-	console.log(table.toString());
+	console.log('\n' + table.toString());
 	progressBar.stop();
 	stringifier.end();
 };

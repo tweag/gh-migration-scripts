@@ -79,7 +79,7 @@ const generateGithubMigrationScript = async (options) => {
 		}
 
 		saveScriptToFile(scriptsArr, options);
-		console.log(table.toString());
+		console.log('\n' + table.toString());
 	} catch (error) {
 		speak.error(error);
 		spinner.fail(speak.errorColor('Failed to generate GHES migration script'));

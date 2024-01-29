@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
-import progress from 'cli-progress';
+import progressBar from 'progress-bar-cli';
+import Table from 'cli-table';
 import fs from 'fs';
 import {
 	delay,
@@ -11,7 +12,9 @@ import {
 	doRequest,
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
-import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
+import { GITHUB_GRAPHQL_API_URL, PROGRESS_BAR_CLEAR_NUM } from '../../../../services/constants.js';
 import https from 'https';
 
 const spinner = Ora();
@@ -33,8 +36,13 @@ let fetched = {};
  */
 let count = 0;
 
-let progressBar;
+let totalCount = 0;
 
+let table;
+
+const tableHead = ['Organization', 'No. of users'].map((h) =>
+	speak.successColor(h),
+);
 export const fetchUsersInOrg = async (
 	org,
 	token,
@@ -56,6 +64,10 @@ export const fetchUsersInOrg = async (
 const exportGithubOrgUsers = async (options) => {
 	count = 0;
 	opts = options;
+	table = new Table({
+		chars: tableChars,
+		head: tableHead,
+	});
 	const response = await fetchUsersInOrg(
 		options.organization,
 		options.token,
@@ -67,8 +79,11 @@ const exportGithubOrgUsers = async (options) => {
 	showGraphQLErrors(response);
 	fetched = response.data;
 	totalCount = fetched.data.organization.membersWithRole.totalCount;
-	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
-	progressBar.start(totalCount, 0);
+
+	if (totalCount === 0) {
+		speak.warn(`No users in organization ${options.organization}`);
+		return;
+	}
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -79,17 +94,17 @@ const exportGithubOrgUsers = async (options) => {
 
 export const fetchingController = async () => {
 	await fetchUsersMetrics(fetched.data.organization.membersWithRole.edges);
-	progressBar.stop();
+	const org = opts.organization.replace(/\s/g, '');
 
-	if (!opts.return && metrics) {
-		const org = opts.organization.replace(/\s/g, '');
+	if (!opts.return) {
 		await storeUsersMetrics(org);
+		table.push([org, metrics.length]);
+		console.log('\n' + table.toString());
 	}
 };
 
 export const fetchUsersMetrics = async (users) => {
 	for (const user of users) {
-		progressBar.increment();
 		spinner.start(
 			`(${count}/${totalCount}) Fetching metrics for user ${user.node.login}`,
 		);
@@ -118,6 +133,8 @@ export const fetchUsersMetrics = async (users) => {
 			`(${count}/${totalCount}) Fetching metrics for user ${user.node.login}`,
 		);
 	}
+
+	if (!opts.return) progressBar.progressBar(count - 1, totalCount, new Date(), PROGRESS_BAR_CLEAR_NUM);
 
 	// paginating calls
 	// if there are more than batchSize users

@@ -86,7 +86,6 @@ export const getDate = () => {
 export const delay = (sec = 1) => {
 	return new Promise((resolve) => {
 		const delayMsg = '\ndelay: ' + sec + ' seconds\n';
-		speak.warn(delayMsg);
 		setTimeout(resolve, sec * 1000);
 	});
 };
@@ -109,11 +108,13 @@ export const currentTime = () =>
 export const showGraphQLErrors = (response) => {
 	if (response.errorMessage) {
 		spinner.fail(`${response.errorMessage}`);
+		// eslint-disable-next-line no-undef
 		process.exit();
 	}
 
 	if (response.data && response.data.errors) {
 		spinner.fail(`${response.data.errors[0].message}`);
+		// eslint-disable-next-line no-undef
 		process.exit();
 	}
 };

@@ -9,15 +9,14 @@ import {
 	doRequest,
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
-import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import { GITHUB_GRAPHQL_API_URL, PROGRESS_BAR_CLEAR_NUM } from '../../../../services/constants.js';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
 import https from 'https';
-import progress from 'cli-progress';
+import { progressBar } from 'progress-bar-cli';
 import Table from 'cli-table';
 
 const spinner = Ora();
-let progressBar;
 
 /**
  * Running PullRequest and issues array
@@ -127,13 +126,15 @@ const exportGithubRepos = async (options) => {
 	showGraphQLErrors(response);
 	fetched = response.data;
 	totalCount = fetched.data.organization.repositories.totalCount;
-	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
-	progressBar.start(totalCount, 0);
+
+	if (totalCount === 0) {
+		speak.warn(`No repositories found for organization ${options.organization}`);
+		return;
+	}
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
 	await fetchingController();
-	progressBar.stop();
 
 	if (options.return) return metrics;
 };
@@ -152,7 +153,7 @@ export const fetchingController = async () => {
 	}
 
 	table.push([org, metrics.length]);
-	console.log(table.toString());
+	console.log('\n' + table.toString());
 
 	return metrics;
 };
@@ -164,7 +165,6 @@ export const fetchingController = async () => {
  */
 export const fetchRepoMetrics = async (repositories) => {
 	for (const repo of repositories) {
-		progressBar.increment();
 		spinner.start(
 			`(${count}/${totalCount}) Fetching metrics for repo ${repo.node.name}`,
 		);
@@ -213,6 +213,8 @@ export const fetchRepoMetrics = async (repositories) => {
 			`(${count}/${totalCount}) Fetching metrics for repo ${repo.node.name}`,
 		);
 	}
+
+	progressBar(count - 1, totalCount, new Date(), PROGRESS_BAR_CLEAR_NUM);
 
 	// paginating calls
 	// if there are more than batchSize repos

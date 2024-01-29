@@ -8,7 +8,7 @@ import {
 	delay,
 	currentTime,
 } from '../../../../services/utils.js';
-import { getTeam } from '../../../export/ghes/teams/get-team.js';
+import exportGithubTeam from '../../../export/github/teams/export-github-team.js';
 import {
 	GITHUB_API_URL,
 	SUCCESS_STATUS,
@@ -102,7 +102,7 @@ const importGithubTeams = async (options) => {
 			let parentTeamId;
 
 			if (parentTeam) {
-				const parentTeamData = await getTeam(parentTeam, options);
+				const parentTeamData = await exportGithubTeam(parentTeam, options);
 
 				if (parentTeamData.status !== 404) {
 					parentTeamId = parentTeamData.data.id;

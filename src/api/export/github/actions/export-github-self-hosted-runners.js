@@ -58,10 +58,7 @@ const exportGithubActionsSelfHostedRunners = async (options) => {
 		const statusColumns = ['page', 'status', 'statusText', 'errorMessage'];
 		const outputFileName = getOutputFileName(org, outputFile);
 		const stringifier = getStringifier(outputFileName, columns);
-		const statusStringifier = getStringifier(
-			`${org}-github-actions-self-hosted-runners-status.csv`,
-			statusColumns,
-		);
+		const statusStringifier = getStringifier(`status-${outputFileName}`, statusColumns);
 		const table = new Table({
 			head: tableHead,
 			chars: tableChars,
@@ -82,6 +79,7 @@ const exportGithubActionsSelfHostedRunners = async (options) => {
 				(status = SUCCESS_STATUS), (statusText = '');
 				errorMessage = '';
 				length = responseData.length;
+
 				for (const runner of responseData) {
 					const { id, name, os, status, busy, labels } = runner;
 					const runnerLabels = labels
@@ -102,12 +100,11 @@ const exportGithubActionsSelfHostedRunners = async (options) => {
 
 		stringifier.end();
 		statusStringifier.end();
-		console.log(table.toString());
+		console.log('\n' + table.toString());
 		speak.success(
 			`Successfully saved github actions self-hosted runner to ${outputFileName}`,
 		);
-		progressBar.stop();
-		console.log(table.toString());
+		console.log('\n' + table.toString());
 	} catch (error) {
 		speak.error(error);
 		speak.error('Failed to export github actions self-hosted runner');
@@ -115,62 +112,3 @@ const exportGithubActionsSelfHostedRunners = async (options) => {
 };
 
 export default exportGithubActionsSelfHostedRunners;
-
-const c = {
-	total_count: 2,
-	runners: [
-		{
-			id: 23,
-			name: 'linux_runner',
-			os: 'linux',
-			status: 'online',
-			busy: true,
-			labels: [
-				{
-					id: 5,
-					name: 'self-hosted',
-					type: 'read-only',
-				},
-				{
-					id: 7,
-					name: 'X64',
-					type: 'read-only',
-				},
-				{
-					id: 11,
-					name: 'Linux',
-					type: 'read-only',
-				},
-			],
-		},
-		{
-			id: 24,
-			name: 'mac_runner',
-			os: 'macos',
-			status: 'offline',
-			busy: false,
-			labels: [
-				{
-					id: 5,
-					name: 'self-hosted',
-					type: 'read-only',
-				},
-				{
-					id: 7,
-					name: 'X64',
-					type: 'read-only',
-				},
-				{
-					id: 20,
-					name: 'macOS',
-					type: 'read-only',
-				},
-				{
-					id: 21,
-					name: 'no-gpu',
-					type: 'custom',
-				},
-			],
-		},
-	],
-};

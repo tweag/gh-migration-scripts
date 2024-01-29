@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
-import progress from 'cli-progress';
+import { progressBar } from 'progress-bar-cli';
 import Table from 'cli-table';
 import fs from 'fs';
 import {
@@ -10,7 +10,7 @@ import {
 	showGraphQLErrors,
 	currentTime,
 } from '../../../../services/utils.js';
-import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import { GITHUB_GRAPHQL_API_URL, PROGRESS_BAR_CLEAR_NUM } from '../../../../services/constants.js';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
 import https from 'https';
@@ -39,7 +39,6 @@ let count = 0;
  */
 let totalCount = 0;
 
-let progressBar;
 let table;
 
 const tableHead = ['No.', 'Project V1 Title'].map((h) => speak.successColor(h));
@@ -80,8 +79,11 @@ const exportGithubProjectsV1 = async (options) => {
 	showGraphQLErrors(response);
 	fetched = response.data;
 	totalCount = fetched.data.organization.projects.totalCount;
-	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
-	progressBar.start(totalCount, 0);
+
+	if (totalCount === 0) {
+		speak.warn(`No projects V1 found for organization ${options.organization}`);
+		return;
+	}
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -92,7 +94,6 @@ export const fetchingController = async () => {
 	const nodes = fetched.data.organization.projects.nodes;
 	const cursor = fetched.data.organization.projects.pageInfo.endCursor;
 	await fetchProjectV1Metrics(nodes, cursor);
-	progressBar.stop();
 
 	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
@@ -103,7 +104,7 @@ export const fetchingController = async () => {
 		table.push([i + 1, metrics[i].title]);
 	}
 
-	console.log(table.toString());
+	console.log('\n' + table.toString());
 };
 
 const convertProjectV1ToProjectV2 = (project) => {
@@ -239,7 +240,6 @@ const getNextColumnCards = async (columns, projectId) => {
 
 export const fetchProjectV1Metrics = async (projectsV1, cursor) => {
 	for (const project of projectsV1) {
-		progressBar.increment();
 		spinner.start(`(${count}/${totalCount}) Fetching projects V1`);
 		count = count + 1;
 		const nextColumnCards = await getNextColumnCards(
@@ -251,6 +251,8 @@ export const fetchProjectV1Metrics = async (projectsV1, cursor) => {
 		metrics.push(convertedProject);
 		spinner.succeed(`(${count}/${totalCount}) Fetching projects V1`);
 	}
+
+	progressBar(count - 1, totalCount, new Date(), PROGRESS_BAR_CLEAR_NUM);
 
 	// paginating calls
 	// fetch the next 2 projects

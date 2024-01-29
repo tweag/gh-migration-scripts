@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import progress from 'cli-progress';
+import { progressBar } from 'progress-bar-cli';
 import Table from 'cli-table';
 import {
 	doRequest,
@@ -14,6 +14,7 @@ import { tableChars } from '../../../../services/style-utils.js';
 import {
 	GITHUB_API_URL,
 	SUCCESS_STATUS,
+	PROGRESS_BAR_CLEAR_NUM,
 } from '../../../../services/constants.js';
 
 const getDeleteRepoConfig = (repo, options) => {
@@ -42,7 +43,7 @@ const deleteRequest = async (repo, options) => {
 
 const getOutputFileName = (outputFile, org) => {
 	if (outputFile && outputFile.endsWith('.csv')) return outputFile;
-	return `${org}-delete-repos-status-${currentTime()}.csv`;
+	return `${org}-delete-repos-${currentTime()}.csv`;
 };
 
 const columns = ['repo', 'status', 'statusText', 'errorMessage'];
@@ -64,7 +65,12 @@ const deleteGithubRepos = async (options) => {
 		} = options;
 		let isMultiple = true;
 
-		if (repo) isMultiple = false;
+		if (repo) {
+			isMultiple = false;
+			speak.success('Started deleting repositories');
+		} else {
+			speak.success(`Started deleting repo: ${repo}`);
+		}
 
 		const outputFileName = getOutputFileName(outputFile, org);
 		const stringifier = getStringifier(outputFileName, columns);
@@ -83,18 +89,15 @@ const deleteGithubRepos = async (options) => {
 		}
 		let index = 0;
 		let failedRequests = 0;
-		let progressBar;
 		let totalCount = 1;
 
 		if (isMultiple) {
 			totalCount = repositories.length;
-			progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
-			progressBar.start(totalCount, 0);
 		}
 
 		for (const repo of repositories) {
-			if (isMultiple) progressBar.increment();
-			console.log(++index);
+			progressBar(index, totalLength, new Date(), PROGRESS_BAR_CLEAR_NUM);
+			++index;
 			const response = await deleteRequest(repo, options);
 			console.log(JSON.stringify(response, null, 2));
 			let status = SUCCESS_STATUS;
@@ -113,12 +116,14 @@ const deleteGithubRepos = async (options) => {
 			await delay(waitTime);
 		}
 
-		if (isMultiple) progressBar.stop();
-
 		if (isMultiple) {
 			table.push([org, totalCount, totalCount - failedRequests]);
-			console.log(table.toString());
+			console.log('\n' + table.toString());
+			speak.success(`Successfully deleted repositories for org: ${org}`);
+		} else {
+			speak.success(`Successfully deleted repo: ${repo}`);
 		}
+
 		stringifier.end();
 	} catch (error) {
 		console.error(error);

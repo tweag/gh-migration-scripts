@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
-import progress from 'cli-progress';
+import progressBar from 'progress-bar-cli';
 import Table from 'cli-table';
 import fs from 'fs';
 import {
@@ -11,7 +11,7 @@ import {
 	doRequest,
 	showGraphQLErrors,
 } from '../../../../services/utils.js';
-import { GITHUB_GRAPHQL_API_URL } from '../../../../services/constants.js';
+import { GITHUB_GRAPHQL_API_URL, PROGRESS_BAR_CLEAR_NUM } from '../../../../services/constants.js';
 import processTeamsMembers from '../../../../services/process-teams-members.js';
 import processTeamsRepos from '../../../../services/process-teams-repos.js';
 import * as speak from '../../../../services/style-utils.js';
@@ -37,7 +37,7 @@ let fetched = {};
  */
 let count = 0;
 
-let progressBar;
+let totalCount = 0;
 
 let table;
 
@@ -119,8 +119,11 @@ const exportGithubTeamsAndPermissions = async (options) => {
 	showGraphQLErrors(response);
 	fetched = response.data;
 	totalCount = fetched.data.organization.teams.totalCount;
-	progressBar = new progress.SingleBar({}, progress.Presets.shades_classic);
-	progressBar.start(totalCount, 0);
+
+	if (totalCount === 0) {
+		speak.warn('No teams found for organization ${options.organization');
+		return;
+	}
 
 	// Successful Authorization
 	spinner.succeed('Authorized with GitHub\n');
@@ -129,7 +132,6 @@ const exportGithubTeamsAndPermissions = async (options) => {
 
 export const fetchingController = async () => {
 	await fetchTeamMetrics(fetched.data.organization.teams.edges);
-	progressBar.stop();
 
 	if (metrics) {
 		const org = opts.organization.replace(/\s/g, '');
@@ -151,7 +153,6 @@ const processMembers = (edges) => {
 
 export const fetchTeamMetrics = async (teams) => {
 	for (const team of teams) {
-		progressBar.increment();
 		spinner.start(
 			`(${count}/${totalCount}) Fetching metrics for team ${team.node.name}`,
 		);
@@ -228,6 +229,8 @@ export const fetchTeamMetrics = async (teams) => {
 			`(${count}/${totalCount}) Fetching metrics for team ${team.node.name}`,
 		);
 	}
+
+	progressBar.progressBar(count - 1, totalCount, new Date(), PROGRESS_BAR_CLEAR_NUM);
 
 	// paginating calls
 	// if there are more than batchSize teams

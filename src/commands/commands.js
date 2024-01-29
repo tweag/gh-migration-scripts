@@ -10,6 +10,7 @@ import {
 	handleInputFile,
 	handleOrg,
 	handleUsername,
+	handleServerUrl,
 } from './handlers.js';
 import exportGithubRepoBranches from '../api/export/github/repos/export-github-repo-branches.js';
 import exportGithubSelfHostedRunners from '../api/export/github/actions/export-github-self-hosted-runners.js';
@@ -86,8 +87,6 @@ const orgScripts = [
 ];
 
 const serverUrlScripts = [
-	exportGithubRepoBranches,
-	exportGithubSelfHostedRunners,
 	ghecLastCommitCheck,
 	exportGitlabRepositories,
 	exportGitlabTeams,
@@ -108,6 +107,13 @@ const sourceTokenScripts = [
 	generateGithubMigrationScript,
 ];
 
+const excludeTokenScripts = [
+	compareRepoDirectCollaborators,
+	compareTeams,
+	generateGithubMigrationScript,
+	ghecLastCommitCheck,
+];
+
 const fileScripts = [compareRepoDirectCollaborators, compareTeams];
 
 const setInputFile = async (service, options, field, msg) => {
@@ -126,14 +132,7 @@ const setInputFile = async (service, options, field, msg) => {
  * @param {string} service the service to be executed
  */
 export const commandController = async (PAT, options, service) => {
-	if (
-		![
-			compareRepoDirectCollaborators,
-			compareTeams,
-			generateGithubMigrationScript,
-			ghecLastCommitCheck,
-		].includes(service)
-	)
+	if (!excludeTokenScripts.includes(service))
 		options.token = await handleToken(PAT, options, 'Enter PAT: ', 'token');
 
 	if (sourceTokenScripts.includes(service)) {

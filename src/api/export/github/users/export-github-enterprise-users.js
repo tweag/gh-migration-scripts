@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 
 import Ora from 'ora';
+import progressBar from 'progress-bar-cli';
 import Table from 'cli-table';
 import {
 	getData,
 	getStringifier,
 	currentTime,
 } from '../../../../services/utils.js';
+import { PROGRESS_BAR_CLEAR_NUM } from '../../../../services/constants.js';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
 import exportGithubOrgUsers from './export-github-org-users.js';
@@ -37,8 +39,10 @@ const exportGithubEnterpriseUsers = async (options) => {
 			`enterprise-users-${currentTime()}.csv`;
 		const stringifier = getStringifier(outputFileName, ['login']);
 		const usersSet = new Set();
+		const organizationsLength = enterpriseOrganizations.length;
 
-		for (let org of enterpriseOrganizations) {
+		for (let i = 0; i < organizationsLength; i++) {
+			const org = enterpriseOrganizations[i];
 			options.organization = org;
 			options.return = true;
 			const orgUsersData = await exportGithubOrgUsers(options);
@@ -54,13 +58,14 @@ const exportGithubEnterpriseUsers = async (options) => {
 			}
 
 			table.push([org, usersCount]);
+			progressBar.progressBar(i, organizationsLength, new Date(), PROGRESS_BAR_CLEAR_NUM);
 		}
 
 		for (const user of usersSet.keys()) {
 			stringifier.write({ login: user });
 		}
 
-		console.log(table.toString());
+		console.log('\n' + table.toString());
 		stringifier.end();
 		spinner.succeed('Successfully fetched enterprise users...');
 	} catch (error) {

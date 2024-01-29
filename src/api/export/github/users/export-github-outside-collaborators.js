@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import Ora from 'ora';
+import Table from 'cli-table';
 import * as speak from '../../../../services/style-utils.js';
+import { tableChars } from '../../../../services/style-utils.js';
 import {
 	delay,
 	doRequest,
@@ -11,7 +12,9 @@ import {
 } from '../../../../services/utils.js';
 import { GITHUB_API_URL } from '../../../../services/constants.js';
 
-const spinner = Ora();
+const tableHead = ['Organization', 'No. of outside collaborators'].map((h) =>
+	speak.successColor(h),
+);
 
 const getOutsideCollaboratorsConfig = (page, options) => {
 	const { organization: org, serverUrl, token } = options;
@@ -39,7 +42,11 @@ const fetchOutsideCollaborators = async (page, options) => {
 
 const exportGithubOutsideCollaborators = async (options) => {
 	try {
-		spinner.start(speak.successColor('Getting outside collaborators'));
+		speak.success('Started exporting outside collaborators');
+		const table = new Table({
+			head: tableHead,
+			chars: tableChars,
+		});
 		const { usersFile, organization: org, outputFile, waitTime } = options;
 		let page = 1;
 		let length = 0;
@@ -85,24 +92,26 @@ const exportGithubOutsideCollaborators = async (options) => {
 
 		stringifier.end();
 
-		if (outsideCollaborators.length === 0) {
+		const outsideCollaboratorsLength = outsideCollaborators.length;
+		if (outsideCollaboratorsLength === 0) {
 			speak.warn('No outside collaborators found');
 		} else {
 			speak.success(
-				`Found ${outsideCollaborators.length} outside collaborators`,
+				`Found ${outsideCollaboratorsLength} outside collaborators`,
 			);
+			speak.success(`Written results to output file: ${outputFileName}`);
+		speak.success(
+			`Successfully exported outside collaborators for ${org}`,
+		);
 		}
 
-		speak.success(`Written results to output file: ${outputFileName}`);
-		spinner.succeed(
-			speak.successColor(
-				`Successfully processed outside collaborators for ${org}`,
-			),
-		);
+		table.push([org, outsideCollaboratorsLength]);
+		console.log(table.toString());
+
 		return outsideCollaborators;
 	} catch (error) {
 		speak.error(error);
-		spinner.fail(speak.errorColor('Failed to get outside collaborators'));
+		speak.error('Failed to export outside collaborators');
 	}
 };
 

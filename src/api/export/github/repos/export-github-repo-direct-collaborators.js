@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import progress from 'cli-progress';
+import { progressBar } from 'progress-bar-cli';
 import Table from 'cli-table';
 import * as speak from '../../../../services/style-utils.js';
 import { tableChars } from '../../../../services/style-utils.js';
@@ -14,6 +14,7 @@ import {
 import {
 	GITHUB_API_URL,
 	SUCCESS_STATUS,
+	PROGRESS_BAR_CLEAR_NUM,
 } from '../../../../services/constants.js';
 import exportGithubOutsideCollaborators from '../users/export-github-outside-collaborators.js';
 
@@ -46,7 +47,7 @@ const getOutputFileName = (org, outputFile) => {
 	return `${org}-repo-direct-collaborators-${currentTime()}.csv`;
 };
 
-const tableHead = ['Repo', 'No. of direct collaborators'].map((h) =>
+const tableHead = ['No.', 'Repo', 'No. of direct collaborators'].map((h) =>
 	speak.successColor(h),
 );
 
@@ -71,9 +72,7 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 		const outputFileName = getOutputFileName(org, outputFile);
 		const stringifier = getStringifier(outputFileName, columns);
 		const statusStringifier = getStringifier(
-			`${org}-repo-direct-collaborators-status.csv`,
-			statusColumns,
-		);
+			`status-${outputFileName}`, statusColumns);
 		const table = new Table({
 			head: tableHead,
 			chars: tableChars,
@@ -95,25 +94,22 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 
 		let index = 0;
 
-		let repos = await getData(inputFile);
-		repos = repos.slice(skip);
-		repos = repos.map((row) => row.repo);
-		const progressBar = new progress.SingleBar(
-			{},
-			progress.Presets.shades_classic,
-		);
-		progressBar.start(repos.length, 0);
+		const repos = (await getData(inputFile)).slice(Number(skip)).map(row => row.repo);
+		const reposLength = repos.length;
 
 		for (const repo of repos) {
-			speak.info(++index);
-
+			progressBar(index, reposLength, new Date(), PROGRESS_BAR_CLEAR_NUM);
+			++index;
 			const response = await fetchRepoDirectCollaborators(repo, options);
-			console.log(JSON.stringify(response, null, 2));
-			console.log({ repo });
+			speak.info('\n' + `Repository ${repo}`);
 			let status = response.status;
 			let statusText = response.statusText;
 			let errorMessage = response.errorMessage;
 			let collaboratorsCount = 0;
+
+			if (errorMessage) {
+				speak.error(errorMessage);
+			}
 
 			if (response.data) {
 				(status = SUCCESS_STATUS), (statusText = '');
@@ -138,18 +134,16 @@ const exportGithubRepoDirectCollaborators = async (options) => {
 				}
 			}
 
-			statusStringifier.write({ repo, status, statusText, errorMessage });
-			progressBar.increment();
-			table.push([repo, collaboratorsCount]);
 			await delay(waitTime);
+			statusStringifier.write({ repo, status, statusText, errorMessage });
+			table.push([`${index}.`, repo, collaboratorsCount]);
 		}
 
+		console.log('\n' + table.toString());
 		stringifier.end();
 		speak.success(
 			`Successfully saved repositories direct collaborators to ${outputFileName}`,
 		);
-		progressBar.stop();
-		console.log(table.toString());
 	} catch (error) {
 		speak.error(error);
 		speak.error('Failed to get repositories direct collaborators');
