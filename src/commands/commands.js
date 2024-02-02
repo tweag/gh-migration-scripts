@@ -2,102 +2,122 @@
 
 import compareRepoDirectCollaborators from '../api/compare/ghes-vs-ghec/repo-direct-collaborators.js';
 import compareTeams from '../api/compare/ghes-vs-ghec/teams.js';
-import generateGHESMigrationScript from '../api/export/ghes/repos/generate-ghes-migration-script.js';
+import generateGithubMigrationScript from '../api/export/github/repos/generate-github-migration-script.js';
 import ghecLastCommitCheck from '../api/compare/ghec-last-commit-check.js';
-import getGHECMissingRepos from '../api/import/ghec/repos/get-ghec-missing-repos.js';
+import exportGithubMissingRepos from '../api/export/github/repos/export-github-missing-repos.js';
 import {
 	handleToken,
 	handleInputFile,
 	handleOrg,
 	handleUsername,
+	handleServerUrl,
 } from './handlers.js';
-import { getReposDirectCollaborators } from '../api/export/ghes/repos/get-repo-direct-collaborators.js';
-import { setRepoDirectCollaborators } from '../api/import/ghec/repos/set-repo-direct-collaborators.js';
-import { setRepoTeamPermission } from '../api/import/ghec/repos/set-repo-team-permission.js';
-import { setArchivedStatus } from '../api/import/ghec/repos/set-archived-status.js';
-import { createTeams } from '../api/import/ghec/teams/create-teams.js';
-import { deleteRepos } from '../api/import/ghec/repos/delete-repos.js';
-import createProjectsV2 from '../api/import/ghec/projects/create-projects-v2.js';
-import { insertTeamMembers } from '../api/import/ghec/teams/insert-team-members.js';
-import { setMembershipInOrg } from '../api/import/ghec/users/set-memberships-in-org.js';
-import getGitlabReposDirectCollaborators from '../api/export/gitlab/repos/get-gitlab-repo-direct-collaborators.js';
-import getGitlabTeamMembers from '../api/export/gitlab/teams/get-gitlab-team-members.js';
-import { getOrgUsers } from '../api/export/ghes/users/get-org-users.js';
-import { getOutsideCollaborators } from '../api/export/ghes/users/get-outside-collaborators.js';
-import { getRepos } from '../api/export/ghes/repos/get-repos.js';
-import getReposMigrationStatus from '../api/import/ghec/repos/get-repos-migration-status.js';
-import { getTeams } from '../api/export/ghes/teams/get-teams.js';
-import exportProjectsV1 from '../api/export/ghes/projects/export-projects-v1.js';
-import exportProjectsV2 from '../api/export/ghes/projects/export-projects-v2.js';
-import getGitlabRepositories from '../api/export/gitlab/repos/get-gitlab-repos.js';
-import getGitlabTeams from '../api/export/gitlab/teams/get-gitlab-teams.js';
-import getGitlabUsers from '../api/export/gitlab/users/get-gitlab-users.js';
+import exportGithubRepoBranches from '../api/export/github/repos/export-github-repo-branches.js';
+import exportGithubSelfHostedRunners from '../api/export/github/actions/export-github-self-hosted-runners.js';
+import exportGithubRepoDirectCollaborators from '../api/export/github/repos/export-github-repo-direct-collaborators.js';
+import importGithubRepoDirectCollaborators from '../api/import/github/repos/import-github-repo-direct-collaborators.js';
+import importGithubRepoTeamPermission from '../api/import/github/repos/import-github-repo-team-permission.js';
+import setGithubArchivedStatus from '../api/import/github/repos/set-github-archived-status.js';
+import importGithubTeams from '../api/import/github/teams/import-github-teams.js';
+import deleteGithubRepos from '../api/import/github/repos/delete-github-repos.js';
+import importGithubProjectsV2 from '../api/import/github/projects/import-github-projects-v2.js';
+import importGithubTeamMembers from '../api/import/github/teams/import-github-team-members.js';
+import importGithubMembershipInOrg from '../api/import/github/users/import-github-memberships-in-org.js';
+import exportGitlabReposDirectCollaborators from '../api/export/gitlab/repos/export-gitlab-repo-direct-collaborators.js';
+import exportGitlabTeamMembers from '../api/export/gitlab/teams/export-gitlab-team-members.js';
+import exportOrgUsers from '../api/export/github/users/export-github-org-users.js';
+import exportOutsideCollaborators from '../api/export/github/users/export-github-outside-collaborators.js';
+import exportGithubRepos from '../api/export/github/repos/export-github-repos.js';
+import exportGithubReposMigrationStatus from '../api/export/github/repos/export-github-repos-migration-status.js';
+import exportGithubTeamsAndPermissionsTeams from '../api/export/github/teams/export-github-teams-and-permissions.js';
+import exportGithubProjectsV1 from '../api/export/github/projects/export-github-projects-v1.js';
+import exportGithubProjectsV2 from '../api/export/github/projects/export-github-projects-v2.js';
+import exportGitlabRepositories from '../api/export/gitlab/repos/export-gitlab-repos.js';
+import exportGitlabTeams from '../api/export/gitlab/teams/export-gitlab-teams.js';
+import exportGitlabUsers from '../api/export/gitlab/users/export-gitlab-users.js';
+import exportBitbucketRepoBranches from '../api/export/bitbucket/repos/export-bitbucket-repo-branches.js';
 
 const inputFileScripts = [
-	setRepoDirectCollaborators,
-	setRepoTeamPermission,
-	setArchivedStatus,
-	createTeams,
-	deleteRepos,
-	generateGHESMigrationScript,
-	getReposDirectCollaborators,
-	createProjectsV2,
-	insertTeamMembers,
-	setMembershipInOrg,
-	getGitlabReposDirectCollaborators,
-	getGitlabTeamMembers,
+	exportGithubRepoBranches,
+	importGithubRepoDirectCollaborators,
+	importGithubRepoTeamPermission,
+	setGithubArchivedStatus,
+	importGithubTeams,
+	deleteGithubRepos,
+	generateGithubMigrationScript,
+	exportGithubRepoDirectCollaborators,
+	importGithubProjectsV2,
+	importGithubTeamMembers,
+	importGithubMembershipInOrg,
+	exportGitlabReposDirectCollaborators,
+	exportGitlabTeamMembers,
+	exportBitbucketRepoBranches,
 ];
 
 const orgScripts = [
-	setRepoDirectCollaborators,
-	setRepoTeamPermission,
-	setArchivedStatus,
+	exportGithubRepoBranches,
+	exportGithubSelfHostedRunners,
+	importGithubRepoDirectCollaborators,
+	importGithubRepoTeamPermission,
+	setGithubArchivedStatus,
 	compareTeams,
-	deleteRepos,
-	getOrgUsers,
-	getOutsideCollaborators,
-	getReposDirectCollaborators,
-	getRepos,
-	getReposMigrationStatus,
-	getTeams,
-	exportProjectsV1,
-	exportProjectsV2,
-	createProjectsV2,
-	insertTeamMembers,
+	deleteGithubRepos,
+	exportOrgUsers,
+	exportOutsideCollaborators,
+	exportGithubRepoDirectCollaborators,
+	exportGithubRepos,
+	exportGithubReposMigrationStatus,
+	exportGithubTeamsAndPermissionsTeams,
+	exportGithubProjectsV1,
+	exportGithubProjectsV2,
+	importGithubProjectsV2,
+	importGithubTeamMembers,
 	compareTeams,
 	compareRepoDirectCollaborators,
-	getGitlabRepositories,
-	getGitlabReposDirectCollaborators,
-	getGitlabTeams,
-	getGitlabTeamMembers,
-	getGitlabUsers,
-	setMembershipInOrg,
-	generateGHESMigrationScript,
+	exportGitlabRepositories,
+	exportGitlabReposDirectCollaborators,
+	exportGitlabTeams,
+	exportGitlabTeamMembers,
+	exportGitlabUsers,
+	importGithubMembershipInOrg,
+	generateGithubMigrationScript,
 	ghecLastCommitCheck,
-	getGHECMissingRepos,
+	exportGithubMissingRepos,
+	exportBitbucketRepoBranches,
 ];
 
 const serverUrlScripts = [
 	ghecLastCommitCheck,
-	getGitlabRepositories,
-	getGitlabTeams,
-	getGitlabTeamMembers,
-	getGitlabUsers,
-	generateGHESMigrationScript,
+	exportGitlabRepositories,
+	exportGitlabTeams,
+	exportGitlabTeamMembers,
+	exportGitlabUsers,
+	generateGithubMigrationScript,
+	exportBitbucketRepoBranches,
 ];
 
 const sourceOrgScripts = [
-	getGHECMissingRepos,
-	generateGHESMigrationScript,
+	exportGithubMissingRepos,
+	generateGithubMigrationScript,
 	ghecLastCommitCheck,
 ];
 
-const sourceTokenScripts = [getGHECMissingRepos, generateGHESMigrationScript];
+const sourceTokenScripts = [
+	exportGithubMissingRepos,
+	generateGithubMigrationScript,
+];
+
+const excludeTokenScripts = [
+	compareRepoDirectCollaborators,
+	compareTeams,
+	generateGithubMigrationScript,
+	ghecLastCommitCheck,
+];
 
 const fileScripts = [compareRepoDirectCollaborators, compareTeams];
 
 const setInputFile = async (service, options, field, msg) => {
-	if (service === deleteRepos && options.repo) return;
+	if (service === deleteGithubRepos && options.repo) return;
 
 	if (inputFileScripts.includes(service)) {
 		return handleInputFile(options, field, msg);
@@ -112,14 +132,7 @@ const setInputFile = async (service, options, field, msg) => {
  * @param {string} service the service to be executed
  */
 export const commandController = async (PAT, options, service) => {
-	if (
-		![
-			compareRepoDirectCollaborators,
-			compareTeams,
-			generateGHESMigrationScript,
-			ghecLastCommitCheck,
-		].includes(service)
-	)
+	if (!excludeTokenScripts.includes(service))
 		options.token = await handleToken(PAT, options, 'Enter PAT: ', 'token');
 
 	if (sourceTokenScripts.includes(service)) {
@@ -171,7 +184,7 @@ export const commandController = async (PAT, options, service) => {
 		options.serverUrl = await handleServerUrl(options);
 	}
 
-	if (service === createTeams) {
+	if (service === importGithubTeams) {
 		options.githubUser = await handleUsername(options);
 	}
 

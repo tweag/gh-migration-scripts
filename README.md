@@ -25,32 +25,37 @@ Hey there! 👋 Welcome to our migration tools repository – your go-to toolkit
 
 ## Export
 
-| Features                              | GHES                                                                                                                                                                                                                                     | Bitbucket Server                                                                                                                                                | GitLab                                                                                                                                                    |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Fetch repositories                 | ✅ [get-repos](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-repos)                                                                                                                                      | ✅ [get-bitbucket-repositories](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-bitbucket-repositories)                           | ✅ [get-gitlab-repositories](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-gitlab-repositories)                           |
-| 2. Fetch repositories members         | ✅ [get-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-repo-direct-collaborators)                                                                                              | ✅ [get-bitbucket-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-bitbucket-repo-direct-collaborators) | ✅ [get-gitlab-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-gitlab-repo-direct-collaborators) |
-| 3. Fetch teams                        | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-teams)                                                                                                                                      | ✅ [get-bitbucket-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-bitbucket-teams)                                         | ✅ [get-gitlab-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-gitlab-teams)                                         |
-| 4. Fetch team members                 | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-teams)                                                                                                                                      | ✅ [get-bitbucket-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-bitbucket-team-members)                           | ✅ [get-gitlab-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-gitlab-team-members)                           |
-| 5. Fetch team repositories permission | ✅ [get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-teams)                                                                                                                                      | ✅ [get-bitbucket-repo-team-permissions](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-bitbucket-repo-team-permissions)         | ✅ [get-gitlab-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-gitlab-team-members)                           |
-| 6. Fetch organization users           | ✅ [get-org-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-org-users)                                                                                                                              | ✅ [get-bitbucket-project-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-bitbucket-project-users)                         | ❌                                                                                                                                                        |
-| 7. Fetch enterprise users             | ✅ [get-enterprise-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-enterprise-users)                                                                                                                | ✅ [get-bitbucket-enterprise-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-bitbucket-enterprise-users)                   | ✅ [get-gitlab-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#get-gitlab-users)                                         |
-| 8. Fetch organization projects        | ✅ [export-projects-v1](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-projects-v1) [export-projects-v2](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-projects-v2) | ❌                                                                                                                                                              | ❌                                                                                                                                                        |
-| 9. Check repositories last commits    | ✅ [ghec-last-commit-check](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#ghec-last-commit-check)                                                                                                            | ❌                                                                                                                                                              | ❌                                                                                                                                                        |
-| 10. Delete repositories               | ✅ [delete-repos](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#2-delete-repos)                                                                                                                              | ❌                                                                                                                                                              | ❌                                                                                                                                                        |
-| 11. Fetch outside collaborators       | ✅ [get-outside-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#3-get-outside-collaborators)                                                                                                    | ❌                                                                                                                                                              | ❌                                                                                                                                                        |
+| Features                                    | GHES                                                                                                                                                                                                                                                                 | Bitbucket Server                                                                                                                                                      | GitLab                                                                                                                                                          |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Export repositories                      | ✅ [export-github-repos](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-github-repos)                                                                                                                                              | ✅ [export-bitbucket-repositories](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-bitbucket-repositories)                           | ✅ [export-gitlab-repositories](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-gitlab-repositories)                           |
+| 2. Export repositories members              | ✅ [export-github-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-github-repo-direct-collaborators)                                                                                                      | ✅ [export-bitbucket-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-bitbucket-repo-direct-collaborators) | ✅ [export-gitlab-repo-direct-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-gitlab-repo-direct-collaborators) |
+| 3. Export teams                             | ✅ [export-github-teams-and-permissions](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-github-teams-and-permissions)                                                                                                              | ✅ [export-bitbucket-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-bitbucket-teams)                                         | ✅ [export-gitlab-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-gitlab-teams)                                         |
+| 4. Export team members                      | ✅ [export-github-teams-and-permissions](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-github-teams-and-permissions)                                                                                                              | ✅ [export-bitbucket-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-bitbucket-team-members)                           | ✅ [export-gitlab-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-gitlab-team-members)                           |
+| 5. Export team repositories permission      | ✅ [export-bitbucket-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-bitbucket-team-members)                                                                                                                          | ✅ [export-bitbucket-repo-team-permissions](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-bitbucket-repo-team-permissions)         | ✅ [export-gitlab-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-gitlab-team-members)                           |
+| 6. Export organization users                | ✅ [export-github-org-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-github-org-users)                                                                                                                                      | ✅ [export-bitbucket-project-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-bitbucket-project-users)                         | ❌                                                                                                                                                              |
+| 7. Export enterprise users                  | ✅ [export-github-enterprise-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-github-enterprise-users)                                                                                                                        | ✅ [export-bitbucket-enterprise-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-bitbucket-enterprise-users)                   | ✅ [export-gitlab-users](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-gitlab-users)                                         |
+| 8. Export organization projects             | ✅ [export-github-projects-v1](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-github-projects-v1) [export-github-projects-v2](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#export-github-projects-v2) | ❌                                                                                                                                                                    | ❌                                                                                                                                                              |
+| 9. Check repositories last commits          | ✅ [ghec-last-commit-check](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#ghec-last-commit-check)                                                                                                                                        | ❌                                                                                                                                                                    | ❌                                                                                                                                                              |
+| 10. Delete repositories                     | ✅ [delete-github-repos](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#2-delete-github-repos)                                                                                                                                            | ❌                                                                                                                                                                    | ❌                                                                                                                                                              |
+| 11. Export outside collaborators            | ✅ [export-github-outside-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#3-export-github-outside-collaborators)                                                                                                            | ❌                                                                                                                                                                    | ❌                                                                                                                                                              |
+| 12. Export List Of Github Actions In A Repo | Todo                                                                                                                                                                                                                                                                 | ❌                                                                                                                                                                    | ❌                                                                                                                                                              |
+| 13. Export List Of Github Actions In An Org | Todo                                                                                                                                                                                                                                                                 | ❌                                                                                                                                                                    | ❌                                                                                                                                                              |
+| 14. Export Branches Of A Repo               | Todo                                                                                                                                                                                                                                                                 | Todo                                                                                                                                                                  | Todo                                                                                                                                                            |
+| 15. Export Dependencies In A Repo           | Todo                                                                                                                                                                                                                                                                 | ❌                                                                                                                                                                    | ❌                                                                                                                                                              |
+| 16. Export Settings Of An Enterrpise        | Todo                                                                                                                                                                                                                                                                 | ❌                                                                                                                                                                    | ❌                                                                                                                                                              |
 
 ## Import
 
-| Features                               | GHEC                                                                                                                              |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Set repository direct collaborators | ✅ [set-repo-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#set-repo-collaborators)     |
-| 2. Set repository team permissions     | ✅ [set-repo-team-permission](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#set-repo-team-permission) |
-| 3. Create teams                        | ✅ [create-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#create-teams)                         |
-| 4. Add team members                    | ✅ [insert-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#insert-team-members)           |
-| 5. Archive/unarchive repositories      | ✅ [set-archived-status](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#1-set-archived-status)         |
-| 6. Delete repositories                 | ✅ [delete-repos](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#2-delete-repos)                       |
-| 7. Set organization memberships        | ✅ [set-membership-in-org](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#set-membership-in-org)       |
-| 8. Add organization projects           | ✅ [create-projects-v2](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#create-projects-v2)             |
+| Features                                  | GHEC                                                                                                                                                  |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Import repository direct collaborators | ✅ [import-github-repo-collaborators](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-repo-collaborators)     |
+| 2. Import repository team permissions     | ✅ [import-github-repo-team-permission](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-repo-team-permission) |
+| 3. Import teams                           | ✅ [import-github-teams](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-teams)                               |
+| 4. Import team members                    | ✅ [import-github-team-members](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-team-members)                 |
+| 5. Archive/unarchive repositories         | ✅ [set-github-archived-status](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#1-set-github-archived-status)               |
+| 6. Delete repositories                    | ✅ [delete-github-repos](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#2-delete-github-repos)                             |
+| 7. Import organization memberships        | ✅ [import-github-membership-in-org](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-membership-in-org)       |
+| 8. Import organization projects           | ✅ [import-github-projects-v2](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-projects-v2)                   |
 
 # How it works
 
@@ -58,16 +63,16 @@ Hey there! 👋 Welcome to our migration tools repository – your go-to toolkit
 
 ### A. GitHub Enterprise Server - GHES
 
-### 1. Get Repositories
+### 1. Export Github Repositories
 
-#### get-repos
+#### export-github-repos
 
 #### Usage
 
-Fetches all repositories of an organization
+Exports all repositories of a github organization
 
 ```
-modus get-repos
+git-migrator export-github-repos
 ```
 
 #### Arguments
@@ -88,18 +93,18 @@ modus get-repos
 
 No input is required.
 
-### 2. Get Repository collaborators
+### 2. Export Github Direct Repository collaborators
 
 Repo team permissions will be exported in the first step.
 
-#### get-repo-direct-collaborators
+#### export-github-repo-direct-collaborators
 
-Fetches the direct collaborators of repositories in an organization.
+Exports the direct collaborators of repositories in a github organization.
 
 #### Usage
 
 ```
-modus get-repo-direct-collaborators
+git-migrator export-github-repo-direct-collaborators
 ```
 
 #### Arguments
@@ -134,22 +139,22 @@ Repositories direct collaborators role file (-y | --output-file)
 | --------- | ------- | ---------- | ------------ |
 | test-repo | Success |            |              |
 
-### 3a. Get Team In An Organization
+### 3a. Export Github Teams In An Organization
 
-### 3b. Get Team Members
+### 3b. Export Github Team Members
 
-### 3c. Get Repository Team Permission
+### 3c. Export Github Repository Team Permission
 
-All the above 3 actions are done by the below `get-teams` script.
+All the above 3 actions are done by the below `export-github-teams-and-permissions` script.
 
-#### get-teams
+#### export-github-teams-and-permissions
 
-Fetches all teams of an organization along with team memberships and repo team permissions.
+Exports all teams of an organization along with team memberships and repo team permissions.
 
 #### Usage
 
 ```
-modus get-teams
+git-migrator export-github-teams-and-permissions
 ```
 
 #### Arguments
@@ -210,16 +215,16 @@ _date_ - Format is DD/MM/YYYY - The date is when the file is created
 _target_ - ghes or ghec
 If a custom output file name is given, the team repos file name will be `<custom-output-file>-repo-team-permission-<date>-<target>.csv`.
 
-### 4. Get Enterprise Users
+### 4. Export Github Enterprise Users
 
-#### get-enterprise-users
+#### export-github-enterprise-users
 
-Fetches all users from all organizations on the enterprise server.
+Exports all users from all github organizations on the enterprise server.
 
 #### Usage
 
 ```
-modus get-enterprise-users
+git-migrator export-github-enterprise-users
 ```
 
 #### Arguments
@@ -244,16 +249,16 @@ No input file is required
 | user1 |
 | user2 |
 
-### 5. Get Organization Users
+### 5. Export Github Organization Users
 
-#### get-org-users
+#### export-github-org-users
 
-Fetches users details in an organization.
+Exports users details in an organization.
 
 #### Usage
 
 ```
-modus get-org-users
+git-migrator export-github-org-users
 ```
 
 #### Arguments
@@ -277,16 +282,16 @@ No input file is required
 | ------------ | ------------ | ------------------ | ----- | ------------------- | --- | ---------------------- | --------------- | ----------------------- | ----------- | -------- | ------------------------ | ------------------------------- | -------------------- | -------------------- |
 | sample-login | Sample Login | sample-login@email | admin | true                | 123 | https://avatar-url.com | https://url.com | https://website-url.com | false       | false    | https://projects-url.com | /orgs/org/teams/owners/projects | 2018-11-02T21:22:15Z | 2018-11-02T21:22:15Z |
 
-### 6. Get Projects V1
+### 6. Export Github Projects V1
 
-#### export-projects-v1
+#### export-github-projects-v1
 
-Fetches all V1 projects of an organization.
+Exports all V1 projects of a github organization.
 
 #### Usage
 
 ```
-modus export-projects-v1
+git-migrator export-github-projects-v1
 ```
 
 #### Arguments
@@ -307,16 +312,16 @@ No input file is required
 
 Output is a JSON file with projects info.
 
-### 7. Get Projects V2
+### 7. Export Github Projects V2
 
-#### export-projects-v2
+#### export-github-projects-v2
 
-Fetches all V2 projects of an organization.
+Exports all V2 projects of a igthub organization.
 
 #### Usage
 
 ```
-modus export-projects-v2
+git-migrator export-github-projects-v2
 ```
 
 #### Arguments
@@ -337,16 +342,16 @@ No input file is required
 
 Output is a JSON file with projects info.
 
-### 8. Create Projects V2
+### 8. Import Github Projects V2
 
-#### create-projects-v2
+#### import-github-projects-v2
 
 Creates V2 projects in an organization.
 
 #### Usage
 
 ```
-modus create-projects-v2
+git-migrator import-github-projects-v2
 ```
 
 #### Arguments
@@ -370,16 +375,16 @@ Output is a JSON file with projects info.
 
 ### B. Bitbucket
 
-### 1. Get Bitbucket Repo Team Permissions
+### 1. Export Bitbucket Repo Team Permissions
 
-#### get-bitbucket-repo-team-permissions
+#### export-bitbucket-repo-team-permissions
 
-Fetches team permissions of all repositories of a bitbucket project.
+Exports team permissions of all repositories of a bitbucket project.
 
 #### Usage
 
 ```
-modus get-bitbucket-repo-team-permissions
+git-migrator export-bitbucket-repo-team-permissions
 ```
 
 #### Arguments
@@ -404,16 +409,16 @@ modus get-bitbucket-repo-team-permissions
 | ----------- | ----------- | ---------- |
 | sample-repo | sample-team | write      |
 
-### 2. Get Bitbucket Repositories
+### 2. Export Bitbucket Repositories
 
-#### get-bitbucket-repositories
+#### export-bitbucket-repos
 
-Fetches all repositories of a bitbucket organization (workspace).
+Exports all repositories of a bitbucket organization (workspace).
 
 #### Usage
 
 ```
-modus get-bitbucket-repositories
+git-migrator export-bitbucket-repos
 ```
 
 #### Arguments
@@ -435,16 +440,16 @@ No input is required
 | ----------- |
 | sample-repo |
 
-### 3. Get Bitbucket Repo Direct Collaborators
+### 3. Export Bitbucket Repo Direct Collaborators
 
-#### get-bitbucket-repo-direct-collaborators
+#### export-bitbucket-repo-direct-collaborators
 
-Fetches users permissions of all repositories of a bitbucket organization (workspace).
+Exports users permissions of all repositories of a bitbucket organization (workspace).
 
 #### Usage
 
 ```
-modus get-bitbucket-repo-direct-collaborators
+git-migrator export-bitbucket-repo-direct-collaborators
 ```
 
 #### Arguments
@@ -469,16 +474,16 @@ modus get-bitbucket-repo-direct-collaborators
 | ----------- | --------- | ----- |
 | sample-repo | test-user | write |
 
-### 4. Get Bitbucket Teams
+### 4. Export Bitbucket Teams
 
-#### get-bitbucket-teams
+#### export-bitbucket-teams
 
-Fetches all teams of a Bitbucket project.
+Exports all teams of a Bitbucket project.
 
 #### Usage
 
 ```
-modus get-bitbucket-teams
+git-migrator export-bitbucket-teams
 ```
 
 #### Arguments
@@ -500,16 +505,16 @@ No input is required.
 | ----------- | ----------- | ------- | ---------------- | ----------- |
 | Sample Team | sample-team | closed  | sample team desc | parent-team |
 
-### 5. Get Bitbucket Team Members
+### 5. Export Bitbucket Team Members
 
-#### get-bitbucket-team-members
+#### exort-bitbucket-team-members
 
-Fetches team members of a bitbucket project.
+Exports team members of a bitbucket project.
 
 #### Usage
 
 ```
-modus get-bitbucket-team-members
+git-migrator export-bitbucket-team-members
 ```
 
 #### Arguments
@@ -534,16 +539,16 @@ modus get-bitbucket-team-members
 | --------- | ------ | ----- |
 | test-user | team-1 | admin |
 
-### 6. Get Bitbucket Project Users
+### 6. Export Bitbucket Project Users
 
-#### get-bitbucket-project-users
+#### export-bitbucket-project-users
 
-Fetches users of a bitbucket project.
+Exports users of a bitbucket project.
 
 #### Usage
 
 ```
-modus get-bitbucket-project-users
+git-migrator export-bitbucket-project-users
 ```
 
 #### Arguments
@@ -565,16 +570,16 @@ No input is required
 | --------- |
 | test-user |
 
-### 7. Get Bitbucket Enterprise Users
+### 7. Export Bitbucket Enterprise Users
 
-#### get-bitbucket-enterprise-users
+#### export-bitbucket-enterprise-users
 
-Fetches users of a bitbucket enterprise.
+Exports users of a bitbucket enterprise.
 
 #### Usage
 
 ```
-modus get-bitbucket-enterprise-users
+git-migrator export-bitbucket-enterprise-users
 ```
 
 #### Arguments
@@ -598,16 +603,16 @@ No input is required
 
 ### C. GitLab
 
-### 1. Get GitLab Repositories
+### 1. Export GitLab Repositories
 
-#### get-gitlab-repositories
+#### export-gitlab-repositories
 
-Fetches all repositories of a Gitlab organization.
+Exports all repositories of a Gitlab organization.
 
 #### Usage
 
 ```
-modus get-gitlab-repositories
+git-migrator export-gitlab-repositories
 ```
 
 #### Arguments
@@ -630,16 +635,16 @@ No input is required
 | ------------- | --------- | ------------ | --- | ---------- | ---------- |
 | abc/repo-name | repo-name | sample-group | 123 | false      | private    |
 
-### 2. Get GitLab Repo Direct Collaborators
+### 2. Export GitLab Repo Direct Collaborators
 
-#### get-gitlab-repo-direct-collaborators
+#### export-gitlab-repo-direct-collaborators
 
-Fetches direct collaborators of all repositories of a Gitlab organization.
+Exports direct collaborators of all repositories of a Gitlab organization.
 
 #### Usage
 
 ```
-modus get-gitlab-repo-direct-collaborators
+git-migrator export-gitlab-repo-direct-collaborators
 ```
 
 #### Arguments
@@ -664,16 +669,16 @@ modus get-gitlab-repo-direct-collaborators
 | ----------- | --------- | ----- |
 | sample-repo | test-user | write |
 
-### 3. Get GitLab Teams
+### 3. Export GitLab Teams
 
-#### get-gitlab-teams
+#### export-gitlab-teams
 
-Fetches all teams of a gitlab organization.
+Exports all teams of a gitlab organization.
 
 #### Usage
 
 ```
-modus get-gitlab-teams
+git-migrator export-gitlab-teams
 ```
 
 #### Arguments
@@ -695,16 +700,16 @@ No input is required.
 | ----------- | ----------- | ------- | ---------------- | ----------- |
 | Sample Team | sample-team | closed  | sample team desc | parent-team |
 
-### 4. Get GitLab Team Members
+### 4. Export GitLab Team Members
 
-#### get-gitlab-team-members
+#### export-gitlab-team-members
 
-Fetches team members of a gitlab organization.
+Exports team members of a gitlab organization.
 
 #### Usage
 
 ```
-modus get-gitlab-team-members
+git-migrator export-gitlab-team-members
 ```
 
 #### Arguments
@@ -729,16 +734,16 @@ modus get-gitlab-team-members
 | --------- | ------ | ----- |
 | test-user | team-1 | admin |
 
-### 5. Get GitLab Users
+### 5. Export GitLab Users
 
-#### get-gitlab-users
+#### export-gitlab-users
 
-Fetches users of a gitlab organization.
+Exports users of a gitlab organization.
 
 #### Usage
 
 ```
-modus get-gitlab-users
+git-migrator export-gitlab-users
 ```
 
 #### Arguments
@@ -764,16 +769,16 @@ No input is required
 
 ### A. GitHub Enterprise Cloud - GHEC
 
-### 1. Add Members To The Organization
+### 1. Import Members To The Organization
 
-#### set-membership-in-org
+#### import-github-membership-in-org
 
-Adds or removes members from an organization.
+Adds or removes members from a github organization.
 
 #### Usage
 
 ```
-modus set-membership-in-org
+git-migrator import-github-membership-in-org
 ```
 
 #### Arguments
@@ -799,16 +804,16 @@ modus set-membership-in-org
 | ------------ | ------- | ---------- | ------------ |
 | example-user | Success |            |              |
 
-### 2. Create teams
+### 2. Import Github teams
 
-#### create-teams
+#### import-github-teams
 
-Create teams in an organization.
+Imports teams to a github organization.
 
 #### Usage
 
 ```
-modus create-teams
+git-migrator import-github-teams
 ```
 
 #### Arguments
@@ -843,16 +848,16 @@ Required fields in the input CSV file are:
 | team a | Success |            |              |
 | team b | Success |            |              |
 
-### 3. Insert Members To Teams
+### 3. Import Members To Github Teams
 
-#### insert-team-members
+#### import-github-team-members
 
-Inserts members to teams with the specified roles.
+Imports members to teams with the specified roles.
 
 #### Usage
 
 ```
-modus insert-team-members
+git-migrator import-github-team-members
 ```
 
 #### Arguments
@@ -873,16 +878,16 @@ modus insert-team-members
 
 To migrate the team members from GHES to GHEC, use the team members output file of **[get-teams](https://github.com/ModusCreateOrg/gh-migration-scripts#8-get-teams)** operation.
 
-### 4. Add Repo direct collaborators
+### 4. Import Github Repo direct collaborators
 
-#### set-repo-collaborators
+#### import-github-repo-collaborators
 
 Adds or removes direct collaborators of repositories in an organization.
 
 #### Usage
 
 ```
-modus set-repo-collaborators
+git-migrator import-github-repo-collaborators
 ```
 
 #### Arguments
@@ -908,16 +913,16 @@ modus set-repo-collaborators
 | -------- | ----------- | ----- | ------- | ---------- | ------------ |
 | abc-repo | sample-user | admin | Success |            |              |
 
-### 5. Set Repo Team Permission
+### 5. Import github Repo Team Permission
 
-#### set-repo-team-permission
+#### import-github-repo-team-permission
 
-Add teams with permissions to the repositories in an organization.
+Imports teams with permissions to the repositories in an organization.
 
 #### Usage
 
 ```
-modus set-repo-team-permission
+git-migrator import-github-repo-team-permission
 ```
 
 #### Arguments
@@ -950,7 +955,7 @@ Compares team metrics for GHES and GHEC for an organization.
 #### Usage
 
 ```
-modus compare-teams -c <ghec-file> -s <ghes-file>
+git-migrator compare-teams -c <ghec-file> -s <ghes-file>
 ```
 
 #### Arguments
@@ -1010,7 +1015,7 @@ Compares repo direct collaborators between GHES and GHEC in an organization.
 #### Usage
 
 ```
-modus compare-repo-direct-collaborators -c <ghec-file> -s <ghes-file>
+git-migrator compare-repo-direct-collaborators -c <ghec-file> -s <ghes-file>
 ```
 
 #### Arguments
@@ -1060,7 +1065,7 @@ Format
 Compares the last commits of all branches of every repositories between source and target organizations
 
 ```
-modus ghec-last-commit-check -p <ghec-organization> -q <source-organization> -h <source token> -t <target-token> -g <server-url>
+git-migrator ghec-last-commit-check -p <ghec-organization> -q <source-organization> -h <source token> -t <target-token> -g <server-url>
 ```
 
 #### Arguments
@@ -1087,14 +1092,14 @@ Input is optional, a CSV file with header `repo`.
 
 ### Miscellaneous
 
-### 1. set-archived-status
+### 1. set-github-archived-status
 
-Archive or unarchive repositories in an organization.
+Archive or unarchive repositories in a github organization.
 
 #### Usage
 
 ```
-modus set-archived-status
+git-migrator set-github-archived-status
 ```
 
 #### Arguments
@@ -1120,14 +1125,14 @@ modus set-archived-status
 | -------- | ------- | ---------- | ------------ |
 | abc-repo | Success |            |              |
 
-### 2. delete-repos
+### 2. delete-github-repos
 
 Delete repositories in an organization.
 
 #### Usage
 
 ```
-modus delete-repos
+git-migrator delete-github-repos
 ```
 
 #### Arguments
@@ -1152,14 +1157,14 @@ modus delete-repos
 | -------- | ------- | ---------- | ------------ |
 | abc-repo | Success |            |              |
 
-### 3. get-outside-collaborators
+### 3. export-github-outside-collaborators
 
-Fetches outside collaborators of an organization.
+Exports outside collaborators of an organization.
 
 #### Usage
 
 ```
-modus get-outside-collaborators
+git-migrator export-github-outside-collaborators
 ```
 
 #### Arguments

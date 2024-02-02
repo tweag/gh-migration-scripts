@@ -9,6 +9,7 @@ import { stringify } from 'csv-stringify';
 import kebabCase from 'lodash.kebabcase';
 import figlet from 'figlet';
 import chalk from 'chalk';
+import * as speak from './style-utils.js';
 
 const spinner = Ora();
 
@@ -84,7 +85,7 @@ export const getDate = () => {
 
 export const delay = (sec = 1) => {
 	return new Promise((resolve) => {
-		console.log('\ndelay: ', sec, ' seconds\n');
+		const delayMsg = '\ndelay: ' + sec + ' seconds\n';
 		setTimeout(resolve, sec * 1000);
 	});
 };
@@ -106,12 +107,14 @@ export const currentTime = () =>
 
 export const showGraphQLErrors = (response) => {
 	if (response.errorMessage) {
-		spinner.fail(` ${response.errorMessage}`);
+		spinner.fail(`${response.errorMessage}`);
+		// eslint-disable-next-line no-undef
 		process.exit();
 	}
 
 	if (response.data && response.data.errors) {
 		spinner.fail(`${response.data.errors[0].message}`);
+		// eslint-disable-next-line no-undef
 		process.exit();
 	}
 };

@@ -10,3 +10,4 @@ export const GITHUB_HOST = 'GitHub';
 export const GITLAB_HOST = 'GitLab';
 export const GIT_HOST = 'gitHost';
 export const GITHUB_GRAPHQL_API_URL = 'https://api.github.com/graphql';
+export const PROGRESS_BAR_CLEAR_NUM = 10;
