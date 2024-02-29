@@ -1,0 +1,4 @@
+p4python==2023.2.2543803
+launchdarkly-server-sdk==9.2.0
+PyGithub
+GitPython
