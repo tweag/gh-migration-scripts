@@ -15,8 +15,6 @@ def export_users_and_groups(p4):
     with open(groups_file, 'w') as f:
         json.dump(groups, f, indent=4)
 
-    users = list(map(lambda user: user['User'], users))
-    groups = list(set(map(lambda group: group['group'], groups)))
     return users, groups
 
 def get_permissions(p4, depot, users):
@@ -46,6 +44,31 @@ def save_permissions_csv(p4, depots, users, csv_file):
                 permission['Depot'] = depot
                 writer.writerow(permission)
 
+def save_group_members_csv(group_members, csv_file):
+    with open(csv_file, 'w', newline='') as f:
+        fieldnames = ['member', 'team', 'role']
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for group_member in group_members:
+            role = "maintainer" if group_member['isOwner'] == "1" else "member"
+            writer.writerow({ "member": group_member['user'], "team": group_member['group'], "role": role })
+
+def save_users_csv(users, csv_file):
+    with open(csv_file, 'w', newline='') as f:
+        fieldnames = ['login', 'full_name', 'email']
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for user in users:
+            writer.writerow({ "login": user['User'], "full_name": user['FullName'], "email": user['Email'] })
+
+def save_groups_csv(groups, csv_file):
+    with open(csv_file, 'w', newline='') as f:
+        fieldnames = ['name', 'description', 'privacy', 'parentTeamId']
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for group in groups:
+            writer.writerow({ "name": group['Group'], "description": group['Description'], "privacy": "secret" })
+
 def list_permissions_for_all_depots(p4):
     try:
         p4.connect()
@@ -54,7 +77,13 @@ def list_permissions_for_all_depots(p4):
         csv_file = 'permissions.csv'
         depot_names = [depot['name'] for depot in depots]
         print("Started exporting users and groups...")
+
         users, groups = export_users_and_groups(p4)
+        save_users_csv(users, 'users.csv')
+        save_groups_csv(groups, 'group_members.csv')
+        users = list(map(lambda user: user['User'], users))
+        save_group_members_csv(groups, 'group_members.csv')
+
         print("Finished exporting users and groups...")
         print("Now saving depot permissions for users and groups to csv...")
         save_permissions_csv(p4, depot_names, users, csv_file)
