@@ -1,3 +1,9 @@
+# This script checks the downloaded migration log files to see which ones completed successfully
+# and how long the migration took.
+# It expects to be run from within the directory where the log files are located
+
+
+
 echo -n "Checking migration logs for completion status..."
 
 # Now check to see how many were started
@@ -7,7 +13,7 @@ MIGRATION_STARTED_COUNT=$(grep "Migration started" migration-log-*.log | wc -l)
 MIGRATION_COMPLETED_COUNT=$(grep "Migration complete" migration-log-*.log | wc -l)
 
 echo "done."
-echo "${MIGRATION_STARTED_COUNT}/${MIGRATION_COMPLETED_COUNT} migrations completed."
+echo "${MIGRATION_COMPLETED_COUNT}/${MIGRATION_STARTED_COUNT} migrations completed."
 
 if [ "${MIGRATION_STARTED_COUNT}" -ne "${MIGRATION_COMPLETED_COUNT}" ]; then
   echo "Exiting because not all migrations completed."
