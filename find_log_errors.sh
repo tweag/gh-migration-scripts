@@ -1,33 +1,57 @@
-# This script examines a directory containing all the log files after starting migrations with
-# the gei tool, and finds which ones failed with errors
-# It outputs a list of the source org, source repo, destination org, and destination repo
-
 #!/usr/bin/env bash
-set -e 
+#
+# This script examines a directory containing all the log files after starting migrations with
+# the gei tool, and finds which ones failed with errors.
+# It outputs a list of the source org, source repo, destination org, destination repo, and error message.
 
-# Set defaults
-LOG_DIRECTORY=""
+set -euo pipefail
 
-# Check options
-while getopts "d:" o; do
-  case "${o}" in
+# Function to display script usage
+usage() {
+  echo "Usage: $0 -d <log_directory>"
+  echo "Options:"
+  echo "  -d <log_directory>   Specify the directory where the logs are"
+  exit 1
+}
+
+# Parse command line options
+while getopts "d:" opt; do
+  case "${opt}" in
     d)
       LOG_DIRECTORY=${OPTARG}
+      ;;
+    *)
+      usage
       ;;
   esac
 done
 
-if [ -z "${LOG_DIRECTORY}" ]; then
-  echo "Specify the directory where the logs are with the -d parameter"
-  exit 1;
+# Check if log directory is provided
+if [ -z "${LOG_DIRECTORY:-}" ]; then
+  echo "Error: Log directory is not specified."
+  usage
 fi
 
-echo "source_org,source_repo,destination_org,destination_repo"
-for LOGFILE in $(grep -l "\[ERROR\]" ${LOG_DIRECTORY}/*.octoshift.log); do 
+# Check if log directory exists
+if [ ! -d "${LOG_DIRECTORY}" ]; then
+  echo "Error: Log directory '${LOG_DIRECTORY}' does not exist."
+  exit 1
+fi
 
-   # get the verbose log file name
-   VERBOSE_LOGFILE=$(echo ${LOGFILE} | sed "s/\octoshift.log/octoshift.verbose.log/")
-   ERROR=$(cat ${VERBOSE_LOGFILE} | grep "\[ERROR\]" | sed "s/^.\+\[ERROR\] \(.\+\)/\\1/")
-   cat "${LOGFILE}" | tr '\n' ' ' | sed "s/^.\+GITHUB SOURCE ORG: \([^ ]\+\).\+SOURCE REPO: \([^ ]\+\).\+GITHUB TARGET ORG: \([^ ]\+\).\+TARGET REPO: \([^ ]\+\).\+/\\1,\\2,\\3,\\4/"
-   echo ",\"${ERROR}\""
+# Print header
+echo "source_org,source_repo,destination_org,destination_repo,error_message"
+
+# Process log files
+for LOGFILE in "${LOG_DIRECTORY}"/*.octoshift.log; do
+  # Check if log file contains errors
+  if grep -q "\[ERROR\]" "${LOGFILE}"; then
+    # Get the verbose log file name
+    VERBOSE_LOGFILE="${LOGFILE%.octoshift.log}.octoshift.verbose.log"
+    # Extract error message
+    ERROR=$(grep "\[ERROR\]" "${VERBOSE_LOGFILE}" | sed "s/^.\+\[ERROR\] \(.\+\)/\\1/")
+    # Extract org and repo information
+    INFO=$(grep -oP "GITHUB SOURCE ORG: \K[^ ]+|SOURCE REPO: \K[^ ]+|GITHUB TARGET ORG: \K[^ ]+|TARGET REPO: \K[^ ]+" "${LOGFILE}" | tr '\n' ',' | sed 's/,$//')
+    # Print org, repo, and error message
+    echo "${INFO},${ERROR}"
+  fi
 done
