@@ -77,8 +77,7 @@ if [ ! -f "${INPUT_FILE}" ]; then
 fi
 
 # Loop through the input file
-while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO
-do
+while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO; do
   # Trim leading/trailing whitespace
   SOURCE_ORG=$(echo "${SOURCE_ORG}" | xargs)
   SOURCE_REPO=$(echo "${SOURCE_REPO}" | xargs)
@@ -86,27 +85,25 @@ do
   DESTINATION_REPO=$(echo "${DESTINATION_REPO}" | xargs)
 
   # Override destination org and repo for debugging
-  if [ ! -z "${OVERRIDE_DESTINATION_ORG}" ]; then
+  if [ -n "${OVERRIDE_DESTINATION_ORG}" ]; then
     DESTINATION_ORG="${OVERRIDE_DESTINATION_ORG}"
   fi
-  if [ ! -z "${OVERRIDE_DESTINATION_REPO_PREFIX}" ]; then
+  if [ -n "${OVERRIDE_DESTINATION_REPO_PREFIX}" ]; then
     DESTINATION_REPO="${OVERRIDE_DESTINATION_REPO_PREFIX}${DESTINATION_REPO}"
   fi
 
   log "Fetching secrets for ${SOURCE_ORG}/${SOURCE_REPO}"
 
   # Set the source API URL if provided
-  if [ ! -z "${SOURCE_API_URL}" ]; then
+  if [ -n "${SOURCE_API_URL}" ]; then
     GITHUB_API_URL="${SOURCE_API_URL}" GITHUB_TOKEN="${SOURCE_TOKEN}" gh secret list --repo "${SOURCE_ORG}/${SOURCE_REPO}" | tail -n +2 | cut -d$'\t' -f1
   else
     GITHUB_TOKEN="${SOURCE_TOKEN}" gh secret list --repo "${SOURCE_ORG}/${SOURCE_REPO}" | tail -n +2 | cut -d$'\t' -f1
   fi
 
-  set +e
-  SECRETS=$?
-  set -e
+  SECRETS_RESULT=$?
 
-  if [ ${SECRETS} -ne 0 ]; then
+  if [ ${SECRETS_RESULT} -ne 0 ]; then
     log "Error: Failed to fetch secrets for ${SOURCE_ORG}/${SOURCE_REPO}"
     continue
   fi
@@ -116,8 +113,7 @@ do
     continue
   fi
 
-  for SECRET_NAME in ${SECRETS}
-  do
+  for SECRET_NAME in ${SECRETS}; do
     log "${SECRET_NAME} -> ${DESTINATION_ORG}/${DESTINATION_REPO}"
     GITHUB_TOKEN="${DESTINATION_TOKEN}" gh secret set "${SECRET_NAME}" --body placeholder --repo "${DESTINATION_ORG}/${DESTINATION_REPO}" || log "Error: Failed to migrate secret ${SECRET_NAME} to ${DESTINATION_ORG}/${DESTINATION_REPO}"
   done

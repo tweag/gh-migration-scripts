@@ -1218,7 +1218,21 @@ Checks the downloaded migration log files to see which ones completed successful
 
 #### Arguments
 
-1. Directory - Optional -  The directory where the migration log files are located. If not provided, then the script assumes the current directory has the log files.
+1. Directory - Optional -  The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
+
+### 5. Find Log Errors
+
+Examines a directory containing all the log files after starting migrations with the GEI tool, and finds which ones failed with errors.
+
+#### Usage
+
+```
+./find_log_errors.sh [directory]
+```
+
+#### Arguments
+
+1. Directory - Optional -  The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
 
 ## Prerequisites
 
