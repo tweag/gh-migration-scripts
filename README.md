@@ -1187,14 +1187,14 @@ No input file is required
 | sample-user1  |
 | samples-user2 |
 
-### 4. Set Secrets
+### 4. Set Secret Variables
 
 Fetches secret variables from source repo and sets the corresponding secret variables in the target repo.
 
 #### Usage
 
 ```
-./migrate_secrets.sh
+./migrate_secrets.sh -i [input_csv] -s [source_token] -t [destination_token] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-a [source_api_url]]
 ```
 
 #### Arguments
@@ -1206,7 +1206,7 @@ Fetches secret variables from source repo and sets the corresponding secret vari
 5. `-y` - override_destination_repo_prefix - Prepend prefix to destination repo names (optional, useful for testing).
 6. `-a` - source_api_url - Source system API URL (optional, required for GHES).
 
-### 4. Check Migration Logs
+### 5. Check Migration Logs
 
 Checks the downloaded migration log files to see which ones completed successfully and how long the migration took.
 
@@ -1233,6 +1233,28 @@ Examines a directory containing all the log files after starting migrations with
 #### Arguments
 
 1. Directory - Optional -  The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
+
+### 6. Compare Migrations
+
+This script compares migration data between source and destination GitHub organizations based on provided input, downloading necessary data files, and generating a CSV report indicating match status along with signatures of repositories.
+
+#### Usage
+
+```
+./compare_migrations.sh -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_url] -p [path_to_analyzer] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]]
+```
+
+#### Arguments
+
+1. `-i` - input_csv - A CSV with source_org,source_repo,destination_org,destination_repo.
+2. `-o` - output_csv - A CSV file with match,source_org,source_repo,source_signature,target_org,target_repo,target_signature.
+3. `-s` - source_token - Source system token.
+4. `-t` - destination_token - Destination system token.
+5. `-z` - override_destination_org - Override destination org with this value (optional, useful for testing).
+6. `-y` - override_destination_repo_prefix - Prepend prefix to destination repo names (optional, useful for testing).
+7. `-a` - source_api_url - Source system API URL (optional, required for GHES).
+8. `-p` - path_to_analyzer - Path to the GitHub migration analyzer.
+9. `w` - working_directory - Working directory (optional, uses a new temporary directory if not specified).
 
 ## Prerequisites
 

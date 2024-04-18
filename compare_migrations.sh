@@ -1,152 +1,176 @@
-# Usage:
-# -i [input_csv] A CSV with source_org,source_repo,destination_org,DESTINATION_REPO
-# -o [output_csv_ A CSV file with match,source_org,source_repo,source_signature,target_org,target_repo,target_signature
-# -s [source system token]
-# -t [destination system token]
-# -a [source api URL]
-# -p [path to github migration analyzer]
-# -w [working directory, uses new tmp directory if not specified]
-# -z [override destination org with this value; useful for testing]
-# -y [prepend prefix to destination repo names; useful for testing]
-
 #!/usr/bin/env bash
-set -e 
+
+# Log file
+LOG_FILE="compare_migrations.log"
+
+# Function to log messages
+log() {
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >> "${LOG_FILE}"
+}
+
+# Function to print usage
+print_usage() {
+  echo "Usage: $0 -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_url] -p [path_to_analyzer] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]]"
+  echo "  -i [input_csv]                  A CSV with source_org,source_repo,destination_org,destination_repo"
+  echo "  -o [output_csv]                 A CSV file with match,source_org,source_repo,source_signature,target_org,target_repo,target_signature"
+  echo "  -s [source_token]               Source system token"
+  echo "  -t [destination_token]          Destination system token"
+  echo "  -a [source_api_url]             Source API URL (required for GHES)"
+  echo "  -p [path_to_analyzer]           Path to the GitHub migration analyzer"
+  echo "  -w [working_directory]          Working directory (optional, uses a new temporary directory if not specified)"
+  echo "  -z [override_destination_org]   Override destination org with this value (optional, useful for testing)"
+  echo "  -y [override_destination_repo_prefix]   Prepend prefix to destination repo names (optional, useful for testing)"
+}
 
 # Set defaults
 OUTPUT_FILE="comparison_output.csv"
 PATH_TO_ANALYZER="./gh-migration-analyzer"
-TMPDIR="$(mktemp -d)"
+TMPDIR=$(mktemp -d)
 OVERRIDE_DESTINATION_ORG=""
 OVERRIDE_DESTINATION_REPO_PREFIX=""
-STARTDIR="$(pwd)"
+STARTDIR=$(pwd)
+
 # Check options
-while getopts "i:o:s:t:a:p:w:z:y:" o; do
-  case "${o}" in
+while getopts "i:o:s:t:a:p:w:z:y:h" opt; do
+  case "${opt}" in
     i)
       INPUT_FILE=${OPTARG}
       ;;
     o)
       OUTPUT_FILE=${OPTARG}
       ;;
-	s)
-	  SOURCE_TOKEN=${OPTARG}
-	  ;;
-	t)
-	  DESTINATION_TOKEN=${OPTARG}
-	  ;;
-	a)
-	  GHES_API_URL=${OPTARG}
-	  ;;
-	p)
-	  PATH_TO_ANALYZER=${OPTARG}
-	  ;;
-	w)
-	  TMPDIR=${OPTARG}
-	  ;;
-	z)
-	  OVERRIDE_DESTINATION_ORG=${OPTARG}
-	  ;;
-	y)
-	  OVERRIDE_DESTINATION_REPO_PREFIX=${OPTARG}
-	  ;;
+    s)
+      SOURCE_TOKEN=${OPTARG}
+      ;;
+    t)
+      DESTINATION_TOKEN=${OPTARG}
+      ;;
+    a)
+      GHES_API_URL=${OPTARG}
+      ;;
+    p)
+      PATH_TO_ANALYZER=${OPTARG}
+      ;;
+    w)
+      TMPDIR=${OPTARG}
+      ;;
+    z)
+      OVERRIDE_DESTINATION_ORG=${OPTARG}
+      ;;
+    y)
+      OVERRIDE_DESTINATION_REPO_PREFIX=${OPTARG}
+      ;;
+    h)
+      print_usage
+      exit 0
+      ;;
+    *)
+      print_usage
+      exit 1
+      ;;
   esac
 done
 
+# Check if required parameters are provided
 if [ -z "${INPUT_FILE}" ] || [ -z "${OUTPUT_FILE}" ] || [ -z "${SOURCE_TOKEN}" ] || [ -z "${DESTINATION_TOKEN}" ] || [ -z "${GHES_API_URL}" ]; then
-  echo "Not all required parameters are provided.  View the top of this source file to see comment."
-  exit 1;
+  log "Error: Not all required parameters are provided."
+  print_usage
+  exit 1
 fi
 
-echo "Working in ${TMPDIR}"
+# Check if the input file exists
+if [ ! -f "${INPUT_FILE}" ]; then
+  log "Error: Input file '${INPUT_FILE}' does not exist."
+  exit 1
+fi
 
-# TODO: Parameterize input file
+# Check if the path to migration analyzer is available
+if [ ! -f "${PATH_TO_ANALYZER}" ]; then
+  log "Error: Path to migration analyzer not found at '${PATH_TO_ANALYZER}'."
+  exit 1
+fi
+
+# Check if the GitHub migration analyzer is available
+if [ ! -f "${PATH_TO_ANALYZER}/src/index.js" ]; then
+  log "Error: GitHub migration analyzer not found at '${PATH_TO_ANALYZER}/src/index.js'."
+  exit 1
+fi
+
+log "Working in ${TMPDIR}"
+
+# Copy the input file to the working directory
 cp "${INPUT_FILE}" "${TMPDIR}"
-cd "${TMPDIR}"
+cd "${TMPDIR}" || { log "Error: Unable to change to temporary directory ${TMPDIR}"; exit 1; }
 
-# Unfortunately we have to do TWO loops over all the repos
-# This is because the github migration analyzer tool has no way to suppress its output and it's annoying to seem
-# it mixed in with the other output.  (At least, that's the case in windows with gitbash and winpty)
-# So let's just do one first loop to get all that out of the way, and then a second loop to do the comparison
+log "Downloading required data files..."
 
-echo "Downloading required data files..."
-while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO
-do 
-
-  # Override for debugging
-  if [ ! -z "${OVERRIDE_DESTINATION_ORG}" ]; then
+# Download source and destination org data
+while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO; do
+  # Override destination org and repo for debugging
+  if [ -n "${OVERRIDE_DESTINATION_ORG}" ]; then
     DESTINATION_ORG="${OVERRIDE_DESTINATION_ORG}"
   fi
-  if [ ! -z "${OVERRIDE_DESTINATION_REPO_PREFIX}" ]; then
+  if [ -n "${OVERRIDE_DESTINATION_REPO_PREFIX}" ]; then
     DESTINATION_REPO="${OVERRIDE_DESTINATION_REPO_PREFIX}${DESTINATION_REPO}"
   fi
 
   # Download source org data
-  if [ ! -f ./"${SOURCE_ORG}"-metrics/repo-metrics.csv ]; then
-    echo "-> Downloading org data for ${SOURCE_ORG}"
-    # Unfortunately there seems to be no way to redirect the stdout and stderror from this command to /dev/null so it gets messy at the console
-	"${PATH_TO_ANALYZER}"/src/index.js GH-org -o "${SOURCE_ORG}" -a -s "${GHES_API_URL}" -t "${SOURCE_TOKEN}" 2>&1 > /dev/null
+  if [ ! -f "./${SOURCE_ORG}-metrics/repo-metrics.csv" ]; then
+    log "-> Downloading org data for ${SOURCE_ORG}"
+    if ! "${PATH_TO_ANALYZER}/src/index.js" GH-org -o "${SOURCE_ORG}" -a -s "${GHES_API_URL}" -t "${SOURCE_TOKEN}" &>/dev/null; then
+      log "Error: Failed to download source org data for ${SOURCE_ORG}."
+      exit 1
+    fi
+    if [ ! -f "./${SOURCE_ORG}-metrics/repo-metrics.csv" ]; then
+      log "Error: Failed to download source org data for ${SOURCE_ORG}."
+      exit 1
+    fi
+    log "-> Got org data for ${SOURCE_ORG}"
   fi
-  # The github analyzer doesn't seem to return an error code on failure so let's check if it succeeded
-  if [ ! -f ./"${SOURCE_ORG}"-metrics/repo-metrics.csv ]; then
-	echo "Failed to download source org data for ${SOURCE_ORG}."
-	exit 1;
-  fi
-  echo "-> Got org data for ${SOURCE_ORG}"
-  
-  
+
   # Download destination data
-  if [ ! -f ./"${DESTINATION_ORG}"-metrics/repo-metrics.csv ]; then
-    echo "-> Downloading org data for ${DESTINATION_ORG}"
-    # Unfortunately there seems to be no way to redirect the stdout and stderror from this command to /dev/null so it gets messy at the console
-	"${PATH_TO_ANALYZER}"/src/index.js GH-org -o "${DESTINATION_ORG}" -t "${DESTINATION_TOKEN}" 2>&1 > /dev/null
+  if [ ! -f "./${DESTINATION_ORG}-metrics/repo-metrics.csv" ]; then
+    log "-> Downloading org data for ${DESTINATION_ORG}"
+    if ! "${PATH_TO_ANALYZER}/src/index.js" GH-org -o "${DESTINATION_ORG}" -t "${DESTINATION_TOKEN}" &>/dev/null; then
+      log "Error: Failed to download destination org data for ${DESTINATION_ORG}."
+      exit 1
+    fi
+    if [ ! -f "./${DESTINATION_ORG}-metrics/repo-metrics.csv" ]; then
+      log "Error: Failed to download destination org data for ${DESTINATION_ORG}."
+      exit 1
+    fi
+    log "-> Got org data for ${DESTINATION_ORG}"
   fi
-  if [ ! -f ./"${DESTINATION_ORG}"-metrics/repo-metrics.csv ]; then
-    echo "Failed to download destination org data for ${DESTINATION_ORG}."
-	exit 1; 
-  fi
-  echo "-> Got org data for ${DESTINATION_ORG}"
-  
-done < "${INPUT_FILE}"
+done <"${INPUT_FILE}"
 
-echo
-echo "OK we should have all the data now. Did you enjoy that?  Let's compare."
-echo 
-
+log "OK, we should have all the data now."
 
 # Print output CSV header
 touch "${OUTPUT_FILE}"
-echo "match,source_org,source_repo,source_signature,destination_org,destination_repo,destination_signature" > "${OUTPUT_FILE}"
-while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO
-do 
+echo "match,source_org,source_repo,source_signature,destination_org,destination_repo,destination_signature" >"${OUTPUT_FILE}"
 
-  # Override for debugging
-  if [ ! -z "${OVERRIDE_DESTINATION_ORG}" ]; then
+while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO; do
+  # Override destination org and repo for debugging
+  if [ -n "${OVERRIDE_DESTINATION_ORG}" ]; then
     DESTINATION_ORG="${OVERRIDE_DESTINATION_ORG}"
   fi
-  if [ ! -z "${OVERRIDE_DESTINATION_REPO_PREFIX}" ]; then
+  if [ -n "${OVERRIDE_DESTINATION_REPO_PREFIX}" ]; then
     DESTINATION_REPO="${OVERRIDE_DESTINATION_REPO_PREFIX}${DESTINATION_REPO}"
   fi
 
-  # Create a "signature" for each repo based off its archive status, number of pull requests, number of discussions, numberr of 
-  # releases, and whether the wiki is enabled.
-  # Unfortunately we can't include the last push date as that's altered during migration, and the data size which seems to also
-  # be slightly different after a normal migration (for reasons unknown to me)
-  SOURCE_REPO_SIGNATURE=$(grep "^${SOURCE_REPO}," ./"${SOURCE_ORG}"-metrics/repo-metrics.csv | cut -d, -f3,4,7-10)
-  DESTINATION_REPO_SIGNATURE=$(grep "^${DESTINATION_REPO}," ./"${DESTINATION_ORG}"-metrics/repo-metrics.csv | cut -d, -f3,4,7-10)
-  
-  if [[ "${SOURCE_REPO_SIGNATURE}" != "${DESTINATION_REPO_SIGNATURE}" ]]; then
+  # Create a "signature" for each repo based on its archive status, number of pull requests, number of discussions, number of releases, and whether the wiki is enabled
+  SOURCE_REPO_SIGNATURE=$(grep "^${SOURCE_REPO}," "./${SOURCE_ORG}-metrics/repo-metrics.csv" | cut -d, -f3,4,7-10)
+  DESTINATION_REPO_SIGNATURE=$(grep "^${DESTINATION_REPO}," "./${DESTINATION_ORG}-metrics/repo-metrics.csv" | cut -d, -f3,4,7-10)
+
+  if [ "${SOURCE_REPO_SIGNATURE}" != "${DESTINATION_REPO_SIGNATURE}" ]; then
     OUTPUT="FALSE"
   else
     OUTPUT="TRUE"
   fi
   OUTPUT="${OUTPUT},${SOURCE_ORG},${SOURCE_REPO},\"${SOURCE_REPO_SIGNATURE}\",${DESTINATION_ORG},${DESTINATION_REPO},\"${DESTINATION_REPO_SIGNATURE}\""
   echo "${OUTPUT}"
-  echo "${OUTPUT}" >> "${OUTPUT_FILE}"
-  
-done < "${INPUT_FILE}"
-
+  echo "${OUTPUT}" >>"${OUTPUT_FILE}"
+done <"${INPUT_FILE}"
 
 cd "${STARTDIR}"
-echo 
-echo "Data files can be found here: ${TMPDIR}"
-
+log "Data files and output can be found in ${TMPDIR}"
