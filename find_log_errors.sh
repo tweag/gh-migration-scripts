@@ -5,19 +5,43 @@ LOG_FILE="find_log_errors.log"
 
 # Function to log messages
 log() {
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >> "${LOG_FILE}"
+  local message="$1"
+
+  # Log to the log file
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
+
+  # Log to the console
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
 }
 
 # Function to print usage
 print_usage() {
-  echo "Usage: $0 [log_directory]"
+  echo "Usage: $0 [log_directory] [-l [log_file]]"
   echo "This script examines a directory containing all the log files after starting migrations with the GEI tool, and finds which ones failed with errors."
   echo "It outputs a list of the source org, source repo, destination org, destination repo, and the error message."
   echo "If no directory is provided, it checks the current working directory for the log files."
+  echo "-l [log_file] Log file path (optional, default: find_log_errors.log)"
 }
 
 # Set the log directory to the current working directory if not provided
 LOG_DIRECTORY="${1:-$PWD}"
+
+# Check options
+while getopts "l:h" opt; do
+  case "${opt}" in
+    l)
+      LOG_FILE=${OPTARG}
+      ;;
+    h)
+      print_usage
+      exit 0
+      ;;
+    *)
+      print_usage
+      exit 1
+      ;;
+  esac
+done
 
 # Check if the log directory exists
 if [ ! -d "${LOG_DIRECTORY}" ]; then

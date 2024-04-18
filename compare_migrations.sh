@@ -5,21 +5,28 @@ LOG_FILE="compare_migrations.log"
 
 # Function to log messages
 log() {
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >> "${LOG_FILE}"
+  local message="$1"
+
+  # Log to the log file
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
+
+  # Log to the console
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
 }
 
 # Function to print usage
 print_usage() {
-  echo "Usage: $0 -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_url] -p [path_to_analyzer] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]]"
+  echo "Usage: $0 -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_url] -p [path_to_analyzer] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]"
   echo "  -i [input_csv]                  A CSV with source_org,source_repo,destination_org,destination_repo"
   echo "  -o [output_csv]                 A CSV file with match,source_org,source_repo,source_signature,target_org,target_repo,target_signature"
-  echo "  -s [source_token]               Source system token"
-  echo "  -t [destination_token]          Destination system token"
+  echo "  -s [source_token]               Source system token (optional, if not provided, GH_SRC_PAT environment variable will be used)"
+  echo "  -t [destination_token]          Destination system token (optional, if not provided, GH_DEST_PAT environment variable will be used)"
   echo "  -a [source_api_url]             Source API URL (required for GHES)"
   echo "  -p [path_to_analyzer]           Path to the GitHub migration analyzer"
   echo "  -w [working_directory]          Working directory (optional, uses a new temporary directory if not specified)"
   echo "  -z [override_destination_org]   Override destination org with this value (optional, useful for testing)"
   echo "  -y [override_destination_repo_prefix]   Prepend prefix to destination repo names (optional, useful for testing)"
+  echo "  -l [log_file]                   Log file path (optional, default: compare_migrations.log)"
 }
 
 # Set defaults
@@ -31,7 +38,7 @@ OVERRIDE_DESTINATION_REPO_PREFIX=""
 STARTDIR=$(pwd)
 
 # Check options
-while getopts "i:o:s:t:a:p:w:z:y:h" opt; do
+while getopts "i:o:s:t:a:p:w:z:y:l:h" opt; do
   case "${opt}" in
     i)
       INPUT_FILE=${OPTARG}
@@ -60,6 +67,9 @@ while getopts "i:o:s:t:a:p:w:z:y:h" opt; do
     y)
       OVERRIDE_DESTINATION_REPO_PREFIX=${OPTARG}
       ;;
+    l)
+      LOG_FILE=${OPTARG}
+      ;;
     h)
       print_usage
       exit 0
@@ -72,7 +82,7 @@ while getopts "i:o:s:t:a:p:w:z:y:h" opt; do
 done
 
 # Check if required parameters are provided
-if [ -z "${INPUT_FILE}" ] || [ -z "${OUTPUT_FILE}" ] || [ -z "${SOURCE_TOKEN}" ] || [ -z "${DESTINATION_TOKEN}" ] || [ -z "${GHES_API_URL}" ]; then
+if [ -z "${INPUT_FILE}" ] || [ -z "${OUTPUT_FILE}" ] || [ -z "${GHES_API_URL}" ]; then
   log "Error: Not all required parameters are provided."
   print_usage
   exit 1
@@ -82,6 +92,30 @@ fi
 if [ ! -f "${INPUT_FILE}" ]; then
   log "Error: Input file '${INPUT_FILE}' does not exist."
   exit 1
+fi
+
+# Check if source token is provided or GH_SRC_PAT environment variable is set
+if [ -z "${SOURCE_TOKEN}" ] && [ -z "${GH_SRC_PAT}" ]; then
+  log "Error: Source token not provided, and GH_SRC_PAT environment variable is not set."
+  print_usage
+  exit 1
+fi
+
+# Use GH_SRC_PAT environment variable if SOURCE_TOKEN is not provided
+if [ -z "${SOURCE_TOKEN}" ]; then
+  SOURCE_TOKEN="${GH_SRC_PAT}"
+fi
+
+# Check if destination token is provided or GH_DEST_PAT environment variable is set
+if [ -z "${DESTINATION_TOKEN}" ] && [ -z "${GH_DEST_PAT}" ]; then
+  log "Error: Destination token not provided, and GH_DEST_PAT environment variable is not set."
+  print_usage
+  exit 1
+fi
+
+# Use GH_DEST_PAT environment variable if DESTINATION_TOKEN is not provided
+if [ -z "${DESTINATION_TOKEN}" ]; then
+  DESTINATION_TOKEN="${GH_DEST_PAT}"
 fi
 
 # Check if the path to migration analyzer is available

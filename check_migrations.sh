@@ -5,18 +5,42 @@ LOG_FILE="check_migrations.log"
 
 # Function to log messages
 log() {
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >> "${LOG_FILE}"
+  local message="$1"
+
+  # Log to the log file
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
+
+  # Log to the console
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
 }
 
 # Function to print usage
 print_usage() {
-  echo "Usage: $0 [directory]"
+  echo "Usage: $0 [directory] [-l [log_file]]"
   echo "This script checks the downloaded migration log files to see which ones completed successfully and how long the migration took."
   echo "If no directory is provided, it checks the current working directory for the log files."
+  echo "-l [log_file] Log file path (optional, default: check_migrations.log)"
 }
 
 # Check if a directory is provided
 LOG_FILES_DIR="${1:-$PWD}"
+
+# Check options
+while getopts "l:h" opt; do
+  case "${opt}" in
+    l)
+      LOG_FILE=${OPTARG}
+      ;;
+    h)
+      print_usage
+      exit 0
+      ;;
+    *)
+      print_usage
+      exit 1
+      ;;
+  esac
+done
 
 # Check if log files directory exists
 if [ ! -d "$LOG_FILES_DIR" ]; then
