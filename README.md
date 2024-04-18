@@ -1187,6 +1187,25 @@ No input file is required
 | sample-user1  |
 | samples-user2 |
 
+### 4. Set Secrets
+
+Fetches secret variables from source repo and sets the corresponding secret variables in the target repo.
+
+#### Usage
+
+```
+./migrate_secrets.sh
+```
+
+#### Arguments
+
+1. `-i` - input_csv - A CSV with source_org,source_repo,destination_org,destination_repo.
+2. `-s` - source_token - Source system token.
+3. `-t` - destination_token - Destination system token.
+4. `-z` - override_destination_org - Override destination org with this value (optional, useful for testing).
+5. `-y` - override_destination_repo_prefix - Prepend prefix to destination repo names (optional, useful for testing).
+6. `-a` - source_api_url - Source system API URL (optional, required for GHES).
+
 ## Prerequisites
 
 **Node V16+**
