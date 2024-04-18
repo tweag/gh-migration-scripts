@@ -1206,6 +1206,20 @@ Fetches secret variables from source repo and sets the corresponding secret vari
 5. `-y` - override_destination_repo_prefix - Prepend prefix to destination repo names (optional, useful for testing).
 6. `-a` - source_api_url - Source system API URL (optional, required for GHES).
 
+### 4. Check Migration Logs
+
+Checks the downloaded migration log files to see which ones completed successfully and how long the migration took.
+
+#### Usage
+
+```
+./check_migrations.sh [directory]
+```
+
+#### Arguments
+
+1. Directory - Optional -  The directory where the migration log files are located. If not provided, then the script assumes the current directory has the log files.
+
 ## Prerequisites
 
 **Node V16+**

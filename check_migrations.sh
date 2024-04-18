@@ -1,37 +1,65 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# This script checks the downloaded migration log files to see which ones completed successfully
-# and how long the migration took.
-# It expects to be run from within the directory where the log files are located
+# Log file
+LOG_FILE="check_migrations.log"
 
-LOG_FILES="migration-log-*.log"
+# Function to log messages
+log() {
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >> "${LOG_FILE}"
+}
 
-echo -n "Checking migration logs for completion status..."
+# Function to print usage
+print_usage() {
+  echo "Usage: $0 [directory]"
+  echo "This script checks the downloaded migration log files to see which ones completed successfully and how long the migration took."
+  echo "If no directory is provided, it checks the current working directory for the log files."
+}
 
-# Check if the log files exist in the current directory
-if [ ! -f "$LOG_FILES" ]; then
-  echo "Migration Log files with the format '$LOG_FILES' not found. Exiting."
+# Check if a directory is provided
+LOG_FILES_DIR="${1:-$PWD}"
+
+# Check if log files directory exists
+if [ ! -d "$LOG_FILES_DIR" ]; then
+  log "Error: Directory '$LOG_FILES_DIR' not found."
+  print_usage
   exit 1
 fi
 
-# Count the number of started and completed migrations
-MIGRATION_STARTED_COUNT=$(grep -c "Migration started" $LOG_FILES)
-MIGRATION_COMPLETED_COUNT=$(grep -c "Migration complete" $LOG_FILES)
-
-echo "done."
-echo "${MIGRATION_COMPLETED_COUNT}/${MIGRATION_STARTED_COUNT} migrations completed."
-
-# If the number of started and completed migrations is not the same, exit with an error
-if [ $MIGRATION_STARTED_COUNT -ne $MIGRATION_COMPLETED_COUNT ]; then
-  echo "Exiting because not all migrations completed."
+# Check if log files exist in the specified directory
+if [ ! "$(ls "${LOG_FILES_DIR}"/migration-log-*.log 2>/dev/null)" ]; then
+  log "Error: No migration log files found in the directory '${LOG_FILES_DIR}'."
+  print_usage
   exit 1
 fi
 
-echo -n "Checking duration..."
+log "Checking migration logs in '${LOG_FILES_DIR}' for completion status..."
 
-# Get the earliest and latest migration timestamps
-MIGRATION_STARTED_TIME=$(grep -oP "(?<=^\[).+?(?=\])" $LOG_FILES | sort | head -1)
-MIGRATION_ENDED_TIME=$(grep -oP "(?<=^\[).+?(?=\])" $LOG_FILES | sort | tail -n 1)
+# Count the number of migrations started
+MIGRATION_STARTED_COUNT=$(grep "Migration started" "${LOG_FILES_DIR}"/migration-log-*.log | wc -l)
+if [ "${MIGRATION_STARTED_COUNT}" -eq 0 ]; then
+  log "Error: No migrations started found in the log files."
+  exit 1
+fi
 
-echo "done."
-echo "Migration started at ${MIGRATION_STARTED_TIME} and ended at ${MIGRATION_ENDED_TIME}"
+# Count the number of migrations completed
+MIGRATION_COMPLETED_COUNT=$(grep "Migration complete" "${LOG_FILES_DIR}"/migration-log-*.log | wc -l)
+
+log "${MIGRATION_COMPLETED_COUNT}/${MIGRATION_STARTED_COUNT} migrations completed."
+
+if [ "${MIGRATION_STARTED_COUNT}" -ne "${MIGRATION_COMPLETED_COUNT}" ]; then
+  log "Error: Not all migrations completed."
+  exit 1
+fi
+
+log "Checking migration duration..."
+
+# Get the start and end times of the migration
+MIGRATION_STARTED_TIME=$(sed -n "s/^\[\(.*\)\] INFO -- Migration started.\+$/\1/p" "${LOG_FILES_DIR}"/migration-log-*.log | sort | head -1)
+MIGRATION_ENDED_TIME=$(sed -n "s/^\[\(.*\)\] INFO -- Migration complete/\1/p" "${LOG_FILES_DIR}"/migration-log-*.log | sort | tail -n 1)
+
+if [ -z "${MIGRATION_STARTED_TIME}" ] || [ -z "${MIGRATION_ENDED_TIME}" ]; then
+  log "Error: Unable to determine migration start or end time."
+  exit 1
+fi
+
+log "Migration started at ${MIGRATION_STARTED_TIME} and ended at ${MIGRATION_ENDED_TIME}"
