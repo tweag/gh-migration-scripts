@@ -18,6 +18,7 @@ PATH_TO_ANALYZER="./gh-migration-analyzer"
 TMPDIR="$(mktemp -d)"
 OVERRIDE_DESTINATION_ORG=""
 OVERRIDE_DESTINATION_REPO_PREFIX=""
+GHES_API_URL=""
 STARTDIR="$(pwd)"
 # Check options
 while getopts "i:o:s:t:a:p:w:z:y:" o; do
@@ -52,7 +53,7 @@ while getopts "i:o:s:t:a:p:w:z:y:" o; do
   esac
 done
 
-if [ -z "${INPUT_FILE}" ] || [ -z "${OUTPUT_FILE}" ] || [ -z "${SOURCE_TOKEN}" ] || [ -z "${DESTINATION_TOKEN}" ] || [ -z "${GHES_API_URL}" ]; then
+if [ -z "${INPUT_FILE}" ] || [ -z "${OUTPUT_FILE}" ] || [ -z "${SOURCE_TOKEN}" ] || [ -z "${DESTINATION_TOKEN}" ]; then
   echo "Not all required parameters are provided.  View the top of this source file to see comment."
   exit 1;
 fi
@@ -84,7 +85,11 @@ do
   if [ ! -f ./"${SOURCE_ORG}"-metrics/repo-metrics.csv ]; then
     echo "-> Downloading org data for ${SOURCE_ORG}"
     # Unfortunately there seems to be no way to redirect the stdout and stderror from this command to /dev/null so it gets messy at the console
-	"${PATH_TO_ANALYZER}"/src/index.js GH-org -o "${SOURCE_ORG}" -a -s "${GHES_API_URL}" -t "${SOURCE_TOKEN}" 2>&1 > /dev/null
+	if [ -z "${GHES_API_URL}" ]; then
+	  "${PATH_TO_ANALYZER}"/src/index.js GH-org -o "${SOURCE_ORG}" -t "${SOURCE_TOKEN}" 2>&1 > /dev/null
+	else
+	  "${PATH_TO_ANALYZER}"/src/index.js GH-org -o "${SOURCE_ORG}" -a -s "${GHES_API_URL}" -t "${SOURCE_TOKEN}" 2>&1 > /dev/null
+	fi
   fi
   # The github analyzer doesn't seem to return an error code on failure so let's check if it succeeded
   if [ ! -f ./"${SOURCE_ORG}"-metrics/repo-metrics.csv ]; then
