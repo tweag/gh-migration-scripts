@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // Default values
 const defaultLogFile = 'find_log_errors.log';
@@ -64,7 +64,7 @@ if (logFiles.length === 0) {
 log(`Searching for errors in log files in '${logOptions.logDirectory}'...`);
 
 // Print the header
-console.log('source_org,source_repo,destination_org,destination_repo,error_message');
+log('source_org,source_repo,destination_org,destination_repo,error_message');
 
 // Process each log file
 logFiles.forEach(logFile => {
@@ -82,5 +82,5 @@ logFiles.forEach(logFile => {
   const destinationOrg = logFileContent.match(/GITHUB TARGET ORG: ([^\s]*)/)?.[1] || '';
   const destinationRepo = logFileContent.match(/TARGET REPO: ([^\s]*)/)?.[1] || '';
 
-  console.log(`${sourceOrg},${sourceRepo},${destinationOrg},${destinationRepo},"${error}"`);
+  log(`${sourceOrg},${sourceRepo},${destinationOrg},${destinationRepo},"${error}"`);
 });
