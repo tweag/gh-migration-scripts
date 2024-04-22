@@ -1,19 +1,5 @@
 #!/usr/bin/env bash
 
-# Log file
-LOG_FILE="migrate_secrets.log"
-
-# Function to log messages
-log() {
-  local message="$1"
-
-  # Log to the log file
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
-
-  # Log to the console
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
-}
-
 # Function to print usage
 print_usage() {
   echo "Migrate secrets (without values) for a given list of repositories"
@@ -72,6 +58,21 @@ while getopts "i:s:t:z:y:a:l:h" opt; do
       ;;
   esac
 done
+
+# Log file
+LOG_FILE_NAME="migrate_secrets.log"
+LOG_FILE="${LOG_FILE:-LOG_FILE_NAME}"
+
+# Function to log messages
+log() {
+  local message="$1"
+
+  # Log to the log file
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
+
+  # Log to the console
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
+}
 
 # Check if input file is provided
 if [ -z "${INPUT_FILE}" ]; then

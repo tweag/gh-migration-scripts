@@ -1,34 +1,20 @@
 #!/usr/bin/env bash
 
-# Log file
-LOG_FILE="find_log_errors.log"
-
-# Function to log messages
-log() {
-  local message="$1"
-
-  # Log to the log file
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
-
-  # Log to the console
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
-}
-
 # Function to print usage
 print_usage() {
-  echo "Usage: $0 [log_directory] [-l [log_file]]"
+  echo "Usage: $0 [-d log_directory] [-l log_file]"
   echo "This script examines a directory containing all the log files after starting migrations with the GEI tool, and finds which ones failed with errors."
   echo "It outputs a list of the source org, source repo, destination org, destination repo, and the error message."
-  echo "If no directory is provided, it checks the current working directory for the log files."
-  echo "-l [log_file] Log file path (optional, default: find_log_errors.log)"
+  echo "-d log_directory Log directory path (optional, default: current working directory)"
+  echo "-l log_file Log file path (optional, default: find_log_errors.log)"
 }
 
-# Set the log directory to the current working directory if not provided
-LOG_DIRECTORY="${1:-$PWD}"
-
 # Check options
-while getopts "l:h" opt; do
+while getopts "d:l:h" opt; do
   case "${opt}" in
+    d)
+      LOG_DIRECTORY=${OPTARG}
+      ;;
     l)
       LOG_FILE=${OPTARG}
       ;;
@@ -42,6 +28,23 @@ while getopts "l:h" opt; do
       ;;
   esac
 done
+
+# Set the log directory to the current working directory if not provided
+LOG_DIRECTORY="${LOG_DIRECTORY:-$PWD}"
+# Log file
+LOG_FILE_NAME="find_log_errors.log"
+LOG_FILE="${LOG_FILE:-LOG_FILE_NAME}"
+
+# Function to log messages
+log() {
+  local message="$1"
+
+  # Log to the log file
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
+
+  # Log to the console
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
+}
 
 # Check if the log directory exists
 if [ ! -d "${LOG_DIRECTORY}" ]; then
@@ -59,7 +62,7 @@ fi
 log "Searching for errors in log files in '${LOG_DIRECTORY}'..."
 
 # Print the header
-echo "source_org,source_repo,destination_org,destination_repo,error_message"
+log "source_org,source_repo,destination_org,destination_repo,error_message"
 
 for LOGFILE in "${LOG_DIRECTORY}"/*.octoshift.log; do
   # Get the verbose log file name
@@ -75,5 +78,5 @@ for LOGFILE in "${LOG_DIRECTORY}"/*.octoshift.log; do
   DESTINATION_REPO=$(grep "TARGET REPO:" "${LOGFILE}" | sed "s/^.*TARGET REPO: \([^ ]*\).*$/\1/")
 
   # Print the output
-  echo "${SOURCE_ORG},${SOURCE_REPO},${DESTINATION_ORG},${DESTINATION_REPO},\"${ERROR}\""
+  log "${SOURCE_ORG},${SOURCE_REPO},${DESTINATION_ORG},${DESTINATION_REPO},\"${ERROR}\""
 done

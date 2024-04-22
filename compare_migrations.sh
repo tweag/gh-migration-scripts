@@ -1,28 +1,14 @@
 #!/usr/bin/env bash
 
-# Log file
-LOG_FILE="compare_migrations.log"
-
-# Function to log messages
-log() {
-  local message="$1"
-
-  # Log to the log file
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
-
-  # Log to the console
-  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
-}
-
 # Function to print usage
 print_usage() {
-  echo "Usage: $0 -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_url] -p [path_to_analyzer] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]"
+  echo "Usage: $0 -i [input_csv] -a [source_api_url] -o [output_csv] -s [source_token] -t [destination_token] -p [path_to_analyzer] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]"
   echo "  -i [input_csv]                  A CSV with source_org,source_repo,destination_org,destination_repo"
+  echo "  -a [source_api_url]             Source API URL (required for GHES)"
   echo "  -o [output_csv]                 A CSV file with match,source_org,source_repo,source_signature,target_org,target_repo,target_signature"
   echo "  -s [source_token]               Source system token (optional, if not provided, GH_SRC_PAT environment variable will be used)"
   echo "  -t [destination_token]          Destination system token (optional, if not provided, GH_DEST_PAT environment variable will be used)"
-  echo "  -a [source_api_url]             Source API URL (required for GHES)"
-  echo "  -p [path_to_analyzer]           Path to the GitHub migration analyzer"
+  echo "  -p [path_to_analyzer]           Path to the GitHub migration analyzer (optional, default: ./gh-migration-analyzer)"
   echo "  -w [working_directory]          Working directory (optional, uses a new temporary directory if not specified)"
   echo "  -z [override_destination_org]   Override destination org with this value (optional, useful for testing)"
   echo "  -y [override_destination_repo_prefix]   Prepend prefix to destination repo names (optional, useful for testing)"
@@ -30,8 +16,8 @@ print_usage() {
 }
 
 # Set defaults
-OUTPUT_FILE="comparison_output.csv"
-PATH_TO_ANALYZER="./gh-migration-analyzer"
+DEFAULT_OUTPUT_FILE="comparison_output.csv"
+DEFAULT_PATH_TO_ANALYZER="./gh-migration-analyzer"
 TMPDIR=$(mktemp -d)
 OVERRIDE_DESTINATION_ORG=""
 OVERRIDE_DESTINATION_REPO_PREFIX=""
@@ -81,6 +67,24 @@ while getopts "i:o:s:t:a:p:w:z:y:l:h" opt; do
   esac
 done
 
+# Log file
+LOG_FILE_NAME="compare_migrations.log"
+LOG_FILE="${LOG_FILE:-LOG_FILE_NAME}"
+
+PATH_TO_ANALYZER="${PATH_TO_ANALYZER:-$DEFAULT_PATH_TO_ANALYZER}"
+OUTPUT_FILE="${OUTPUT_FILE:-$DEFAULT_OUTPUT_FILE}"
+
+# Function to log messages
+log() {
+  local message="$1"
+
+  # Log to the log file
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message" >> "$LOG_FILE"
+
+  # Log to the console
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $message"
+}
+
 # Check if required parameters are provided
 if [ -z "${INPUT_FILE}" ] || [ -z "${OUTPUT_FILE}" ] || [ -z "${GHES_API_URL}" ]; then
   log "Error: Not all required parameters are provided."
@@ -116,12 +120,6 @@ fi
 # Use GH_DEST_PAT environment variable if DESTINATION_TOKEN is not provided
 if [ -z "${DESTINATION_TOKEN}" ]; then
   DESTINATION_TOKEN="${GH_DEST_PAT}"
-fi
-
-# Check if the path to migration analyzer is available
-if [ ! -f "${PATH_TO_ANALYZER}" ]; then
-  log "Error: Path to migration analyzer not found at '${PATH_TO_ANALYZER}'."
-  exit 1
 fi
 
 # Check if the GitHub migration analyzer is available

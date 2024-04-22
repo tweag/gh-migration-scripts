@@ -64,7 +64,7 @@ if (logFiles.length === 0) {
 log(`Checking migration logs in '${logOptions.logDirectory}' for completion status...`);
 // Count the number of migrations started
 const migrationStartedCount = logFiles.reduce((count, file) => {
-  const content = fs.readFileSync(path.join(logFilesDir, file), 'utf8');
+  const content = fs.readFileSync(path.join(logOptions.logDirectory, file), 'utf8');
   const matches = content.match(/Migration started/g) || [];
   return count + matches.length;
 }, 0);
@@ -76,7 +76,7 @@ if (migrationStartedCount === 0) {
 
 // Count the number of migrations completed
 const migrationCompletedCount = logFiles.reduce((count, file) => {
-  const content = fs.readFileSync(path.join(logFilesDir, file), 'utf8');
+  const content = fs.readFileSync(path.join(logOptions.logDirectory, file), 'utf8');
   const matches = content.match(/Migration complete/g) || [];
   return count + matches.length;
 }, 0);
@@ -95,7 +95,7 @@ const migrationStartedTimes = [];
 const migrationEndedTimes = [];
 
 logFiles.forEach((file) => {
-  const content = fs.readFileSync(path.join(logFilesDir, file), 'utf8');
+  const content = fs.readFileSync(path.join(logOptions.logDirectory, file), 'utf8');
   const startedMatches = content.match(/\[(.*)\] INFO -- Migration started/g) || [];
   const endedMatches = content.match(/\[(.*)\] INFO -- Migration complete/g) || [];
 

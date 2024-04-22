@@ -12,7 +12,12 @@
 		"analyze": "node index"
 	},
 	"bin": {
-		"git-migrator": "src/index.js"
+		"git-migrator": "src/index.js",
+		"check-migrations": "./check_migrations.sh",
+		"compare-migrations": "./compare_migrations.sh",
+		"find-log-errors": "./find_log_errors.sh",
+		"migrate-secrets": "./migrate_secrets.sh",
+		"find-log-errors-js": "./find_log_errors.js"
 	},
 	"keywords": [],
 	"author": "ModusCreate",
