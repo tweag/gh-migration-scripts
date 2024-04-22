@@ -122,6 +122,12 @@ if [ -z "${DESTINATION_TOKEN}" ]; then
   DESTINATION_TOKEN="${GH_DEST_PAT}"
 fi
 
+# Check if the path to migration analyzer is available
+if [ ! -d "${PATH_TO_ANALYZER}" ]; then
+  log "Error: Path to migration analyzer not found at '${PATH_TO_ANALYZER}'."
+  exit 1
+fi
+
 # Check if the GitHub migration analyzer is available
 if [ ! -f "${PATH_TO_ANALYZER}/src/index.js" ]; then
   log "Error: GitHub migration analyzer not found at '${PATH_TO_ANALYZER}/src/index.js'."
