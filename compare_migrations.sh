@@ -3,7 +3,7 @@
 # -o [output_csv_ A CSV file with match,source_org,source_repo,source_signature,target_org,target_repo,target_signature
 # -s [source system token]
 # -t [destination system token]
-# -a [source api URL]
+# -a [source api graphql URL]
 # -p [path to github migration analyzer]
 # -w [working directory, uses new tmp directory if not specified]
 # -z [override destination org with this value; useful for testing]
