@@ -3,20 +3,20 @@
 # Function to print usage
 print_usage() {
   echo "Migrate secrets (without values) for a given list of repositories"
-  echo "Usage: $0 -i [input_csv] [-s [source_token]] [-t [destination_token]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-a [source_api_url]] [-l [log_file]]"
+  echo "Usage: $0 -i [input_csv] [-s [source_token]] [-t [destination_token]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-a [ghes_hostname]] [-l [log_file]]"
   echo "  -i [input_csv]                  A CSV with source_org,source_repo,destination_org,destination_repo"
   echo "  -s [source_token]               Source system token (optional, if not provided, GH_SRC_PAT environment variable will be used)"
   echo "  -t [destination_token]          Destination system token (optional, if not provided, GH_DEST_PAT environment variable will be used)"
   echo "  -z [override_destination_org]   Override destination org with this value (optional, useful for testing)"
   echo "  -y [override_destination_repo_prefix]   Prepend prefix to destination repo names (optional, useful for testing)"
-  echo "  -a [source_api_url]             Source system API URL (optional, required for GHES)"
+  echo "  -a [ghes_hostname]              GHES hostname (not API URL, optional, required for GHES)"
   echo "  -l [log_file]                   Log file path (optional, default: migrate_secrets.log)"
 }
 
 # Set defaults
 OVERRIDE_DESTINATION_ORG=""
 OVERRIDE_DESTINATION_REPO_PREFIX=""
-SOURCE_API_URL=""
+API_URL=""
 
 # Check if 'gh' command is installed
 if ! command -v gh &> /dev/null; then
@@ -43,7 +43,7 @@ while getopts "i:s:t:z:y:a:l:h" opt; do
       OVERRIDE_DESTINATION_REPO_PREFIX=${OPTARG}
       ;;
     a)
-      SOURCE_API_URL=${OPTARG}
+      API_URL=${OPTARG}
       ;;
     l)
       LOG_FILE=${OPTARG}
@@ -129,23 +129,21 @@ while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO; do
 
   log "Fetching secrets for ${SOURCE_ORG}/${SOURCE_REPO}"
 
-  # Set the source GHES API URL if provided
-  if [ -n "${SOURCE_API_URL}" ]; then
-    SECRETS=$(GITHUB_API_URL="${SOURCE_API_URL}" GITHUB_TOKEN="${SOURCE_TOKEN}" gh secret list --repo "${SOURCE_ORG}/${SOURCE_REPO}" | tail -n +2 | cut -d$'\t' -f1)
-  else
-    SECRETS=$(GITHUB_TOKEN="${SOURCE_TOKEN}" gh secret list --repo "${SOURCE_ORG}/${SOURCE_REPO}" | tail -n +2 | cut -d$'\t' -f1)
-  fi
+  #
+  # IMPORTANT:  Verify API results when fetching from GHEC vs GHES. There seems to be a different header you need to skip with the "tail" command!
+  #
+  SECRETS=$(GH_HOST="${API_URL}" GH_ENTERPRISE_TOKEN="${SOURCE_TOKEN}" gh secret list --repo ${API_URL}/${SOURCE_ORG}/${SOURCE_REPO} | tail -n +1 | cut -d$'\t' -f1)
 
   SECRETS_RESULT=$?
 
   if [ ${SECRETS_RESULT} -ne 0 ]; then
     log "Error: Failed to fetch secrets for ${SOURCE_ORG}/${SOURCE_REPO}"
-    continue
+    exit 1
   fi
 
   if [ -z "${SECRETS}" ]; then
     log "No secrets found for ${SOURCE_ORG}/${SOURCE_REPO}"
-    continue
+    exit 1
   fi
 
   for SECRET_NAME in ${SECRETS}; do

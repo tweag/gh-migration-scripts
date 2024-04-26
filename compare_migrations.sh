@@ -4,7 +4,7 @@
 print_usage() {
   echo "Usage: $0 -i [input_csv] -a [source_api_url] -o [output_csv] -s [source_token] -t [destination_token] -p [path_to_analyzer] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]"
   echo "  -i [input_csv]                  A CSV with source_org,source_repo,destination_org,destination_repo"
-  echo "  -a [source_api_url]             Source API URL (required for GHES)"
+  echo "  -a [source_api_graphql_url]     Source API GRAPHQL URL (required for GHES)"
   echo "  -o [output_csv]                 A CSV file with match,source_org,source_repo,source_signature,target_org,target_repo,target_signature"
   echo "  -s [source_token]               Source system token (optional, if not provided, GH_SRC_PAT environment variable will be used)"
   echo "  -t [destination_token]          Destination system token (optional, if not provided, GH_DEST_PAT environment variable will be used)"
@@ -155,9 +155,10 @@ while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO; do
   # Download source org data
   if [ ! -f "./${SOURCE_ORG}-metrics/repo-metrics.csv" ]; then
     log "-> Downloading org data for ${SOURCE_ORG}"
-    if ! "${PATH_TO_ANALYZER}/src/index.js" GH-org -o "${SOURCE_ORG}" -a -s "${GHES_API_URL}" -t "${SOURCE_TOKEN}" &>/dev/null; then
-      log "Error: Failed to download source org data for ${SOURCE_ORG}."
-      exit 1
+    if [ -z "${GHES_API_URL}" ]; then
+      "${PATH_TO_ANALYZER}"/src/index.js GH-org -o "${SOURCE_ORG}" -t "${SOURCE_TOKEN}" 2>&1 > /dev/null
+    else
+      "${PATH_TO_ANALYZER}"/src/index.js GH-org -o "${SOURCE_ORG}" -a -s "${GHES_API_URL}" -t "${SOURCE_TOKEN}" 2>&1 > /dev/null
     fi
     if [ ! -f "./${SOURCE_ORG}-metrics/repo-metrics.csv" ]; then
       log "Error: Failed to download source org data for ${SOURCE_ORG}."

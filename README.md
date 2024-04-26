@@ -1194,7 +1194,7 @@ Fetches secret variables from source repo and sets the corresponding secret vari
 #### Usage
 
 ```
-./migrate_secrets.sh -i [input_csv] [-s [source_token]] [-t [destination_token]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-a [source_api_url]] [-l [log_file]]
+./migrate_secrets.sh -i [input_csv] [-s [source_token]] [-t [destination_token]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-a [ghes_hostname]] [-l [log_file]]
 ```
 
 #### Arguments
@@ -1204,7 +1204,7 @@ Fetches secret variables from source repo and sets the corresponding secret vari
 3. `-t` - destination_token - Destination system token (optional, if not provided, GH_DEST_PAT environment variable will be used).
 4. `-z` - override_destination_org - Override destination org with this value (optional, useful for testing).
 5. `-y` - override_destination_repo_prefix - Prepend prefix to destination repo names (optional, useful for testing).
-6. `-a` - source_api_url - Source system API URL (optional, required for GHES).
+6. `-a` - ghes_hostname - GHES hostname (not API URL, optional, required for GHES).
 7. `l` - log_file - Log file path (optional, default: migrate_secrets.log).
 
 ### 5. Check Migration Logs
@@ -1244,7 +1244,7 @@ This script compares migration data between source and destination GitHub organi
 #### Usage
 
 ```
-./compare_migrations.sh -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_url] [-p [path_to_analyzer]] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]
+./compare_migrations.sh -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_graphql_url] [-p [path_to_analyzer]] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]
 ```
 
 #### Arguments
@@ -1255,7 +1255,7 @@ This script compares migration data between source and destination GitHub organi
 4. `-t` - destination_token - Destination system token (optional, if not provided, GH_DEST_PAT environment variable will be used).
 5. `-z` - override_destination_org - Override destination org with this value (optional, useful for testing).
 6. `-y` - override_destination_repo_prefix - Prepend prefix to destination repo names (optional, useful for testing).
-7. `-a` - source_api_url - Source system API URL (optional, required for GHES).
+7. `-a` - source_api_graphql_url - Source system API GRAPHQL URL (optional, required for GHES).
 8. `-p` - path_to_analyzer - Path to the GitHub migration analyzer (optional, default: ./gh-migration-analyzer).
 9. `w` - working_directory - Working directory (optional, uses a new temporary directory if not specified).
 10. `l` - log_file - Log file path (optional, default: compare_migrations.log).
