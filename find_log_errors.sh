@@ -62,9 +62,9 @@ fi
 log "Searching for errors in log files in '${LOG_DIRECTORY}'..."
 
 # Print the header
-log "source_org,source_repo,destination_org,destination_repo,error_message"
+echo "source_org,source_repo,destination_org,destination_repo,error_message"
 
-for LOGFILE in "${LOG_DIRECTORY}"/*.octoshift.log; do
+for LOGFILE in $(grep -l "\[ERROR\]" ${LOG_DIRECTORY}/*.octoshift.log); do
   # Get the verbose log file name
   VERBOSE_LOGFILE=$(echo "${LOGFILE}" | sed "s/\.octoshift\.log/\.octoshift\.verbose\.log/")
 
