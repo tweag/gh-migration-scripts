@@ -1187,6 +1187,79 @@ No input file is required
 | sample-user1  |
 | samples-user2 |
 
+### 4. Set Secret Variables
+
+Fetches secret variables from source repo and sets the corresponding secret variables in the target repo.
+
+#### Usage
+
+```
+./migrate_secrets.sh -i [input_csv] [-s [source_token]] [-t [destination_token]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-a [ghes_hostname]] [-l [log_file]]
+```
+
+#### Arguments
+
+1. `-i` - input_csv - A CSV with source_org,source_repo,destination_org,destination_repo.
+2. `-s` - source_token - Source system token (optional, if not provided, GH_SRC_PAT environment variable will be used).
+3. `-t` - destination_token - Destination system token (optional, if not provided, GH_DEST_PAT environment variable will be used).
+4. `-z` - override_destination_org - Override destination org with this value (optional, useful for testing).
+5. `-y` - override_destination_repo_prefix - Prepend prefix to destination repo names (optional, useful for testing).
+6. `-a` - ghes_hostname - GHES hostname (not API URL, optional, required for GHES).
+7. `l` - log_file - Log file path (optional, default: migrate_secrets.log).
+
+### 5. Check Migration Logs
+
+Checks the downloaded migration log files to see which ones completed successfully and how long the migration took.
+
+#### Usage
+
+```
+./check_migrations.sh [-d [directory]] [-l [log_file]]
+```
+
+#### Arguments
+
+1. `d` - directory - The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
+2. `l` - log_file - Log file path (optional, default: check_migrations.log).
+
+### 5. Find Log Errors
+
+Examines a directory containing all the log files after starting migrations with the GEI tool, and finds which ones failed with errors.
+
+#### Usage
+
+```
+./find_log_errors.sh [-d [directory]] [-l [log_file]]
+```
+
+#### Arguments
+
+1. `d` - directory - The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
+2. `l` - log_file - Log file path (optional, default: find_log_errors.log).
+
+### 6. Compare Migrations
+
+This script compares migration data between source and destination GitHub organizations based on provided input, downloading necessary data files, and generating a CSV report indicating match status along with signatures of repositories.
+
+#### Usage
+
+```
+./compare_migrations.sh -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_graphql_url] [-p [path_to_analyzer]] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]
+```
+
+#### Arguments
+
+1. `-i` - input_csv - A CSV with source_org,source_repo,destination_org,destination_repo.
+2. `-o` - output_csv - A CSV file with match,source_org,source_repo,source_signature,target_org,target_repo,target_signature.
+3. `-s` - source_token - Source system token (optional, if not provided, GH_SRC_PAT environment variable will be used).
+4. `-t` - destination_token - Destination system token (optional, if not provided, GH_DEST_PAT environment variable will be used).
+5. `-z` - override_destination_org - Override destination org with this value (optional, useful for testing).
+6. `-y` - override_destination_repo_prefix - Prepend prefix to destination repo names (optional, useful for testing).
+7. `-a` - source_api_graphql_url - Source system API GRAPHQL URL (optional, required for GHES).
+8. `-p` - path_to_analyzer - Path to the GitHub migration analyzer (optional, default: ./gh-migration-analyzer).
+9. `w` - working_directory - Working directory (optional, uses a new temporary directory if not specified).
+10. `l` - log_file - Log file path (optional, default: compare_migrations.log).
+
 ## Prerequisites
 
 **Node V16+**
