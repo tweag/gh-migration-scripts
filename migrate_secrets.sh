@@ -143,6 +143,7 @@ while IFS=, read SOURCE_ORG SOURCE_REPO DESTINATION_ORG DESTINATION_REPO; do
 
   if [ -z "${SECRETS}" ]; then
     log "No secrets found for ${SOURCE_ORG}/${SOURCE_REPO}"
+    continue
   fi
 
   for SECRET_NAME in ${SECRETS}; do

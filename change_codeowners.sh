@@ -29,10 +29,10 @@ usage() {
     echo "Description: is used to change CODEOWNER on all repos inside one Organization."
     echo
     echo "  -s: SED script file."
-	echo "  -i: Input CSV with repos to update, NO HEADER, columns: organiztaion,repository"
+    echo "  -i: Input CSV with repos to update, NO HEADER, columns: organiztaion,repository"
     echo "  -t: Temporary directory that will be used to clone all repositories."
-	echo "  -n: Username for a commit message if CODEOWNERS is updated"
-	echo "  -e: Email address for a commit message if CODEOWNERS is updated"
+    echo "  -n: Username for a commit message if CODEOWNERS is updated"
+    echo "  -e: Email address for a commit message if CODEOWNERS is updated"
     echo "  -h: show this usage"
     echo
     echo "You must create personal access tokens that can access the source organizations, "
@@ -94,7 +94,7 @@ main() {
 				if [ -s $temp_file.decoded ]; then
 					# Does it differ from the original?
 					if ! diff -w "${temp_file}.decoded" "${temp_file}.decoded.bak"; then
-#						echo gh api --method PUT -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" repos/${ORG_NAME}/${repo_name}/contents/${directory}CODEOWNERS -f "message=update codeowners" -f "committer[name]=${COMMIT_USERNAME}" -f "committer[email]=${COMMIT_EMAIL}" -f "content=$(base64 -w 0 $temp_file.decoded)" -f "sha=$(head -n 1 $temp_file)"
+						gh api --method PUT -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" repos/${ORG_NAME}/${repo_name}/contents/${directory}CODEOWNERS -f "message=update codeowners" -f "committer[name]=${COMMIT_USERNAME}" -f "committer[email]=${COMMIT_EMAIL}" -f "content=$(base64 -w 0 $temp_file.decoded)" -f "sha=$(head -n 1 $temp_file)"
 						if [ $? -eq 0 ]; then
 							echo "[INFO] Updated ${directory}CODEOWNERS for ${ORG_NAME}/${repo_name}"
 						else
