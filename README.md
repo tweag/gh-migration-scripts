@@ -56,6 +56,7 @@ Hey there! 👋 Welcome to our migration tools repository – your go-to toolkit
 | 6. Delete repositories                    | ✅ [delete-github-repos](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#2-delete-github-repos)                             |
 | 7. Import organization memberships        | ✅ [import-github-membership-in-org](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-membership-in-org)       |
 | 8. Import organization projects           | ✅ [import-github-projects-v2](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-projects-v2)                   |
+| 9. Import repository on gh from bb        | ✅ [import-github-repo-from-bitbucket](https://github.com/ModusCreateOrg/gh-migration-scripts?tab=readme-ov-file#import-github-repo-from-bitbucket)   |
 
 # How it works
 
@@ -372,6 +373,37 @@ No input file is required
 #### Output
 
 Output is a JSON file with projects info.
+
+### 9. Import github Repo from bitbucket
+
+#### import-github-repo-from-bitbucket
+
+Imports repositories on GitHub from Bitbucket.
+
+#### Usage
+
+```
+git-migrator import-github-repo-from-bitbucket
+```
+
+#### Arguments
+
+1. `-f` or `--input-file` - Input file name with repo, team & permission info.
+2. `-o` or `--organization` - Organization name.
+3. `-g` or `--server-url` - The target GHES server endpoint url. If this argument is skipped then the target will the cloud instance.
+4. `-y` or `--output-file` - Output file to save the operation results. If not provided, the default file the results saved is `<organization>-set-repo-team-permission-status-<timestamp>.csv`. This output file logs the successful teams permissions added to repositories.
+5. `-t` or `--token` - Personal access token.
+6. `-r` or `--repos-file` - File with repos names so only those repos will be considered. Should have the column `repos`.
+7. `-s` or `--skip` - Number of lines to skip in the input file. Default is set to 0.
+8. `-w` or `--wait-time` - Delay time (in seconds) to wait between requests. Default value is 1 second.
+
+#### Input
+
+```
+git-migrator import-github-repo-from-bitbucket -f user-bitbucket-repo-9:19:2024-8:31:59-AM.csv
+```
+
+> **Note:** Input the **.csv** file generated in the previous `git-migrator export-bitbucket-repos -o org --server-url https://api.bitbucket.org/2.0` command.
 
 ### B. Bitbucket
 

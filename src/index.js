@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 /* eslint-disable no-undef */
+import dotenv from 'dotenv';
+dotenv.config();
 
 import { program } from 'commander';
 import { commandController } from './commands/commands.js';
@@ -29,6 +31,7 @@ import exportGithubProjectsV1 from './api/export/github/projects/export-github-p
 import exportGithubProjectsV2 from './api/export/github/projects/export-github-projects-v2.js';
 import importGithubProjectsV2 from './api/import/github/projects/import-github-projects-v2.js';
 import exportGithubRepoBranches from './api/export/github/repos/export-github-repo-branches.js';
+import importGithubRepoFromBitbucket from './api/import/github/repos/import-github-repo-from-bitbucket.js';
 
 // GitLab
 import exportGitlabRepositories from './api/export/gitlab/repos/export-gitlab-repos.js';
@@ -463,6 +466,15 @@ program
 	.description('Exports branches of given repositories of an organization')
 	.action(async (args) =>
 		commandController(process.env.PAT, args, exportGithubRepoBranches),
+	);
+
+program
+	.command(getFunctionName(importGithubRepoFromBitbucket))
+	.option(args.inputFile.argument, 'Input file name with repository names')
+	.alias('igrfb')
+	.description('Import all github repositories from bitbucket')
+	.action(async (args) =>
+		commandController(process.env.PAT, args, importGithubRepoFromBitbucket),
 	);
 
 program
