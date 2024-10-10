@@ -13,11 +13,10 @@
 	},
 	"bin": {
 		"git-migrator": "src/index.js",
-		"check-migrations": "./check_migrations.sh",
 		"compare-migrations": "./compare_migrations.sh",
-		"find-log-errors": "./find_log_errors.sh",
 		"migrate-secrets": "./migrate_secrets.sh",
-		"find-log-errors-js": "./find_log_errors.js"
+		"find-log-errors": "node find_log_errors.js",
+		"check-migrations": "node check_migrations.js"
 	},
 	"keywords": [],
 	"author": "ModusCreate",
