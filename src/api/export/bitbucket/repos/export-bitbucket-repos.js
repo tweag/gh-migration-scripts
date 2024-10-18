@@ -9,22 +9,28 @@ import {
 
 const processRepositories = (values, stringifier) => {
 	for (const value of values) {
-		const { name, archived } = value;
+		const { name, description, is_private, links } = value;
 
-		const row = {
-			repo: name,
-			visibility: value.public ? 'public' : 'private',
-			isArchived: archived ? true : false,
-		};
+		for (const clone of links.clone) {
+			if (clone.name === 'https') {
+				const row = {
+					repo: name,
+					description: description,
+					url: clone.href,
+					visibility: is_private ? 'private' : 'public',
+				};
 
-		stringifier.write(row);
+				stringifier.write(row);
+			}
+		}
 	}
 };
+export { processRepositories };
 
 const getRepositoriesConfig = (options, urlOpts) => {
 	const { organization: project, token, batchSize, serverUrl } = options;
 	const { nextPageStart } = urlOpts;
-	let url = `${serverUrl}/rest/api/latest/projects/${project}/repos?limit=${batchSize}`;
+	let url = `${serverUrl}/repositories/${project}?limit=${batchSize}`;
 
 	if (nextPageStart) url = url + `&start=${nextPageStart}`;
 
@@ -44,7 +50,8 @@ const getRepositories = async (options, urlOpts) => {
 	return doRequest(config);
 };
 
-const columns = ['repo', 'isArchived', 'visibility'];
+const columns = ['repo', 'description', 'url', 'visibility'];
+export { columns };
 
 const exportBitbucketRepos = async (options) => {
 	const { organization: project, outputFile, waitTime } = options;
@@ -53,14 +60,16 @@ const exportBitbucketRepos = async (options) => {
 		`${project}-bitbucket-repo-${currentTime()}.csv`;
 	const stringifier = getStringifier(outputFileName, columns);
 	let reposInfo = await getRepositories(options, { nextPageStart: null });
-	processRepositories(reposInfo.values, stringifier);
+	processRepositories(reposInfo.data.values, stringifier);
 	await delay(waitTime);
 
-	while (!reposInfo.isLastPage) {
+	// while (!reposInfo.isLastPage) {
+	// https://developer.atlassian.com/cloud/bitbucket/rest/intro/#pagination
+	while (reposInfo.next) {
 		reposInfo = await getRepositories(options, {
 			nextPageStart: reposInfo.nextPageStart,
 		});
-		processRepositories(reposInfo.values, stringifier);
+		processRepositories(reposInfo.data.values, stringifier);
 		await delay(waitTime);
 	}
 
