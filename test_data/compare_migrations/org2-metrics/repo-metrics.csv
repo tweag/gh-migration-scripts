@@ -1,0 +1,4 @@
+repo,archive_status,pull_requests,discussions,releases,wiki_enabled
+repo2,false,10,2,5,true
+repo4,false,20,3,10,true
+repo6,true,40,5,20,false

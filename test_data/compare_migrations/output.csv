@@ -1,0 +1,4 @@
+match,source_org,source_repo,source_signature,destination_org,destination_repo,destination_signature
+TRUE,org1,repo1,"10,2,5,true",org2,repo2,"10,2,5,true"
+TRUE,org1,repo3,"20,3,10,true",org2,repo4,"20,3,10,true"
+FALSE,org1,repo5,"30,4,15,true",org2,repo6,"40,5,20,false"
