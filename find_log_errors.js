@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import fs from 'fs';
 import path from 'path';
 
@@ -97,15 +99,17 @@ logFiles.forEach((logFile) => {
 	const errorMatch = verboseLogFileContent.match(/\[ERROR\] (.*)/);
 	const error = errorMatch ? errorMatch[1] : '';
 
-	const sourceOrg =
-		logFileContent.match(/GITHUB SOURCE ORG: ([^\s]*)/)?.[1] || '';
-	const sourceRepo = logFileContent.match(/SOURCE REPO: ([^\s]*)/)?.[1] || '';
-	const destinationOrg =
-		logFileContent.match(/GITHUB TARGET ORG: ([^\s]*)/)?.[1] || '';
-	const destinationRepo =
-		logFileContent.match(/TARGET REPO: ([^\s]*)/)?.[1] || '';
+	if (error) {
+		const sourceOrg =
+			logFileContent.match(/GITHUB SOURCE ORG: ([^\s]*)/)?.[1] || '';
+		const sourceRepo = logFileContent.match(/SOURCE REPO: ([^\s]*)/)?.[1] || '';
+		const destinationOrg =
+			logFileContent.match(/GITHUB TARGET ORG: ([^\s]*)/)?.[1] || '';
+		const destinationRepo =
+			logFileContent.match(/TARGET REPO: ([^\s]*)/)?.[1] || '';
 
-	log(
-		`${sourceOrg},${sourceRepo},${destinationOrg},${destinationRepo},"${error}"`,
-	);
+		log(
+			`${sourceOrg},${sourceRepo},${destinationOrg},${destinationRepo},"${error}"`,
+		);
+	}
 });

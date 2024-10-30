@@ -13,11 +13,11 @@
 	},
 	"bin": {
 		"git-migrator": "src/index.js",
-		"check-migrations": "./check_migrations.js",
-		"compare-migrations": "./compare_migrations.js",
-		"find-log-errors": "./find_log_errors.js",
-		"migrate-secrets": "./migrate_secrets.js",
-		"change-codeowners": "./change_codeowners.js"
+		"check-migrations": "node check_migrations.js",
+		"compare-migrations": "node compare_migrations.js",
+		"find-log-errors": "node find_log_errors.js",
+		"migrate-secrets": "node migrate_secrets.js",
+		"change-codeowners": "node change_codeowners.js"
 	},
 	"keywords": [],
 	"author": "ModusCreate",
