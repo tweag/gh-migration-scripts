@@ -31,8 +31,10 @@ const printUsage = () => {
 };
 
 // Default values
+const logFile = 'change_codeowners.log';
+const directories = ['', '.github/', 'docs/'];
+const expectedCSVHeaders = ['source_org', 'source_repo'];
 let tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gh-codeowners-'));
-let logFile = 'change_codeowners.log';
 let sedFile = '';
 let inputFile = '';
 let commitUsername = '';
@@ -55,8 +57,21 @@ const checkRequiredArg = (arg, argName) => {
 	}
 };
 
+// Function to validate header row
+const validateHeaders = (headers) => {
+	for (let header of expectedCSVHeaders) {
+		if (!headers.includes(header)) {
+			log(`Error: Missing required header "${header}" in CSV file.`);
+			printUsage();
+			process.exit(1);
+		}
+	}
+};
+
 // Parse command-line options
 const args = process.argv.slice(2);
+
+// Parse arguments
 for (let i = 0; i < args.length; i++) {
 	switch (args[i]) {
 		case '-s':
@@ -88,9 +103,6 @@ checkRequiredArg(sedFile, 'Sed File (-s)');
 checkRequiredArg(inputFile, 'Input CSV (-i)');
 checkRequiredArg(commitUsername, 'Commit Username (-n)');
 checkRequiredArg(commitEmail, 'Commit Email (-e)');
-
-// Set default directories
-const directories = ['', '.github/', 'docs/'];
 
 // Helper function to execute shell commands
 const execCommand = (cmd) => {
@@ -124,6 +136,9 @@ const execCommand = (cmd) => {
 log('Starting CODEOWNERS update process...');
 fs.createReadStream(inputFile)
 	.pipe(parse({ headers: true }))
+	.on('headers', (headers) => {
+		validateHeaders(headers);
+	})
 	.on('data', (row) => {
 		const { source_org: sourceOrg, source_repo: sourceRepo } = row;
 

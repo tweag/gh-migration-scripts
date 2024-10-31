@@ -28,13 +28,16 @@ const printUsage = () => {
 };
 
 // Default values
+const logFile = 'migrate_secrets.log';
+const expectedCSVHeaders = [
+	'source_org',
+	'source_repo',
+	'destination_org',
+	'destination_repo',
+];
 let overrideDestinationOrg = '';
 let overrideDestinationRepoPrefix = '';
 let apiUrl = '';
-let logFile = 'migrate_secrets.log';
-
-// Parse command-line options
-const args = process.argv.slice(2);
 let inputFile, sourceToken, destinationToken;
 
 // Function to log messages
@@ -53,6 +56,20 @@ const checkRequiredArg = (arg, argName) => {
 		process.exit(1);
 	}
 };
+
+// Function to validate header row
+const validateHeaders = (headers) => {
+	for (let header of expectedCSVHeaders) {
+		if (!headers.includes(header)) {
+			log(`Error: Missing required header "${header}" in CSV file.`);
+			printUsage();
+			process.exit(1);
+		}
+	}
+};
+
+// Parse command-line options
+const args = process.argv.slice(2);
 
 // Parse arguments
 for (let i = 0; i < args.length; i++) {
@@ -126,6 +143,9 @@ const execCommand = (cmd) => {
 // Parse the CSV file and process each repository
 fs.createReadStream(inputFile)
 	.pipe(parse({ headers: true }))
+	.on('headers', (headers) => {
+		validateHeaders(headers);
+	})
 	.on('data', (row) => {
 		const {
 			source_org: sourceOrg,

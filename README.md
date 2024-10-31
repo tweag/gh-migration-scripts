@@ -1230,6 +1230,15 @@ npx check-migrations [-d [directory]] [-l [log_file]]
 1. `d` - directory - The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
 2. `l` - log_file - Log file path (optional, default: check_migrations.log).
 
+#### Tests
+
+In order to test the script offline, you can use the following commands:
+
+```
+npx check-migrations -d test_data/check_migrations/complete/
+npx check-migrations -d test_data/check_migrations/failed/
+```
+
 ### 5. Find Log Errors
 
 Examines a directory containing all the log files after starting migrations with the GEI tool, and finds which ones failed with errors.
@@ -1244,6 +1253,14 @@ npx find-log-errors [-d [directory]] [-l [log_file]]
 
 1. `d` - directory - The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
 2. `l` - log_file - Log file path (optional, default: find_log_errors.log).
+
+#### Tests
+
+In order to test the script offline, you can use the following command:
+
+```
+npx find-log-errors -d ./test_data/find_log_errors
+```
 
 ### 6. Compare Migrations
 

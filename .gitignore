@@ -7,6 +7,10 @@ node_modules
 # Log files
 *.log
 
+# Allow test log files in test_data directory
+!test_data/find_log_errors/*.octoshift*.log
+!test_data/check_migrations/*/migration-log-*.log
+
 # Filesystem descriptors
 .DS_Store
 

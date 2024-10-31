@@ -34,14 +34,18 @@ const printUsage = () => {
 };
 
 // Default values
+const logFile = 'compare_migrations.log';
+const expectedCSVHeaders = [
+	'source_org',
+	'source_repo',
+	'destination_org',
+	'destination_repo',
+];
+
 let tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'gh-migration-'));
-let logFile = 'compare_migrations.log';
 let pathToAnalyzer = './gh-migration-analyzer';
 let overrideDestinationOrg = '';
 let overrideDestinationRepoPrefix = '';
-
-// Parse command-line options
-const args = process.argv.slice(2);
 let inputFile, outputFile, sourceToken, destinationToken, ghesApiUrl;
 
 // Function to log messages
@@ -60,6 +64,20 @@ const checkRequiredArg = (arg, argName) => {
 		process.exit(1);
 	}
 };
+
+// Function to validate header row
+const validateHeaders = (headers) => {
+	for (let header of expectedCSVHeaders) {
+		if (!headers.includes(header)) {
+			log(`Error: Missing required header "${header}" in CSV file.`);
+			printUsage();
+			process.exit(1);
+		}
+	}
+};
+
+// Parse command-line options
+const args = process.argv.slice(2);
 
 // Parse arguments
 for (let i = 0; i < args.length; i++) {
@@ -174,6 +192,9 @@ log('Downloading required data files...');
 
 fs.createReadStream(inputFileCopy)
 	.pipe(parse({ headers: true }))
+	.on('headers', (headers) => {
+		validateHeaders(headers);
+	})
 	.on('data', (row) => {
 		const { source_org, source_repo, destination_org, destination_repo } = row;
 

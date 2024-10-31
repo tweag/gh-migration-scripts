@@ -3,22 +3,6 @@
 import fs from 'fs';
 import path from 'path';
 
-// Default values
-const defaultLogFile = 'find_log_errors.log';
-const defaultLogDirectory = process.cwd();
-
-// Function to log messages
-const log = (message) => {
-	const timestamp = new Date()
-		.toISOString()
-		.replace(/T/, ' ')
-		.replace(/\..+/, '');
-	const logMessage = `[${timestamp}] ${message}`;
-
-	fs.appendFileSync(logOptions.logFile, `${logMessage}\n`);
-	console.log(logMessage);
-};
-
 // Function to print usage
 const printUsage = () => {
 	console.log(
@@ -38,14 +22,28 @@ const printUsage = () => {
 	);
 };
 
-// Parse command-line arguments
-const logOptions = {
-	logFile: defaultLogFile,
-	logDirectory: defaultLogDirectory,
+// Default values
+let logOptions = {
+	logFile: 'find_log_errors.log',
+	logDirectory: process.cwd(),
 };
 
+// Function to log messages
+const log = (message) => {
+	const timestamp = new Date()
+		.toISOString()
+		.replace(/T/, ' ')
+		.replace(/\..+/, '');
+	const logMessage = `[${timestamp}] ${message}`;
+
+	fs.appendFileSync(logOptions.logFile, `${logMessage}\n`);
+	console.log(logMessage);
+};
+
+// Parse command-line options
 const args = process.argv.slice(2);
 
+// Parse arguments
 for (let i = 0; i < args.length; i++) {
 	if (args[i] === '-d') {
 		logOptions.logDirectory = args[++i];
