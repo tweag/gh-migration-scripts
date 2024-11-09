@@ -1246,7 +1246,7 @@ Checks the downloaded migration log files to see which ones completed successful
 #### Usage
 
 ```
-./check_migrations.sh [-d [directory]] [-l [log_file]]
+npx check-migrations [-d [directory]] [-l [log_file]]
 ```
 
 #### Arguments
@@ -1261,7 +1261,7 @@ Examines a directory containing all the log files after starting migrations with
 #### Usage
 
 ```
-./find_log_errors.sh [-d [directory]] [-l [log_file]]
+npx find-log-errors [-d [directory]] [-l [log_file]]
 ```
 
 #### Arguments
