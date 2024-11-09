@@ -1226,7 +1226,7 @@ Fetches secret variables from source repo and sets the corresponding secret vari
 #### Usage
 
 ```
-./migrate_secrets.sh -i [input_csv] [-s [source_token]] [-t [destination_token]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-a [ghes_hostname]] [-l [log_file]]
+npx migrate-secrets -i [input_csv] [-s [source_token]] [-t [destination_token]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-a [ghes_hostname]] [-l [log_file]]
 ```
 
 #### Arguments
@@ -1239,6 +1239,14 @@ Fetches secret variables from source repo and sets the corresponding secret vari
 6. `-a` - ghes_hostname - GHES hostname (not API URL, optional, required for GHES).
 7. `l` - log_file - Log file path (optional, default: migrate_secrets.log).
 
+#### Tests
+
+In order to test the script offline, you can use the following command:
+
+```
+OFFLINE_MODE=true npx migrate-secrets -i test_data/migrate_secrets/input.csv -s "test" -t "test"
+```
+
 ### 5. Check Migration Logs
 
 Checks the downloaded migration log files to see which ones completed successfully and how long the migration took.
@@ -1246,13 +1254,22 @@ Checks the downloaded migration log files to see which ones completed successful
 #### Usage
 
 ```
-./check_migrations.sh [-d [directory]] [-l [log_file]]
+npx check-migrations [-d [directory]] [-l [log_file]]
 ```
 
 #### Arguments
 
 1. `d` - directory - The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
 2. `l` - log_file - Log file path (optional, default: check_migrations.log).
+
+#### Tests
+
+In order to test the script offline, you can use the following commands:
+
+```
+npx check-migrations -d test_data/check_migrations/complete/
+npx check-migrations -d test_data/check_migrations/failed/
+```
 
 ### 5. Find Log Errors
 
@@ -1261,13 +1278,21 @@ Examines a directory containing all the log files after starting migrations with
 #### Usage
 
 ```
-./find_log_errors.sh [-d [directory]] [-l [log_file]]
+npx find-log-errors [-d [directory]] [-l [log_file]]
 ```
 
 #### Arguments
 
 1. `d` - directory - The directory where the migration log files are located. If no directory is provided, it checks the current working directory for the log files.
 2. `l` - log_file - Log file path (optional, default: find_log_errors.log).
+
+#### Tests
+
+In order to test the script offline, you can use the following command:
+
+```
+npx find-log-errors -d ./test_data/find_log_errors
+```
 
 ### 6. Compare Migrations
 
@@ -1276,7 +1301,7 @@ This script compares migration data between source and destination GitHub organi
 #### Usage
 
 ```
-./compare_migrations.sh -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_graphql_url] [-p [path_to_analyzer]] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]
+npx compare-migrations -i [input_csv] -o [output_csv] -s [source_token] -t [destination_token] -a [source_api_graphql_url] [-p [path_to_analyzer]] [-w [working_directory]] [-z [override_destination_org]] [-y [override_destination_repo_prefix]] [-l [log_file]]
 ```
 
 #### Arguments
@@ -1291,6 +1316,42 @@ This script compares migration data between source and destination GitHub organi
 8. `-p` - path_to_analyzer - Path to the GitHub migration analyzer (optional, default: ./gh-migration-analyzer).
 9. `w` - working_directory - Working directory (optional, uses a new temporary directory if not specified).
 10. `l` - log_file - Log file path (optional, default: compare_migrations.log).
+
+#### Tests
+
+In order to test the script offline, you can use the following command:
+
+```
+OFFLINE_MODE=true npx compare-migrations -i test_data/compare_migrations/input.csv -o test_data/compare_migrations/output.csv -a https://test.com -s "test" -t "test" -w "test_data/compare_migrations"
+```
+
+### 7. Change Codeowners
+
+This script automates the process of updating CODEOWNERS files for multiple GitHub repositories within an organization, checking in the root, .github/ and docs/ directories. It reads from an input CSV containing the source organization and repository information, then applies a specified sed script to modify each CODEOWNERS file. The script processes updates in a temporary directory, and commits changes back to the repository if modifications are detected.
+
+#### Usage
+
+```
+npx change-codeowners -s [sed_script] -i [input_csv] -t [temp_dir] -n [commit_username] -e [commit_email] -h [help]
+```
+
+#### Arguments
+
+1. `-s` - sed_script - SED script file for updating CODEOWNERS.
+2. `-i` - input_csv - A CSV with source_org,source_repo.
+3. `-t` - temp_dir - Working directory (optional, uses a new temporary directory if not specified).
+4. `-n` - commit_username - Username for the commit message when CODEOWNERS is updated.
+5. `-e` - commit_email - Email for the commit message when CODEOWNERS is updated.
+6. `-h` - help - Show usage information.
+7. Ensure that a valid `GITHUB_TOKEN` environment variable is set for access to the repositories.
+
+#### Tests
+
+In order to test the script offline, you can use the following command:
+
+```
+OFFLINE_MODE=true npx change-codeowners -s test_data/change_codeowners/codeowners.sed -i test_data/change_codeowners/input.csv -n "test" -e "test@test.com" -t test_data/change_codeowners
+```
 
 ## Prerequisites
 
