@@ -1,0 +1,4 @@
+source_org,source_repo,destination_org,destination_repo
+org1,repo1,org2,repo1
+org1,repo2,org2,repo2
+org1,repo3,org2,repo3

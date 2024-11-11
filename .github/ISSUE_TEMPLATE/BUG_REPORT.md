@@ -5,27 +5,27 @@ about: Create a report to help us improve
 
 **Environment:**
 
-  **Application version**
-  
-  - App version or git commit number + branch
-  - App location (local, dev, test, stage, prod)
-  - Any paticular configuration of the app
+**Application version**
 
-  **Desktop (please complete the following information):**
+- App version or git commit number + branch
+- App location (local, dev, test, stage, prod)
+- Any paticular configuration of the app
 
-  - OS: [e.g. iOS]
-  - Browser [e.g. chrome, safari]
-  - Version [e.g. 22]
+**Desktop (please complete the following information):**
 
-  **Smartphone (please complete the following information):**
+- OS: [e.g. iOS]
+- Browser [e.g. chrome, safari]
+- Version [e.g. 22]
 
-  - Device: [e.g. iPhone6]
-  - OS: [e.g. iOS8.1]
-  - Browser [e.g. stock browser, safari]
-  - Version [e.g. 22]
+**Smartphone (please complete the following information):**
 
-  **Additional context**
-  Add any other context about the problem here.
+- Device: [e.g. iPhone6]
+- OS: [e.g. iOS8.1]
+- Browser [e.g. stock browser, safari]
+- Version [e.g. 22]
+
+**Additional context**
+Add any other context about the problem here.
 
 **To Reproduce**
 Steps to reproduce the behavior:
